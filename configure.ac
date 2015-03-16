@@ -44,6 +44,7 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_DEFINE([_FORTIFY_SOURCE], 2, [Define to '2' to get glibc warnings.])
 AC_PROG_CXX
 AC_PROG_OBJCXX
+AX_CXX_COMPILE_STDCXX_11([], [mandatory])
 
 dnl override platform specific check for dependent libraries
 dnl otherwise libtool linking of shared libraries will

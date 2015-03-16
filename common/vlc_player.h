@@ -36,11 +36,8 @@ enum vlc_player_action_e
 class vlc_player
 {
 public:
-    vlc_player();
-
     bool open(VLC::Instance& inst);
 
-    bool is_open() const { return _ml_p.isValid(); }
     bool is_playing();
     libvlc_state_t get_state();
     bool is_stopped() { return libvlc_Stopped == get_state(); }

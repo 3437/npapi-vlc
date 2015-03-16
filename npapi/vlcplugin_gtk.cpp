@@ -376,13 +376,11 @@ static gboolean fullscreen_win_keypress_handler(GtkWidget *widget, GdkEventKey *
 
 void VlcPluginGtk::update_controls()
 {
-    if (get_player().is_open()) {
-        libvlc_state_t state = get_player().get_mp().state();
-        if ( state == libvlc_Stopped || state == libvlc_Ended || state == libvlc_Error ) {
-            XUnmapWindow(display, video_xwindow);
-        } else {
-            XMapWindow(display, video_xwindow);
-        }
+    libvlc_state_t state = get_player().get_mp().state();
+    if ( state == libvlc_Stopped || state == libvlc_Ended || state == libvlc_Error ) {
+        XUnmapWindow(display, video_xwindow);
+    } else {
+        XMapWindow(display, video_xwindow);
     }
 
     if (get_toolbar_visible()) {
@@ -401,11 +399,10 @@ void VlcPluginGtk::update_controls()
         }
 
         /* toolbar sensitivity */
-        gtk_widget_set_sensitive(toolbar, get_player().is_open() );
+        gtk_widget_set_sensitive( toolbar, true );
 
         /* time slider */
-        if (!get_player().is_open() ||
-                !get_player().get_mp().isSeekable()) {
+        if (!get_player().get_mp().isSeekable()) {
             gtk_widget_set_sensitive(time_slider, false);
             gtk_range_set_value(GTK_RANGE(time_slider), 0);
         } else {

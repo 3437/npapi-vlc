@@ -21,10 +21,6 @@
 
 #include "vlc_player.h"
 
-vlc_player::vlc_player()
-{
-}
-
 bool vlc_player::open(VLC::Instance& inst)
 {
     if( !inst )
@@ -54,17 +50,11 @@ bool vlc_player::is_playing()
 
 libvlc_state_t vlc_player::get_state()
 {
-    if( !is_open() )
-        return libvlc_NothingSpecial;
-
     return _ml_p.state();
 }
 
 int vlc_player::add_item(const char * mrl, unsigned int optc, const char **optv)
 {
-    if( !is_open() )
-        return -1;
-
     VLC::Media media;
     try {
         media = VLC::Media( _libvlc_instance, mrl, VLC::Media::FromLocation );
@@ -84,9 +74,6 @@ int vlc_player::add_item(const char * mrl, unsigned int optc, const char **optv)
 
 int vlc_player::current_item()
 {
-    if( !is_open() )
-        return -1;
-
     auto media = _mp.media();
 
     if( !media )
@@ -96,27 +83,18 @@ int vlc_player::current_item()
 
 int vlc_player::items_count()
 {
-    if( !is_open() )
-        return 0;
-
     VLC::MediaList::Lock lock( _ml );
     return _ml.count();
 }
 
 bool vlc_player::delete_item(unsigned int idx)
 {
-    if( !is_open() )
-        return false;
-
     VLC::MediaList::Lock lock( _ml );
     return _ml.removeIndex( idx );
 }
 
 void vlc_player::clear_items()
 {
-    if( !is_open() )
-        return;
-
     VLC::MediaList::Lock lock( _ml );
     for( int i = _ml.count(); i > 0; --i) {
         _ml.removeIndex( i - 1 );
@@ -125,9 +103,6 @@ void vlc_player::clear_items()
 
 void vlc_player::play()
 {
-    if( !is_open() )
-        return;
-
     if( 0 == items_count() )
         return;
     else if( -1 == current_item() ) {
@@ -141,9 +116,6 @@ void vlc_player::play()
 
 bool vlc_player::play(unsigned int idx)
 {
-    if( !is_open() )
-        return false;
-
     if( _ml_p.playItemAtIndex( idx ) ) {
         on_player_action(pa_play);
         return true;
@@ -153,33 +125,24 @@ bool vlc_player::play(unsigned int idx)
 
 void vlc_player::pause()
 {
-    if( is_open() ) {
-        _mp.setPause( true );
-        on_player_action(pa_pause);
-    }
+    _mp.setPause( true );
+    on_player_action(pa_pause);
 }
 
 void vlc_player::togglePause()
 {
-    if( is_open() ) {
-        _ml_p.pause();
-        on_player_action(pa_pause);
-    }
+    _ml_p.pause();
+    on_player_action(pa_pause);
 }
 
 void vlc_player::stop()
 {
-    if( is_open() ){
-        libvlc_media_list_player_stop(_ml_p);
-        on_player_action(pa_stop);
-    }
+    libvlc_media_list_player_stop(_ml_p);
+    on_player_action(pa_stop);
 }
 
 bool vlc_player::next()
 {
-    if( !is_open() )
-        return false;
-
     if( _ml_p.next() ) {
         on_player_action(pa_next);
         return true;
@@ -189,10 +152,6 @@ bool vlc_player::next()
 
 bool vlc_player::prev()
 {
-    if( !is_open() )
-        return false;
-
-
     if( _ml_p.previous() ) {
         on_player_action(pa_prev);
         return true;
@@ -202,58 +161,37 @@ bool vlc_player::prev()
 
 float vlc_player::get_rate()
 {
-    if( !is_open() )
-        return 1.f;
-
     return _mp.rate();
 }
 
 void vlc_player::set_rate(float rate)
 {
-    if( !is_open() )
-        return;
-
     _mp.setRate( rate );
 }
 
 float vlc_player::get_fps()
 {
-    if( !is_open() )
-        return 0;
-
     return _mp.fps();
 }
 
 bool vlc_player::has_vout()
 {
-    if( !is_open() )
-        return false;
-
     return _mp.hasVout() > 0;
 }
 
 float vlc_player::get_position()
 {
-    if( !is_open() )
-        return 0.f;
-
     float p = _mp.position();
     return p < 0 ? 0.f : p;
 }
 
 void vlc_player::set_position(float p)
 {
-    if( !is_open() )
-        return;
-
     _mp.setPosition( p );
 }
 
 libvlc_time_t vlc_player::get_time()
 {
-    if( !is_open() )
-        return 0;
-
     auto t = _mp.time();
 
     return t < 0 ? 0 : t;
@@ -261,67 +199,48 @@ libvlc_time_t vlc_player::get_time()
 
 void vlc_player::set_time(libvlc_time_t t)
 {
-    if( !is_open() )
-        return;
-
     _mp.setTime( t );
 }
 
 libvlc_time_t vlc_player::get_length()
 {
-    if( !is_open() )
-        return 0;
-
     auto t = _mp.length();
     return t < 0 ? 0 : t;
 }
 
 void vlc_player::set_mode(libvlc_playback_mode_t mode)
 {
-    if( is_open() )
-        _ml_p.setPlaybackMode( mode );
+    _ml_p.setPlaybackMode( mode );
 }
 
 bool vlc_player::is_muted()
 {
-    if( !is_open() )
-        return false;
-
     return _mp.mute();
 }
 
 void vlc_player::toggle_mute()
 {
-    if( is_open() )
-        _mp.toggleMute();
+    _mp.toggleMute();
 }
 
 void vlc_player::set_mute(bool mute)
 {
-    if( is_open() )
-        _mp.setMute( mute );
+    _mp.setMute( mute );
 }
 
 unsigned int vlc_player::get_volume()
 {
-    if( !is_open() )
-        return 0;
-
     int v = _mp.volume();
     return v < 0 ? 0 : v;
 }
 
 void vlc_player::set_volume(unsigned int volume)
 {
-    if( is_open() )
-        _mp.setVolume( volume );
+    _mp.setVolume( volume );
 }
 
 unsigned int vlc_player::track_count()
 {
-    if( !is_open() )
-        return 0;
-
     int tc = _mp.audioTrackCount();
 
     return tc<0 ? 0 : tc ;
@@ -329,9 +248,6 @@ unsigned int vlc_player::track_count()
 
 unsigned int vlc_player::get_track()
 {
-    if( !is_open() )
-        return 0;
-
     int t = libvlc_audio_get_track(_mp);
 
     return t < 0 ? 0 : t;
@@ -339,20 +255,15 @@ unsigned int vlc_player::get_track()
 
 void vlc_player::set_track(unsigned int track)
 {
-    if( is_open() )
-        _mp.setAudioTrack( track );
+    _mp.setAudioTrack( track );
 }
 
 unsigned int vlc_player::get_channel()
 {
-    if( !is_open() )
-        return 0;
-
     return _mp.channel();
 }
 
 void vlc_player::set_channel(unsigned int channel)
 {
-    if( is_open() )
-        _mp.setChannel( channel );
+    _mp.setChannel( channel );
 }

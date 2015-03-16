@@ -76,10 +76,6 @@ public:
 
     VLC::MediaPlayer& getMD()
     {
-        if( !is_open() )
-        {
-             libvlc_printerr("no mediaplayer");
-        }
         return get_mp();
     }
 

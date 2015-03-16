@@ -272,12 +272,9 @@ VlcPluginBase::~VlcPluginBase()
     free(psz_baseURL);
     free(psz_target);
 
-    if( vlc_player::is_open() )
-    {
-        if( playlist_isplaying() )
-            playlist_stop();
-        events.unhook_manager( this );
-    }
+    if( playlist_isplaying() )
+        playlist_stop();
+    events.unhook_manager( this );
 
     _instances.erase(this);
 }

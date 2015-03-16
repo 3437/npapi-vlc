@@ -31,7 +31,6 @@ class VlcPluginXcb : public VlcPluginBase
 {
 public:
     VlcPluginXcb(NPP, NPuint16_t);
-    virtual ~VlcPluginXcb();
 
     int                 setSize(unsigned width, unsigned height);
 

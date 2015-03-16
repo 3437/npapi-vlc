@@ -1,4 +1,4 @@
-AM_CPPFLAGS = $(LIBVLC_CFLAGS)
+AM_CPPFLAGS = $(LIBVLC_CFLAGS) -I$(top_srcdir)/vlcpp
 
 libvlcplugin_common_la_SOURCES = \
 	position.h \

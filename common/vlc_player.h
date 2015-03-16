@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include <vlc/vlc.h>
+#include <vlcpp/vlc.hpp>
+#include <memory>
 
 enum vlc_player_action_e
 {
@@ -36,12 +37,10 @@ class vlc_player
 {
 public:
     vlc_player();
-    ~vlc_player(void);
 
-    bool open(libvlc_instance_t* inst);
-    void close();
+    bool open(VLC::Instance& inst);
 
-    bool is_open() const { return _ml_p != 0; }
+    bool is_open() const { return _ml_p.isValid(); }
     bool is_playing();
     libvlc_state_t get_state();
     bool is_stopped() { return libvlc_Stopped == get_state(); }
@@ -95,15 +94,15 @@ public:
     unsigned int get_channel();
     void set_channel(unsigned int);
 
-    libvlc_media_player_t* get_mp() const
+    VLC::MediaPlayer& get_mp()
         { return _mp; }
 
 protected:
-    virtual void on_player_action( vlc_player_action_e ){};
+    virtual void on_player_action( vlc_player_action_e ){}
 
 private:
-    libvlc_instance_t *         _libvlc_instance;
-    libvlc_media_player_t*      _mp;
-    libvlc_media_list_t*        _ml;
-    libvlc_media_list_player_t* _ml_p;
+    VLC::Instance           _libvlc_instance;
+    VLC::MediaPlayer        _mp;
+    VLC::MediaList          _ml;
+    VLC::MediaListPlayer    _ml_p;
 };

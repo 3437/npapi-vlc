@@ -74,7 +74,7 @@ public:
 
     NPError             init(int argc, char* const argn[], char* const argv[]);
 
-    libvlc_media_player_t* getMD()
+    VLC::MediaPlayer& getMD()
     {
         if( !is_open() )
         {
@@ -189,12 +189,10 @@ public:
 
 protected:
     // called after libvlc_media_player_new_from_media
-    virtual void on_media_player_new()     {};
+    virtual void on_media_player_new()     {}
     // called before libvlc_media_player_release
-    virtual void on_media_player_release() {};
+    virtual void on_media_player_release() {}
 
-    /* VLC reference */
-    libvlc_instance_t   *libvlc_instance;
     NPClass             *p_scriptClass;
 
     /* browser reference */

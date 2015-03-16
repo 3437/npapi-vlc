@@ -13,7 +13,7 @@ CLEANFILES = $(BUILT_SOURCES) \
 
 npvlcdir = $(libdir)/mozilla/plugins
 
-AM_CPPFLAGS = $(LIBVLC_CFLAGS) -Inpapi-sdk $(MOZILLA_CFLAGS)
+AM_CPPFLAGS = $(LIBVLC_CFLAGS) -Inpapi-sdk $(MOZILLA_CFLAGS) -I$(top_srcdir)/vlcpp
 
 libvlcplugin_la_SOURCES = \
 	common.h \

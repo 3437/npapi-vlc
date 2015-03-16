@@ -52,7 +52,6 @@ VlcPluginBase::VlcPluginBase( NPP instance, NPuint16_t mode ) :
     i_npmode(mode),
     b_stream(0),
     psz_target(NULL),
-    libvlc_instance(NULL),
     p_scriptClass(NULL),
     p_browser(instance),
     psz_baseURL(NULL)
@@ -199,11 +198,13 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
         }
     }
 
-    libvlc_instance = libvlc_new(ppsz_argc, ppsz_argv);
-    if( !libvlc_instance )
+    try {
+        VLC::Instance instance( ppsz_argc, ppsz_argv );
+        vlc_player::open(instance);
+    }
+    catch (std::runtime_error&) {
         return NPERR_GENERIC_ERROR;
-
-    vlc_player::open(libvlc_instance);
+    }
 
     vlc_player::set_mode(b_autoloop ? libvlc_playback_mode_loop :
                                       libvlc_playback_mode_default);
@@ -273,14 +274,10 @@ VlcPluginBase::~VlcPluginBase()
 
     if( vlc_player::is_open() )
     {
-
         if( playlist_isplaying() )
             playlist_stop();
         events.unhook_manager( this );
-        vlc_player::close();
     }
-    if( libvlc_instance )
-        libvlc_release( libvlc_instance );
 
     _instances.erase(this);
 }

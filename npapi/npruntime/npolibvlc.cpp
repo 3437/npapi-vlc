@@ -45,28 +45,6 @@
 #define ERROR_EVENT_NOT_FOUND "ERROR: One or more events could not be found."
 #define ERROR_API_VERSION "ERROR: NPAPI version not high enough. (Gecko >= 1.9 needed)"
 
-// Make a copy of an NPVariant.
-NPVariant copyNPVariant(const NPVariant& original)
-{
-    NPVariant res;
-
-    if (NPVARIANT_IS_STRING(original))
-        STRINGZ_TO_NPVARIANT(strdup(NPVARIANT_TO_STRING(original).UTF8Characters), res);
-    else if (NPVARIANT_IS_INT32(original))
-        INT32_TO_NPVARIANT(NPVARIANT_TO_INT32(original), res);
-    else if (NPVARIANT_IS_DOUBLE(original))
-        DOUBLE_TO_NPVARIANT(NPVARIANT_TO_DOUBLE(original), res);
-    else if (NPVARIANT_IS_OBJECT(original))
-    {
-        NPObject *obj = NPVARIANT_TO_OBJECT(original);
-        NPN_RetainObject(obj);
-        OBJECT_TO_NPVARIANT(obj, res);
-    }
-    else if (NPVARIANT_IS_BOOLEAN(original))
-        BOOLEAN_TO_NPVARIANT(NPVARIANT_TO_BOOLEAN(original), res);
-
-    return res;
-}
 
 /*
 ** implementation of libvlc root object

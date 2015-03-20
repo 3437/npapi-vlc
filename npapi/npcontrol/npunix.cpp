@@ -93,7 +93,6 @@ NPN_PluginThreadAsyncCall(NPP plugin,
 {
     bool workaround = false;
 
-    const int minor = getMinorVersion();
     if (gUserAgent && (strstr(gUserAgent, "Opera")))
         workaround = true;
 

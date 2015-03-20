@@ -22,7 +22,6 @@
 #pragma once
 
 #include <vlcpp/vlc.hpp>
-#include <memory>
 
 enum vlc_player_action_e
 {

@@ -61,7 +61,7 @@ function registerVLCEvent(event, handler)
             vlc.attachEvent (event, handler);
         } else if (vlc.addEventListener) {
             // Mozilla: DOM level 2
-            vlc.addEventListener (event, handler, true);
+            vlc.addEventListener (event, handler);
         } else {
             // DOM level 0
             eval("vlc.on" + event + " = handler");
@@ -79,7 +79,7 @@ function unregisterVLCEvent(event, handler)
             vlc.detachEvent (event, handler);
         } else if (vlc.removeEventListener) {
             // Mozilla: DOM level 2
-            vlc.removeEventListener (event, handler, true);
+            vlc.removeEventListener (event, handler);
         } else {
             // DOM level 0
             eval("vlc.on" + event + " = null");

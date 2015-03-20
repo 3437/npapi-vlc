@@ -32,10 +32,12 @@
 #define __VLCPLUGIN_BASE_H__
 
 #include "common.h"
-#include "events.h"
+#include "utils.hpp"
 
 #include <vector>
 #include <set>
+#include <utility>
+#include <unordered_map>
 
 #include "../common/vlc_player_options.h"
 #include "../common/vlc_player.h"
@@ -180,9 +182,8 @@ public:
 
     static bool canUseEventListener();
 
-    EventObj events;
-    void event_callback(const libvlc_event_t *, NPVariant *, uint32_t);
-
+    void subscribe(const char* eventName, npapi::Variant listener);
+    void unsubscribe( const char* eventName, npapi::Variant listener );
 protected:
     // called after libvlc_media_player_new_from_media
     virtual void on_media_player_new()     {}
@@ -198,10 +199,11 @@ protected:
     /* display settings */
     NPWindow  npwindow;
 
-    static void eventAsync(void *);
-
 private:
     static std::set<VlcPluginBase*> _instances;
+
+private:
+    std::vector<std::tuple<std::string, NPObject*, VLC::EventManager::RegisteredEvent>> m_events;
 };
 
 #endif

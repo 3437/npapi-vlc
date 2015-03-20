@@ -11,6 +11,7 @@
  *          Yannick Brehon <y.brehon@qiplay.com>
  *          Felix Paul Kühne <fkuehne # videolan.org>
  *          Ludovic Fauvet <etix@videolan.org>
+ *          Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,28 +69,6 @@ static bool boolValue(const char *value) {
 }
 
 std::set<VlcPluginBase*> VlcPluginBase::_instances;
-
-void VlcPluginBase::eventAsync(void *param)
-{
-    VlcPluginBase *plugin = (VlcPluginBase*)param;
-    if( _instances.find(plugin) == _instances.end() )
-        return;
-
-    plugin->events.deliver(plugin->getBrowser());
-    plugin->update_controls();
-}
-
-void VlcPluginBase::event_callback(const libvlc_event_t* event,
-                NPVariant *npparams, uint32_t npcount)
-{
-#if defined(XP_UNIX) || defined(XP_WIN) || defined (XP_MACOSX)
-    events.callback(event, npparams, npcount);
-    NPN_PluginThreadAsyncCall(getBrowser(), eventAsync, this);
-#else
-#   warning NPN_PluginThreadAsyncCall not implemented yet.
-    printf("No NPN_PluginThreadAsyncCall(), doing nothing.\n");
-#endif
-}
 
 NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 {
@@ -257,13 +236,6 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     /* new APIs */
     p_scriptClass = RuntimeNPClass<LibvlcRootNPObject>::getClass();
 
-    libvlc_media_player_t *p_md = getMD();
-    if( p_md ) {
-      libvlc_event_manager_t *p_em;
-      p_em = libvlc_media_player_event_manager( getMD() );
-      events.hook_manager( p_em, this );
-    }
-
     return NPERR_NO_ERROR;
 }
 
@@ -274,7 +246,6 @@ VlcPluginBase::~VlcPluginBase()
 
     if( playlist_isplaying() )
         playlist_stop();
-    events.unhook_manager( this );
 
     _instances.erase(this);
 }
@@ -294,6 +265,174 @@ NPError VlcPluginBase::get_root_layer(void *value)
 bool VlcPluginBase::handle_event(void *event)
 {
     return false;
+}
+
+struct AsyncEventWrapper
+{
+    AsyncEventWrapper(NPP b, npapi::Variant l, npapi::VariantArray a)
+        : browser( b )
+        , listener( std::move( l ) )
+        , args( std::move( a ) )
+    {
+    }
+
+    NPP browser;
+    npapi::Variant listener;
+    npapi::VariantArray args;
+};
+
+template <typename... Args>
+static void invokeEvent( NPP browser, npapi::Variant listener, Args&&... args )
+{
+    auto wrapper = new AsyncEventWrapper( browser, std::move( listener ), npapi::wrap( std::forward<Args>( args )... ) );
+    NPN_PluginThreadAsyncCall( browser, [](void* data) {
+        auto w = reinterpret_cast<AsyncEventWrapper*>( data );
+        NPVariant result;
+        if (NPN_InvokeDefault( w->browser, w->listener, w->args, w->args.size(), &result ))
+        {
+            // "result" content is unspecified when invoke fails. Don't clean potential garbage
+            NPN_ReleaseVariantValue( &result );
+        }
+        delete w;
+    }, wrapper);
+}
+
+class CallbackClosure
+{
+public:
+    CallbackClosure(NPP browser, npapi::Variant listener)
+        : _browser( browser )
+        , _listener( std::move( listener ) )
+    {
+    }
+
+    CallbackClosure(const CallbackClosure&) = delete;
+    CallbackClosure(CallbackClosure&&) = default;
+
+    template <typename... Args>
+    void operator()(Args&&... params) const
+    {
+        // This is expected to receive a copy of the listener
+        invokeEvent( _browser, _listener, std::forward<Args>( params )... );
+    }
+
+    void operator()(VLC::MediaPtr) const
+    {
+        // Force Media to be ignored since we don't have a binding for it.
+        // This is expected to receive a copy of the listener
+        invokeEvent( _browser, _listener );
+    }
+private:
+    NPP _browser;
+    npapi::Variant _listener;
+};
+
+static struct vlcevents_t {
+    const char* name;
+    libvlc_event_type_t type;
+} vlcevents[] = {
+    { "MediaPlayerMediaChanged", libvlc_MediaPlayerMediaChanged },
+    { "MediaPlayerNothingSpecial", libvlc_MediaPlayerNothingSpecial },
+    { "MediaPlayerOpening", libvlc_MediaPlayerOpening },
+    { "MediaPlayerBuffering", libvlc_MediaPlayerBuffering },
+    { "MediaPlayerPlaying", libvlc_MediaPlayerPlaying },
+    { "MediaPlayerPaused", libvlc_MediaPlayerPaused },
+    { "MediaPlayerStopped", libvlc_MediaPlayerStopped },
+    { "MediaPlayerForward", libvlc_MediaPlayerForward },
+    { "MediaPlayerBackward", libvlc_MediaPlayerBackward },
+    { "MediaPlayerEndReached", libvlc_MediaPlayerEndReached },
+    { "MediaPlayerEncounteredError", libvlc_MediaPlayerEncounteredError },
+    { "MediaPlayerTimeChanged", libvlc_MediaPlayerTimeChanged },
+    { "MediaPlayerPositionChanged", libvlc_MediaPlayerPositionChanged },
+    { "MediaPlayerSeekableChanged", libvlc_MediaPlayerSeekableChanged },
+    { "MediaPlayerPausableChanged", libvlc_MediaPlayerPausableChanged },
+    { "MediaPlayerTitleChanged", libvlc_MediaPlayerTitleChanged },
+    { "MediaPlayerLengthChanged", libvlc_MediaPlayerLengthChanged },
+};
+
+void VlcPluginBase::subscribe(const char* eventName, npapi::Variant listener)
+{
+    auto event = std::find_if(std::begin(vlcevents), std::end(vlcevents), [eventName](const vlcevents_t& e) {
+        return !strcmp( e.name, eventName);
+    });
+    if (event == std::end(vlcevents))
+        return;
+
+    auto listenerRaw = (NPObject*)listener;
+    auto closure = CallbackClosure{ p_browser, std::move( listener ) };
+
+    VLC::EventManager::RegisteredEvent e = nullptr;
+    switch ( event->type )
+    {
+        case libvlc_MediaPlayerNothingSpecial:
+            e = get_mp().eventManager().onNothingSpecial( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerOpening:
+            e = get_mp().eventManager().onOpening( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerPlaying:
+            e = get_mp().eventManager().onPlaying( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerPaused:
+            e = get_mp().eventManager().onPaused( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerStopped:
+            e = get_mp().eventManager().onStopped( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerForward:
+            e = get_mp().eventManager().onForward( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerBackward:
+            e = get_mp().eventManager().onBackward( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerEndReached:
+            e = get_mp().eventManager().onEndReached( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerEncounteredError:
+            e = get_mp().eventManager().onEncounteredError( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerBuffering:
+            e = get_mp().eventManager().onBuffering( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerTimeChanged:
+            e = get_mp().eventManager().onTimeChanged( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerMediaChanged:
+            e = get_mp().eventManager().onMediaChanged( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerPositionChanged:
+            e = get_mp().eventManager().onPositionChanged( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerSeekableChanged:
+            e = get_mp().eventManager().onSeekableChanged( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerPausableChanged:
+            e = get_mp().eventManager().onPausableChanged( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerTitleChanged:
+            e = get_mp().eventManager().onTitleChanged( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerLengthChanged:
+            e = get_mp().eventManager().onLengthChanged( std::move( closure ) );
+            break;
+        default:
+            break;
+    }
+    if ( e != nullptr )
+    {
+        m_events.emplace_back( std::string(eventName), listenerRaw, e );
+    }
+}
+
+void VlcPluginBase::unsubscribe(const char* eventName, npapi::Variant listener)
+{
+    auto event = std::find_if( begin( m_events ), end( m_events ), [eventName, listener](const decltype(m_events)::value_type e) {
+        return std::get<0>( e ) == eventName && std::get<1>( e ) == listener;
+    });
+    if ( event == end( m_events ) )
+        return;
+    std::get<2>( *event )->unregister();
+    m_events.erase( event );
 }
 
 /*****************************************************************************

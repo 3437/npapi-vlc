@@ -190,10 +190,9 @@ RuntimeNPObject::InvokeResult LibvlcRootNPObject::invoke(int index,
 
     case ID_root_addeventlistener:
     case ID_root_removeeventlistener:
-        if( (3 != argCount) ||
+        if( (2 < argCount) ||
             !NPVARIANT_IS_STRING(args[0]) ||
-            !NPVARIANT_IS_OBJECT(args[1]) ||
-            !NPVARIANT_IS_BOOLEAN(args[2]) )
+            !NPVARIANT_IS_OBJECT(args[1]) )
             break;
 
         if( !VlcPluginBase::canUseEventListener() )
@@ -204,27 +203,19 @@ RuntimeNPObject::InvokeResult LibvlcRootNPObject::invoke(int index,
 
         VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
 
-        bool b;
         if( ID_root_addeventlistener == index )
         {
-            NPN_RetainObject( NPVARIANT_TO_OBJECT(args[1]) );
-            b = p_plugin->events.insert( NPVARIANT_TO_STRING(args[0]),
-                                         NPVARIANT_TO_OBJECT(args[1]),
-                                         NPVARIANT_TO_BOOLEAN(args[2]) );
-            if( !b )
-                NPN_ReleaseObject( NPVARIANT_TO_OBJECT(args[1]) );
+            p_plugin->subscribe( NPVARIANT_TO_STRING(args[0]).UTF8Characters,
+                                         NPVARIANT_TO_OBJECT(args[1] ) );
         }
         else
         {
-            b = p_plugin->events.remove( NPVARIANT_TO_STRING(args[0]),
-                                         NPVARIANT_TO_OBJECT(args[1]),
-                                         NPVARIANT_TO_BOOLEAN(args[2]) );
-            if( b )
-                NPN_ReleaseObject( NPVARIANT_TO_OBJECT(args[1]) );
+            p_plugin->unsubscribe( NPVARIANT_TO_STRING(args[1]).UTF8Characters,
+                    NPVARIANT_TO_OBJECT( args[1] ) );
         }
         VOID_TO_NPVARIANT(result);
 
-        return b ? INVOKERESULT_NO_ERROR : INVOKERESULT_GENERIC_ERROR;
+        return INVOKERESULT_NO_ERROR;
     }
     return INVOKERESULT_NO_SUCH_METHOD;
 }

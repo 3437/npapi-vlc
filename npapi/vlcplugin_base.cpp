@@ -179,13 +179,13 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 
     try {
         VLC::Instance instance( ppsz_argc, ppsz_argv );
-        vlc_player::open(instance);
+        m_player.open(instance);
     }
     catch (std::runtime_error&) {
         return NPERR_GENERIC_ERROR;
     }
 
-    vlc_player::set_mode(b_autoloop ? libvlc_playback_mode_loop :
+    m_player.set_mode(b_autoloop ? libvlc_playback_mode_loop :
                                       libvlc_playback_mode_default);
 
     /*
@@ -365,55 +365,55 @@ void VlcPluginBase::subscribe(const char* eventName, npapi::Variant listener)
     switch ( event->type )
     {
         case libvlc_MediaPlayerNothingSpecial:
-            e = get_mp().eventManager().onNothingSpecial( std::move( closure ) );
+            e = player().get_mp().eventManager().onNothingSpecial( std::move( closure ) );
             break;
         case libvlc_MediaPlayerOpening:
-            e = get_mp().eventManager().onOpening( std::move( closure ) );
+            e = player().get_mp().eventManager().onOpening( std::move( closure ) );
             break;
         case libvlc_MediaPlayerPlaying:
-            e = get_mp().eventManager().onPlaying( std::move( closure ) );
+            e = player().get_mp().eventManager().onPlaying( std::move( closure ) );
             break;
         case libvlc_MediaPlayerPaused:
-            e = get_mp().eventManager().onPaused( std::move( closure ) );
+            e = player().get_mp().eventManager().onPaused( std::move( closure ) );
             break;
         case libvlc_MediaPlayerStopped:
-            e = get_mp().eventManager().onStopped( std::move( closure ) );
+            e = player().get_mp().eventManager().onStopped( std::move( closure ) );
             break;
         case libvlc_MediaPlayerForward:
-            e = get_mp().eventManager().onForward( std::move( closure ) );
+            e = player().get_mp().eventManager().onForward( std::move( closure ) );
             break;
         case libvlc_MediaPlayerBackward:
-            e = get_mp().eventManager().onBackward( std::move( closure ) );
+            e = player().get_mp().eventManager().onBackward( std::move( closure ) );
             break;
         case libvlc_MediaPlayerEndReached:
-            e = get_mp().eventManager().onEndReached( std::move( closure ) );
+            e = player().get_mp().eventManager().onEndReached( std::move( closure ) );
             break;
         case libvlc_MediaPlayerEncounteredError:
-            e = get_mp().eventManager().onEncounteredError( std::move( closure ) );
+            e = player().get_mp().eventManager().onEncounteredError( std::move( closure ) );
             break;
         case libvlc_MediaPlayerBuffering:
-            e = get_mp().eventManager().onBuffering( std::move( closure ) );
+            e = player().get_mp().eventManager().onBuffering( std::move( closure ) );
             break;
         case libvlc_MediaPlayerTimeChanged:
-            e = get_mp().eventManager().onTimeChanged( std::move( closure ) );
+            e = player().get_mp().eventManager().onTimeChanged( std::move( closure ) );
             break;
         case libvlc_MediaPlayerMediaChanged:
-            e = get_mp().eventManager().onMediaChanged( std::move( closure ) );
+            e = player().get_mp().eventManager().onMediaChanged( std::move( closure ) );
             break;
         case libvlc_MediaPlayerPositionChanged:
-            e = get_mp().eventManager().onPositionChanged( std::move( closure ) );
+            e = player().get_mp().eventManager().onPositionChanged( std::move( closure ) );
             break;
         case libvlc_MediaPlayerSeekableChanged:
-            e = get_mp().eventManager().onSeekableChanged( std::move( closure ) );
+            e = player().get_mp().eventManager().onSeekableChanged( std::move( closure ) );
             break;
         case libvlc_MediaPlayerPausableChanged:
-            e = get_mp().eventManager().onPausableChanged( std::move( closure ) );
+            e = player().get_mp().eventManager().onPausableChanged( std::move( closure ) );
             break;
         case libvlc_MediaPlayerTitleChanged:
-            e = get_mp().eventManager().onTitleChanged( std::move( closure ) );
+            e = player().get_mp().eventManager().onTitleChanged( std::move( closure ) );
             break;
         case libvlc_MediaPlayerLengthChanged:
-            e = get_mp().eventManager().onLengthChanged( std::move( closure ) );
+            e = player().get_mp().eventManager().onLengthChanged( std::move( closure ) );
             break;
         default:
             break;
@@ -440,10 +440,9 @@ void VlcPluginBase::unsubscribe(const char* eventName, npapi::Variant listener)
  *****************************************************************************/
 bool  VlcPluginBase::player_has_vout()
 {
-    bool r = false;
     if( playlist_isplaying() )
-        r = libvlc_media_player_has_vout(get_mp())!=0;
-    return r;
+        return player().get_mp().hasVout() != 0;
+    return false;
 }
 
 /*****************************************************************************
@@ -610,7 +609,7 @@ void VlcPluginBase::control_handler(vlc_toolbar_clicked_t clicked)
     {
         case clicked_Play:
         {
-            playlist_play();
+            player().play();
         }
         break;
 

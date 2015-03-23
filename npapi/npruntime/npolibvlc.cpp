@@ -965,7 +965,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_play:
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_play();
+                    p_plugin->player().play();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }

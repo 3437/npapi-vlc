@@ -56,18 +56,13 @@ typedef enum vlc_toolbar_clicked_e {
     clicked_Unmute
 } vlc_toolbar_clicked_t;
 
-class VlcPluginBase: private vlc_player_options, private vlc_player
+class VlcPluginBase: private vlc_player_options
 {
 protected:
 
 public:
     VlcPluginBase( NPP, NPuint16_t );
     virtual ~VlcPluginBase();
-
-    vlc_player& get_player()
-    {
-        return *static_cast<vlc_player*>(this);
-    }
 
     vlc_player_options& get_options()
         { return *static_cast<vlc_player_options*>(this); }
@@ -78,7 +73,7 @@ public:
 
     VLC::MediaPlayer& getMD()
     {
-        return get_mp();
+        return m_player.get_mp();
     }
 
     NPP                 getBrowser() { return p_browser; };
@@ -95,68 +90,69 @@ public:
     int      b_stream;
     char *   psz_target;
 
-    void playlist_play()
-    {
-        play();
-    }
     void playlist_play_item(int idx)
     {
-        play(idx);
+        m_player.play(idx);
     }
     void playlist_stop()
     {
-        stop();
+        m_player.stop();
     }
     void playlist_next()
     {
-        next();
+        m_player.next();
     }
     void playlist_prev()
     {
-        prev();
+        m_player.prev();
     }
     void playlist_pause()
     {
-        pause();
+        m_player.pause();
     }
     void playlist_togglePause()
     {
-        togglePause();
+        m_player.togglePause();
     }
     int playlist_isplaying()
     {
-        return is_playing();
+        return m_player.is_playing();
     }
     int playlist_currentitem()
     {
-        return current_item();
+        return m_player.current_item();
     }
     int playlist_add( const char * mrl)
     {
-        return add_item(mrl);
+        return m_player.add_item(mrl);
     }
     int playlist_add_extended_untrusted( const char *mrl, const char *,
                     int optc, const char **optv )
     {
-        return add_item(mrl, optc, optv);
+        return m_player.add_item(mrl, optc, optv);
     }
     int playlist_delete_item( int idx)
     {
-        return delete_item(idx);
+        return m_player.delete_item(idx);
     }
     void playlist_clear()
     {
-        clear_items() ;
+        m_player.clear_items() ;
     }
     int  playlist_count()
     {
-        return items_count();
+        return m_player.items_count();
     }
     bool playlist_select(int);
 
     void control_handler(vlc_toolbar_clicked_t);
 
     bool  player_has_vout();
+
+    vlc_player& player()
+    {
+        return m_player;
+    }
 
     virtual bool create_windows() = 0;
     virtual bool resize_windows() = 0;
@@ -198,6 +194,8 @@ protected:
 
     /* display settings */
     NPWindow  npwindow;
+
+    vlc_player m_player;
 
 private:
     static std::set<VlcPluginBase*> _instances;

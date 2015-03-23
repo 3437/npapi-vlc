@@ -369,7 +369,7 @@ NPError NPP_SetWindow( NPP instance, NPWindow* window )
                     {
                         if( p_plugin->get_options().get_autoplay() )
                         {
-                            p_plugin->playlist_play();
+                            p_plugin->player().play();
                         }
                     }
                     p_plugin->b_stream = true;
@@ -470,7 +470,7 @@ void NPP_StreamAsFile( NPP instance, NPStream *stream, const char* )
     {
         if( p_plugin->get_options().get_autoplay() )
         {
-            p_plugin->playlist_play();
+            p_plugin->player().play();
         }
     }
 }

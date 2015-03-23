@@ -61,8 +61,8 @@ VlcPluginGtk::~VlcPluginGtk()
 
 void VlcPluginGtk::set_player_window()
 {
-    get_player().get_mp().setXwindow( video_xwindow);
-    get_player().get_mp().setMouseInput( false );
+    player().get_mp().setXwindow( video_xwindow);
+    player().get_mp().setMouseInput( false );
 }
 
 void VlcPluginGtk::toggle_fullscreen()
@@ -376,7 +376,7 @@ static gboolean fullscreen_win_keypress_handler(GtkWidget *widget, GdkEventKey *
 
 void VlcPluginGtk::update_controls()
 {
-    libvlc_state_t state = get_player().get_mp().state();
+    auto state = player().get_mp().state();
     if ( state == libvlc_Stopped || state == libvlc_Ended || state == libvlc_Error ) {
         XUnmapWindow(display, video_xwindow);
     } else {
@@ -402,12 +402,12 @@ void VlcPluginGtk::update_controls()
         gtk_widget_set_sensitive( toolbar, true );
 
         /* time slider */
-        if (!get_player().get_mp().isSeekable()) {
+        if (!player().get_mp().isSeekable()) {
             gtk_widget_set_sensitive(time_slider, false);
             gtk_range_set_value(GTK_RANGE(time_slider), 0);
         } else {
             gtk_widget_set_sensitive(time_slider, true);
-            gdouble timepos = 100.0 * get_player().get_mp().position();
+            gdouble timepos = 100.0 * player().get_mp().position();
             if (time_slider_timeout_id == 0) {
                 /* only set the time if the user is not dragging the slider */
                 gtk_range_set_value(GTK_RANGE(time_slider), timepos);

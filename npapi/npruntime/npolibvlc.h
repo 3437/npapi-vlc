@@ -164,7 +164,7 @@ protected:
 
     InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
 
-    void parseOptions(const NPString &s, int *i_options, char*** ppsz_options);
+    void parseOptions(const NPString& s, int *i_options, char*** ppsz_options);
     void parseOptions(NPObject *obj, int *i_options, char*** ppsz_options);
 
 private:

@@ -29,8 +29,131 @@
 #include <type_traits>
 #include <cstring>
 
+using CStr = std::unique_ptr<char, void(*)(void*)>;
+
 namespace npapi
 {
+
+// We want to handle both NPObject* and NPObject, though
+// we don't want const char* to be converted to char.
+// char* should be considered as const char*, const int as int...
+namespace details
+{
+    // Remove the first pointer to allow std::remove_cv to process the type
+    // instead of the pointer
+    template <typename T>
+    using PointerLess = typename std::remove_pointer<T>::type;
+
+    // Remove the const & volatile
+    template <typename T>
+    using Decayed = typename std::remove_cv<PointerLess<T>>::type;
+}
+
+template <typename T>
+using TraitsType = typename std::conditional<
+                        std::is_same<
+                            details::Decayed<T>,
+                            NPObject
+                        >::value,
+                        // Keep NPObject as this. The traits is using the raw pointerless type.
+                        NPObject,
+                        // Re-add the pointer if the type isn't NPObject & T was a pointer type
+                        typename std::conditional<
+                            std::is_pointer<T>::value,
+                            typename std::add_pointer<details::Decayed<T>>::type,
+                            details::Decayed<T>
+                        >::type
+                >::type;
+
+using NPStringPtr = std::unique_ptr<NPUTF8, void(*)(void*)>;
+
+inline bool is_null( const NPVariant& v )
+{
+    return NPVARIANT_IS_NULL( v );
+}
+
+inline bool is_number( const NPVariant& v )
+{
+    return NPVARIANT_IS_INT32(v)
+        || NPVARIANT_IS_DOUBLE(v)
+        || NPVARIANT_IS_STRING(v);
+}
+
+inline bool is_bool( const NPVariant &v )
+{
+    return NPVARIANT_IS_BOOLEAN( v ) ||
+            is_number( v );
+}
+
+inline bool to_bool( const NPVariant& v )
+{
+    if( NPVARIANT_IS_BOOLEAN(v) )
+    {
+        return NPVARIANT_TO_BOOLEAN(v);
+    }
+    else if( NPVARIANT_IS_STRING(v) )
+    {
+        if(!strcasecmp(NPVARIANT_TO_STRING(v).UTF8Characters, "true"))
+            return true;
+    }
+    else if ( NPVARIANT_IS_INT32(v) )
+    {
+        return NPVARIANT_TO_INT32(v) != 0;
+    }
+    else if ( NPVARIANT_IS_DOUBLE(v) )
+    {
+        return NPVARIANT_TO_DOUBLE(v) != .0;
+    }
+    return false;
+}
+
+inline bool is_string( const NPVariant& v )
+{
+    return NPVARIANT_IS_STRING( v );
+}
+
+inline NPStringPtr to_string( const NPVariant& v )
+{
+    auto s = NPVARIANT_TO_STRING( v );
+    NPUTF8* buff = (NPUTF8*)NPN_MemAlloc(s.UTF8Length + 1);
+    memcpy( buff, s.UTF8Characters, s.UTF8Length + 1 );
+    return NPStringPtr( buff, NPN_MemFree );
+}
+
+// Returns the raw string, uncopied.
+// The pointer becomes invalid as soon as "v" is destroyed
+inline const NPUTF8* to_tmp_string( const NPVariant& v )
+{
+    return NPVARIANT_TO_STRING(v).UTF8Characters;
+}
+
+inline int32_t to_int( const NPVariant& v )
+{
+    if ( NPVARIANT_IS_INT32( v ) )
+        return NPVARIANT_TO_INT32( v );
+    else if ( NPVARIANT_IS_DOUBLE( v ) )
+        return (int32_t)NPVARIANT_TO_DOUBLE( v );
+    else if ( NPVARIANT_IS_STRING( v ) )
+    {
+        auto& s = NPVARIANT_TO_STRING( v );
+        return atoi( s.UTF8Characters );
+    }
+    return 0;
+}
+
+inline double to_double( const NPVariant& v )
+{
+    if ( NPVARIANT_IS_DOUBLE( v ) )
+        return NPVARIANT_TO_DOUBLE( v );
+    else if ( NPVARIANT_IS_INT32( v ) )
+        return (double)NPVARIANT_TO_INT32( v );
+    else if ( NPVARIANT_IS_STRING( v ) )
+    {
+        auto& s = NPVARIANT_TO_STRING( v );
+        return atof( s.UTF8Characters );
+    }
+    return .0;
+}
 
 // We don't want conversion of unknown types to work like any other types.
 // This returns void, so if ( traits<std::vector<...>>::is() ) will fail to build.
@@ -43,7 +166,7 @@ struct traits<std::nullptr_t>
 {
     static bool is( const NPVariant& v )
     {
-        return NPVARIANT_IS_NULL( v );
+        return is_null( v );
     }
 
     static void from( std::nullptr_t, NPVariant& v )
@@ -57,12 +180,12 @@ struct traits<bool>
 {
     static bool is( const NPVariant& v )
     {
-        return NPVARIANT_IS_BOOLEAN( v );
+        return is_bool( v );
     }
 
     static bool to( const NPVariant& v )
     {
-        return NPVARIANT_TO_BOOLEAN( v );
+        return to_bool( v );
     }
 
     static void from( bool b, NPVariant& v )
@@ -79,12 +202,12 @@ struct traits<T, typename std::enable_if<
 {
     static bool is( const NPVariant& v )
     {
-        return NPVARIANT_IS_INT32( v );
+        return is_number( v );
     }
 
     static int to( const NPVariant& v )
     {
-        return NPVARIANT_TO_INT32( v );
+        return to_int( v );
     }
 
     static void from( T i, NPVariant& v )
@@ -94,7 +217,7 @@ struct traits<T, typename std::enable_if<
 
 };
 template <>
-struct traits<NPObject*>
+struct traits<NPObject>
 {
     static bool is( const NPVariant& v )
     {
@@ -120,12 +243,12 @@ struct traits<T, typename std::enable_if<
 {
     static bool is( const NPVariant& v )
     {
-        return NPVARIANT_IS_DOUBLE( v );
+        return is_number( v );
     }
 
     static double to( const NPVariant& v )
     {
-        return NPVARIANT_TO_DOUBLE( v );
+        return to_double( v );
     }
 
     static void from( T d, NPVariant& v )
@@ -139,7 +262,7 @@ struct traits<NPString>
 {
     static bool is( const NPVariant& v )
     {
-        return NPVARIANT_IS_STRING( v );
+        return is_string( v );
     }
 
     static NPString to( const NPVariant& v )
@@ -149,9 +272,48 @@ struct traits<NPString>
 
     static void from( NPString s, NPVariant& v )
     {
-        NPUTF8* buff = (NPUTF8*)NPN_MemAlloc(s.UTF8Length);
-        strcpy( buff, s.UTF8Characters );
-        STRINGZ_TO_NPVARIANT( buff, v );
+        auto raw = strdup( s.UTF8Characters );
+        STRINGZ_TO_NPVARIANT( raw, v );
+    }
+};
+
+template <>
+struct traits<NPUTF8*>
+{
+    static bool is( const NPVariant& v )
+    {
+        return is_string( v );
+    }
+
+    static const NPUTF8* to( const NPVariant& v )
+    {
+        return to_tmp_string( v );
+    }
+
+    static void from( const char* str, NPVariant& v )
+    {
+        auto copy = strdup( str );
+        STRINGZ_TO_NPVARIANT( copy, v );
+    }
+};
+
+template <>
+struct traits<std::string>
+{
+    static bool is( const NPVariant& v )
+    {
+        return is_string( v );
+    }
+
+    static std::string to( const NPVariant& v )
+    {
+        return std::string( to_tmp_string( v ) );
+    }
+
+    static void from( const std::string& str, NPVariant& v )
+    {
+        auto copy = strdup( str.c_str() );
+        STRINGZ_TO_NPVARIANT( copy, v );
     }
 };
 
@@ -170,6 +332,10 @@ public:
     Variant( const NPVariant& v )
         : m_variant( v )
     {
+        if (is<NPString>() )
+            traits<NPString>::from( (NPString)*this, m_variant );
+        else if ( is<NPObject>() )
+            traits<NPObject>::from( (NPObject*)*this, m_variant );
     }
 
     Variant(const Variant& v)
@@ -182,7 +348,7 @@ public:
     Variant(const T& t)
     {
         memset( &m_variant, 0, sizeof( m_variant ) );
-        traits<T>::from( t, m_variant );
+        traits<TraitsType<T>>::from( t, m_variant );
     }
 
     Variant& operator=(const Variant& v)
@@ -196,7 +362,7 @@ public:
             return *this;
         }
         m_variant = v.m_variant;
-        if (v.is<NPObject*>())
+        if (v.is<NPObject>())
             NPN_RetainObject( *this );
         return *this;
     }
@@ -204,20 +370,21 @@ public:
     Variant(Variant&& v)
     {
         m_variant = v.m_variant;
-        memset( &v.m_variant, 0, sizeof( m_variant ) );
+        memset( &v.m_variant, 0, sizeof( v.m_variant ) );
     }
 
     Variant& operator=(Variant&& v)
     {
         release();
         m_variant = v.m_variant;
-        memset( &v.m_variant, 0, sizeof( m_variant ) );
+        memset( &v.m_variant, 0, sizeof( v.m_variant ) );
     }
+
 
     template <typename T>
     bool is() const
     {
-        return traits<T>::is( m_variant );
+        return traits<TraitsType<T>>::is( m_variant );
     }
 
     // /!\ Warning /!\ This does not retain the value for strings & objects
@@ -226,8 +393,8 @@ public:
     template <typename T>
     operator T() const
     {
-        assert(traits<T>::is( m_variant ));
-        return traits<T>::to( m_variant );
+        assert(traits<TraitsType<T>>::is( m_variant ));
+        return traits<TraitsType<T>>::to( m_variant );
     }
 
     operator const NPVariant() const
@@ -240,6 +407,11 @@ public:
         return &m_variant;
     }
 
+    operator NPVariant*()
+    {
+        return &m_variant;
+    }
+
     ~Variant()
     {
         release();
@@ -247,8 +419,7 @@ public:
 
     void release()
     {
-        if ( is<NPString>() || is<NPObject*>() )
-            NPN_ReleaseVariantValue( &m_variant );
+        NPN_ReleaseVariantValue( &m_variant );
     }
 
 private:

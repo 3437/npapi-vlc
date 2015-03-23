@@ -32,27 +32,6 @@
 
 #include "nporuntime.h"
 
-char* RuntimeNPObject::stringValue(const NPString &s)
-{
-    NPUTF8 *val = static_cast<NPUTF8*>(malloc((s.UTF8Length+1) * sizeof(*val)));
-    if( val )
-    {
-        strncpy(val, s.UTF8Characters, s.UTF8Length);
-        val[s.UTF8Length] = '\0';
-    }
-    return val;
-}
-
-char* RuntimeNPObject::stringValue(const NPVariant &v)
-{
-    char *s = NULL;
-    if( NPVARIANT_IS_STRING(v) )
-    {
-        return stringValue(NPVARIANT_TO_STRING(v));
-    }
-    return s;
-}
-
 RuntimeNPObject::InvokeResult RuntimeNPObject::getProperty(int, NPVariant &)
 {
     /* default behaviour */

@@ -168,9 +168,14 @@ RuntimeNPObject::InvokeResult LibvlcRootNPObject::invoke(int index,
 
     case ID_root_addeventlistener:
     case ID_root_removeeventlistener:
-        if( (2 < argCount) ||
-            !NPVARIANT_IS_STRING(args[0]) ||
-            !NPVARIANT_IS_OBJECT(args[1]) )
+        if ( argCount < 2 )
+            return INVOKERESULT_INVALID_ARGS;
+
+        // Don't wrap eventName as it would copy the string even though it's not required.
+        auto listener = npapi::Variant( args[1] );
+
+        if ( !npapi::is_string( args[0] ) ||
+            !listener.is<NPObject>() )
             break;
 
         if( !VlcPluginBase::canUseEventListener() )
@@ -183,13 +188,11 @@ RuntimeNPObject::InvokeResult LibvlcRootNPObject::invoke(int index,
 
         if( ID_root_addeventlistener == index )
         {
-            p_plugin->subscribe( NPVARIANT_TO_STRING(args[0]).UTF8Characters,
-                                         NPVARIANT_TO_OBJECT(args[1] ) );
+            p_plugin->subscribe( npapi::to_tmp_string( args[0] ), listener );
         }
         else
         {
-            p_plugin->unsubscribe( NPVARIANT_TO_STRING(args[1]).UTF8Characters,
-                    NPVARIANT_TO_OBJECT( args[1] ) );
+            p_plugin->unsubscribe( npapi::to_tmp_string( args[0] ), listener );
         }
         VOID_TO_NPVARIANT(result);
 
@@ -301,34 +304,35 @@ LibvlcAudioNPObject::setProperty(int index, const NPVariant &value)
         if( !mp )
             RETURN_ON_ERROR;
 
+        auto v = npapi::Variant( value );
         switch( index )
         {
             case ID_audio_mute:
-                if( isBoolValue(value) )
+                if( v.is<bool>() )
                 {
-                    mp.setMute( boolValue( value ) );
+                    mp.setMute( v );
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
             case ID_audio_volume:
-                if( isNumberValue(value) )
+                if( v.is<int>() )
                 {
-                    mp.setVolume( intValue( value ) );
+                    mp.setVolume( v );
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
             case ID_audio_track:
-                if( isNumberValue(value) )
+                if( v.is<int>() )
                 {
-                    int trackIdx = intValue(value);
+                    int trackIdx = v;
                     if ( mp.setAudioTrack( trackIdx ) )
                         return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
             case ID_audio_channel:
-                if( isNumberValue(value) )
+                if( v.is<int>() )
                 {
-                    if ( mp.setChannel( intValue( value ) ) )
+                    if ( mp.setChannel( v ) )
                         return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
@@ -376,9 +380,12 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
                 return INVOKERESULT_NO_SUCH_METHOD;
             case ID_audio_description:
             {
-                if( argCount == 1 && isNumberValue(args[0]))
+                if ( argCount < 1 )
+                    return INVOKERESULT_INVALID_ARGS;
+                auto v = npapi::Variant( args[0] );
+                if( !v.is<int>() )
                 {
-                    int fakeTrackIndex = intValue(args[0]);
+                    int fakeTrackIndex = v;
                     auto tracks = mp.audioTrackDescription();
                     auto track = std::find_if( begin( tracks ), end( tracks ), [fakeTrackIndex](const VLC::TrackDescription& t) {
                         return t.id() == fakeTrackIndex;
@@ -507,39 +514,37 @@ LibvlcInputNPObject::setProperty(int index, const NPVariant &value)
         if( !mp )
             RETURN_ON_ERROR;
 
+        auto v = npapi::Variant( value );
         switch( index )
         {
             case ID_input_position:
             {
-                if( ! isNumberValue(value) )
+                if( !v.is<double>() )
                 {
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
-                float val = (float)doubleValue(value);
-                mp.setPosition( val );
+                mp.setPosition( v );
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_input_time:
             {
-                if( ! isNumberValue(value) )
+                if( !v.is<int>() )
                 {
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
-                int64_t val = (int64_t)intValue(value);
-                mp.setTime( val );
+                mp.setTime( v );
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_input_rate:
             {
-                if( ! isNumberValue(value) )
+                if( !v.is<double>() )
                 {
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
-                float val = (float)doubleValue(value);
-                mp.setRate( val );
+                mp.setRate( v );
                 return INVOKERESULT_NO_ERROR;
             }
             default:
@@ -752,14 +757,19 @@ LibvlcPlaylistItemsNPObject::invoke(int index, const NPVariant *args,
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
             case ID_playlistitems_remove:
-                if( (argCount == 1) && isNumberValue(args[0]) )
+            {
+                if ( argCount < 1 )
+                    INVOKERESULT_INVALID_ARGS;
+                auto v = npapi::Variant( args[0] );
+                if( v.is<int>() )
                 {
-                    if( !p_plugin->playlist_delete_item(intValue(args[0])) )
+                    if( !p_plugin->playlist_delete_item(v) )
                         return INVOKERESULT_GENERIC_ERROR;
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
+            }
             default:
                 ;
         }
@@ -881,26 +891,19 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             {
                 if( (argCount < 1) || (argCount > 3) )
                     return INVOKERESULT_NO_SUCH_METHOD;
-                if( !NPVARIANT_IS_STRING(args[0]) )
+                if( !npapi::is_string( args[0] ) )
                     return INVOKERESULT_NO_SUCH_METHOD;
 
                 // grab URL
                 if( NPVARIANT_IS_NULL(args[0]) )
                     return INVOKERESULT_NO_SUCH_METHOD;
 
-                char *s = stringValue(NPVARIANT_TO_STRING(args[0]));
-                if( !s )
-                    return INVOKERESULT_OUT_OF_MEMORY;
+                // Don't assign url pointer to s, they don't have the same
+                // deleter function.
+                auto s = npapi::to_string( args[0] );
+                auto url = CStr( p_plugin->getAbsoluteURL( s.get() ), free );
 
-                char *url = p_plugin->getAbsoluteURL(s);
-                if( url )
-                    free(s);
-                else
-                    // problem with combining url, use argument
-                    url = s;
-
-                char *name = NULL;
-
+                auto name = npapi::NPStringPtr( nullptr, NPN_MemFree );
                 // grab name if available
                 if( argCount > 1 )
                 {
@@ -910,11 +913,10 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                     }
                     else if( NPVARIANT_IS_STRING(args[1]) )
                     {
-                        name = stringValue(NPVARIANT_TO_STRING(args[1]));
+                        name = npapi::to_string( args[1] );
                     }
                     else
                     {
-                        free(url);
                         return INVOKERESULT_INVALID_VALUE;
                     }
                 }
@@ -925,33 +927,29 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                 // grab options if available
                 if( argCount > 2 )
                 {
-                    if( NPVARIANT_IS_NULL(args[2]) )
+                    npapi::Variant v = args[2];
+                    if( v.is<std::nullptr_t>() )
                     {
                         // do nothing
                     }
-                    else if( NPVARIANT_IS_STRING(args[2]) )
+                    else if( v.is<NPString>() )
                     {
-                        parseOptions(NPVARIANT_TO_STRING(args[2]),
-                                     &i_options, &ppsz_options);
+                        parseOptions((NPString)v, &i_options, &ppsz_options);
 
                     }
-                    else if( NPVARIANT_IS_OBJECT(args[2]) )
+                    else if( v.is<NPObject>() )
                     {
-                        parseOptions(NPVARIANT_TO_OBJECT(args[2]),
-                                     &i_options, &ppsz_options);
+                        parseOptions((NPObject*)v, &i_options, &ppsz_options);
                     }
                     else
                     {
-                        free(url);
-                        free(name);
                         return INVOKERESULT_INVALID_VALUE;
                     }
                 }
 
-                int item = p_plugin->playlist_add_extended_untrusted(url, name,
-                      i_options, const_cast<const char **>(ppsz_options));
-                free(url);
-                free(name);
+                int item = p_plugin->playlist_add_extended_untrusted(
+                            url ? url.get() : s.get(),
+                            name.get(), i_options, const_cast<const char **>(ppsz_options));
                 if( item == -1 )
                     RETURN_ON_ERROR;
 
@@ -973,13 +971,18 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
             case ID_playlist_playItem:
-                if( (argCount == 1) && isNumberValue(args[0]) )
+            {
+                if ( argCount < 1 )
+                    return INVOKERESULT_INVALID_ARGS;
+                npapi::Variant v = args[0];
+                if ( v.is<int>() )
                 {
-                    p_plugin->playlist_play_item(intValue(args[0]));
+                    p_plugin->playlist_play_item( v );
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
+            }
             case ID_playlist_pause:
                 if( argCount == 0 )
                 {
@@ -1029,14 +1032,19 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
             case ID_playlist_removeitem: /* deprecated */
-                if( (argCount == 1) && isNumberValue(args[0]) )
+            {
+                if ( argCount < 1 )
+                    return INVOKERESULT_INVALID_ARGS;
+                npapi::Variant v = args[0];
+                if ( v.is<int>() )
                 {
-                    if( !p_plugin->playlist_delete_item(intValue(args[0])) )
+                    if( !p_plugin->playlist_delete_item( v ) )
                         return INVOKERESULT_GENERIC_ERROR;
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
+            }
             default:
                 ;
         }
@@ -1050,13 +1058,13 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
 // XXX FIXME option at a time and doesn't need to realloc().
 // XXX FIXME Same for the other version of parseOptions.
 
-void LibvlcPlaylistNPObject::parseOptions(const NPString &nps,
+void LibvlcPlaylistNPObject::parseOptions(const NPString& nps,
                                          int *i_options, char*** ppsz_options)
 {
     if( nps.UTF8Length )
     {
-        char *s = stringValue(nps);
-        char *val = s;
+        auto s = CStr( strdup( nps.UTF8Characters ), free );
+        char *val = s.get();
         if( val )
         {
             long capacity = 16;
@@ -1096,7 +1104,6 @@ void LibvlcPlaylistNPObject::parseOptions(const NPString &nps,
                             if( ! moreOptions )
                             {
                                 /* failed to allocate more memory */
-                                free(s);
                                 /* return what we got so far */
                                 *i_options = nOptions;
                                 *ppsz_options = options;
@@ -1114,7 +1121,6 @@ void LibvlcPlaylistNPObject::parseOptions(const NPString &nps,
                 *i_options = nOptions;
                 *ppsz_options = options;
             }
-            free(s);
         }
     }
 }
@@ -1125,14 +1131,13 @@ void LibvlcPlaylistNPObject::parseOptions(NPObject *obj, int *i_options,
 {
     /* WARNING: Safari does not implement NPN_HasProperty/NPN_HasMethod */
 
-    NPVariant value;
+    npapi::Variant value;
 
     /* we are expecting to have a Javascript Array object */
     NPIdentifier propId = NPN_GetStringIdentifier("length");
-    if( NPN_GetProperty(_instance, obj, propId, &value) )
+    if( NPN_GetProperty(_instance, obj, propId, value) )
     {
-        int count = intValue(value);
-        NPN_ReleaseVariantValue(&value);
+        int count = value;
 
         if( count )
         {
@@ -1144,15 +1149,15 @@ void LibvlcPlaylistNPObject::parseOptions(NPObject *obj, int *i_options,
 
                 while( nOptions < count )
                 {
+                    npapi::Variant value;
                     propId = NPN_GetIntIdentifier(nOptions);
-                    if( ! NPN_GetProperty(_instance, obj, propId, &value) )
+                    if( ! NPN_GetProperty(_instance, obj, propId, value) )
                         /* return what we got so far */
                         break;
 
-                    if( ! NPVARIANT_IS_STRING(value) )
+                    if( !value.is<NPString>() )
                     {
                         /* return what we got so far */
-                        NPN_ReleaseVariantValue(&value);
                         break;
                     }
 
@@ -1163,7 +1168,6 @@ void LibvlcPlaylistNPObject::parseOptions(NPObject *obj, int *i_options,
                         if( ! moreOptions )
                         {
                             /* failed to allocate more memory */
-                            NPN_ReleaseVariantValue(&value);
                             /* return what we got so far */
                             *i_options = nOptions;
                             *ppsz_options = options;
@@ -1172,8 +1176,7 @@ void LibvlcPlaylistNPObject::parseOptions(NPObject *obj, int *i_options,
                         options = moreOptions;
                     }
 
-                    options[nOptions++] = stringValue(value);
-                    NPN_ReleaseVariantValue(&value);
+                    options[nOptions++] = strdup(((NPString)(value)).UTF8Characters);
                 }
                 *i_options = nOptions;
                 *ppsz_options = options;
@@ -1247,10 +1250,10 @@ LibvlcSubtitleNPObject::setProperty(int index, const NPVariant &value)
         {
             case ID_subtitle_track:
             {
-                if( isNumberValue(value) )
+                auto v = npapi::Variant( value );
+                if( v.is<int>() )
                 {
-                    int trackIdx = intValue(value);
-                    if ( mp.setSpu( trackIdx ) )
+                    if ( mp.setSpu( v ) )
                         return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
@@ -1287,9 +1290,12 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
         {
             case ID_subtitle_description:
             {
-                if (argCount == 1 && isNumberValue(args[0]))
+                if ( argCount < 1 )
+                    return INVOKERESULT_INVALID_ARGS;
+                auto v = npapi::Variant( args[0] );
+                if ( v.is<int>() )
                 {
-                    int fakeTrackIndex = intValue(args[0]);
+                    int fakeTrackIndex = v;
                     auto tracks = mp.spuDescription();
                     auto track = std::find_if( begin( tracks ), end( tracks ), [fakeTrackIndex](const VLC::TrackDescription& t) {
                         return t.id() == fakeTrackIndex;
@@ -1451,72 +1457,61 @@ LibvlcVideoNPObject::setProperty(int index, const NPVariant &value)
         if( !mp )
             RETURN_ON_ERROR;
 
+        auto v = npapi::Variant( value );
+
         switch( index )
         {
             case ID_video_fullscreen:
             {
-                if( ! isBoolValue(value) )
-                {
+                if( !v.is<bool>() )
                     return INVOKERESULT_INVALID_VALUE;
-                }
 
-                int val = boolValue(value);
-                p_plugin->set_fullscreen(val);
+                p_plugin->set_fullscreen( (bool)v );
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_video_aspectratio:
             {
-                char *psz_aspect = NULL;
 
-                if( ! NPVARIANT_IS_STRING(value) )
-                {
+                if( !v.is<NPString>() )
                     return INVOKERESULT_INVALID_VALUE;
-                }
 
-                psz_aspect = stringValue(NPVARIANT_TO_STRING(value));
-                if( !psz_aspect )
-                {
-                    return INVOKERESULT_GENERIC_ERROR;
-                }
-
-                mp.setAspectRatio( psz_aspect );
-                free(psz_aspect);
+                std::string ar = v;
+                if ( ar == "default" )
+                    ar = "";
+                mp.setAspectRatio( ar );
 
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_video_subtitle:
             {
-                if( isNumberValue(value) )
+                if( v.is<int>() )
                 {
-                    mp.setSpu( intValue( value ) );
+                    mp.setSpu( v );
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
             }
             case ID_video_crop:
             {
-                char *psz_geometry = NULL;
-
-                if( ! NPVARIANT_IS_STRING(value) )
+                if( !v.is<NPString>() )
                 {
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
-                psz_geometry = stringValue(NPVARIANT_TO_STRING(value));
+                const char *psz_geometry = v;
                 if( !psz_geometry )
                 {
                     return INVOKERESULT_GENERIC_ERROR;
                 }
                 mp.setCropGeometry( psz_geometry );
-                free(psz_geometry);
 
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_video_teletext:
             {
-                if( isNumberValue(value) )
+                if( v.is<int>() )
                 {
-                    mp.setTeletext( intValue( value ) );
+                    mp.setTeletext( v );
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
@@ -1678,6 +1673,7 @@ LibvlcMarqueeNPObject::setProperty(int index, const NPVariant &value)
     if( !mp )
         RETURN_ON_ERROR;
 
+    auto v = npapi::Variant( value );
     switch( index )
     {
     case ID_marquee_color:
@@ -1687,27 +1683,25 @@ LibvlcMarqueeNPObject::setProperty(int index, const NPVariant &value)
     case ID_marquee_size:
     case ID_marquee_x:
     case ID_marquee_y:
-        if( isNumberValue( value ) )
+        if( v.is<int>() )
         {
-            mp.setMarqueeInt( marquee_idx[index], intValue( value ) );
+            mp.setMarqueeInt( marquee_idx[index], v );
             return INVOKERESULT_NO_ERROR;
         }
         break;
 
     case ID_marquee_position:
-        if( !NPVARIANT_IS_STRING(value) ||
-            !position_byname( NPVARIANT_TO_STRING(value).UTF8Characters, i ) )
+        if( !v.is<const char*>() ||
+            !position_byname( v, i ) )
             return INVOKERESULT_INVALID_VALUE;
 
         mp.setMarqueeInt( libvlc_marquee_Position, i );
         return INVOKERESULT_NO_ERROR;
 
     case ID_marquee_text:
-        if( NPVARIANT_IS_STRING( value ) )
+        if( v.is<const char*>() )
         {
-            char *psz_text = stringValue( NPVARIANT_TO_STRING( value ) );
-            mp.setMarqueeString( libvlc_marquee_Text, psz_text );
-            free(psz_text);
+            mp.setMarqueeString( libvlc_marquee_Text, v );
             return INVOKERESULT_NO_ERROR;
         }
         break;
@@ -1824,6 +1818,8 @@ LibvlcLogoNPObject::setProperty(int index, const NPVariant &value)
     if( !mp )
         RETURN_ON_ERROR;
 
+    auto v = npapi::Variant( value );
+
     switch( index )
     {
     case ID_logo_delay:
@@ -1831,10 +1827,10 @@ LibvlcLogoNPObject::setProperty(int index, const NPVariant &value)
     case ID_logo_opacity:
     case ID_logo_x:
     case ID_logo_y:
-        if( !isNumberValue(value) )
+        if( !v.is<int>() )
             return INVOKERESULT_INVALID_VALUE;
 
-        mp.setLogoInt( logo_idx[index], intValue( value ));
+        mp.setLogoInt( logo_idx[index], v );
         break;
 
     case ID_logo_position:
@@ -1972,14 +1968,16 @@ LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
         break;
 
     case ID_deint_enable:
-        if( argCount != 1 || !NPVARIANT_IS_STRING( args[0] ) )
+    {
+        if( argCount < 1 )
+            return INVOKERESULT_INVALID_VALUE;
+        auto v = npapi::Variant( args[0] );
+        if ( !v.is<const char*>() )
             return INVOKERESULT_INVALID_VALUE;
 
-        psz = stringValue( NPVARIANT_TO_STRING( args[0] ) );
-        mp.setDeinterlace( psz );
-        free(psz);
+        mp.setDeinterlace( v );
         break;
-
+    }
     default:
         return INVOKERESULT_NO_SUCH_METHOD;
     }

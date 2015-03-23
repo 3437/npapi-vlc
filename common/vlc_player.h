@@ -93,9 +93,6 @@ public:
     VLC::MediaPlayer& get_mp()
         { return _mp; }
 
-protected:
-    virtual void on_player_action( vlc_player_action_e ){}
-
 private:
     VLC::Instance           _libvlc_instance;
     VLC::MediaPlayer        _mp;

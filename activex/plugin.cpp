@@ -1246,24 +1246,6 @@ void VLCPlugin::set_player_window()
     _WindowsManager.LibVlcAttach( &get_player() );
 }
 
-void VLCPlugin::on_player_action(vlc_player_action_e pa)
-{
-    switch(pa){
-    case pa_play:
-        fireOnPlayEvent();
-        break;
-    case pa_pause:
-        fireOnPauseEvent();
-        break;
-    case pa_stop:
-        fireOnStopEvent();
-        break;
-    case pa_next:
-    case pa_prev:
-        break;
-    }
-}
-
 static vlcplugin_event_t vlcevents[] = {
     { libvlc_MediaPlayerMediaChanged, handle_input_state_event },
     { libvlc_MediaPlayerNothingSpecial, handle_input_state_event },

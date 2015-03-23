@@ -260,6 +260,7 @@ public:
     */
     void freezeEvents(BOOL freeze);
     void firePropChangedEvent(DISPID dispid);
+    //FIXME: I'm fairly convinced this 3 events are useless.
     void fireOnPlayEvent(void);
     void fireOnPauseEvent(void);
     void fireOnStopEvent(void);
@@ -340,8 +341,6 @@ public:
     }
 
 protected:
-    void on_player_action(vlc_player_action_e);
-
     virtual ~VLCPlugin();
 
 private:

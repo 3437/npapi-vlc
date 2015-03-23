@@ -108,43 +108,33 @@ void vlc_player::play()
     else if( -1 == current_item() ) {
         play(0);
     }
-    else {
+    else
         _ml_p.play();
-        on_player_action(pa_play);
-    }
 }
 
 bool vlc_player::play(unsigned int idx)
 {
-    if( _ml_p.playItemAtIndex( idx ) ) {
-        on_player_action(pa_play);
-        return true;
-    }
-    return false;
+    return _ml_p.playItemAtIndex( idx );
 }
 
 void vlc_player::pause()
 {
     _mp.setPause( true );
-    on_player_action(pa_pause);
 }
 
 void vlc_player::togglePause()
 {
     _ml_p.pause();
-    on_player_action(pa_pause);
 }
 
 void vlc_player::stop()
 {
     libvlc_media_list_player_stop(_ml_p);
-    on_player_action(pa_stop);
 }
 
 bool vlc_player::next()
 {
     if( _ml_p.next() ) {
-        on_player_action(pa_next);
         return true;
     }
     return false;
@@ -152,11 +142,7 @@ bool vlc_player::next()
 
 bool vlc_player::prev()
 {
-    if( _ml_p.previous() ) {
-        on_player_action(pa_prev);
-        return true;
-    }
-    return false;
+    return _ml_p.previous();
 }
 
 float vlc_player::get_rate()

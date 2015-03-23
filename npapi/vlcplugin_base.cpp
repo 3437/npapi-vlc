@@ -185,7 +185,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
         return NPERR_GENERIC_ERROR;
     }
 
-    m_player.set_mode(b_autoloop ? libvlc_playback_mode_loop :
+    m_player.mlp().setPlaybackMode( b_autoloop ? libvlc_playback_mode_loop :
                                       libvlc_playback_mode_default);
 
     /*
@@ -243,9 +243,6 @@ VlcPluginBase::~VlcPluginBase()
 {
     free(psz_baseURL);
     free(psz_target);
-
-    if( playlist_isplaying() )
-        playlist_stop();
 
     _instances.erase(this);
 }
@@ -436,16 +433,6 @@ void VlcPluginBase::unsubscribe(const char* eventName, npapi::Variant listener)
 }
 
 /*****************************************************************************
- * VlcPluginBase playlist replacement methods
- *****************************************************************************/
-bool  VlcPluginBase::player_has_vout()
-{
-    if( playlist_isplaying() )
-        return player().get_mp().hasVout() != 0;
-    return false;
-}
-
-/*****************************************************************************
  * VlcPluginBase methods
  *****************************************************************************/
 
@@ -615,13 +602,13 @@ void VlcPluginBase::control_handler(vlc_toolbar_clicked_t clicked)
 
         case clicked_Pause:
         {
-            playlist_pause();
+            player().get_mp().pause();
         }
         break;
 
         case clicked_Stop:
         {
-            playlist_stop();
+            player().get_mp().stop();
         }
         break;
 

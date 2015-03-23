@@ -492,7 +492,7 @@ LibvlcInputNPObject::getProperty(int index, NPVariant &result)
             }
             case ID_input_hasvout:
             {
-                bool val = p_plugin->player_has_vout();
+                bool val = p_plugin->player().get_mp().hasVout() != 0;
                 BOOLEAN_TO_NPVARIANT(val, result);
                 return INVOKERESULT_NO_ERROR;
             }
@@ -713,7 +713,7 @@ LibvlcPlaylistItemsNPObject::getProperty(int index, NPVariant &result)
         {
             case ID_playlistitems_count:
             {
-                int val = p_plugin->playlist_count();
+                int val = p_plugin->player().items_count();
                 INT32_TO_NPVARIANT(val, result);
                 return INVOKERESULT_NO_ERROR;
             }
@@ -751,7 +751,7 @@ LibvlcPlaylistItemsNPObject::invoke(int index, const NPVariant *args,
             case ID_playlistitems_clear:
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_clear();
+                    p_plugin->player().clear_items();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -763,7 +763,7 @@ LibvlcPlaylistItemsNPObject::invoke(int index, const NPVariant *args,
                 auto v = npapi::Variant( args[0] );
                 if( v.is<int>() )
                 {
-                    if( !p_plugin->playlist_delete_item(v) )
+                    if( !p_plugin->player().delete_item( v ) )
                         return INVOKERESULT_GENERIC_ERROR;
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
@@ -817,19 +817,19 @@ LibvlcPlaylistNPObject::getProperty(int index, NPVariant &result)
         {
             case ID_playlist_itemcount: /* deprecated */
             {
-                int val = p_plugin->playlist_count();
+                int val = p_plugin->player().items_count();
                 INT32_TO_NPVARIANT(val, result);
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_playlist_isplaying:
             {
-                int val = p_plugin->playlist_isplaying();
+                int val = p_plugin->player().mlp().isPlaying();
                 BOOLEAN_TO_NPVARIANT(val, result);
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_playlist_currentitem:
             {
-                int val = p_plugin->playlist_currentitem();
+                int val = p_plugin->player().current_item();
                 INT32_TO_NPVARIANT(val, result);
                 return INVOKERESULT_NO_ERROR;
             }
@@ -903,6 +903,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                 auto s = npapi::to_string( args[0] );
                 auto url = CStr( p_plugin->getAbsoluteURL( s.get() ), free );
 
+                //FIXME: This is never used
                 auto name = npapi::NPStringPtr( nullptr, NPN_MemFree );
                 // grab name if available
                 if( argCount > 1 )
@@ -947,9 +948,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                     }
                 }
 
-                int item = p_plugin->playlist_add_extended_untrusted(
-                            url ? url.get() : s.get(),
-                            name.get(), i_options, const_cast<const char **>(ppsz_options));
+                int item = p_plugin->player().add_item( url ? url.get() : s.get(), i_options, const_cast<const char **>(ppsz_options));
                 if( item == -1 )
                     RETURN_ON_ERROR;
 
@@ -977,7 +976,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                 npapi::Variant v = args[0];
                 if ( v.is<int>() )
                 {
-                    p_plugin->playlist_play_item( v );
+                    p_plugin->player().mlp().playItemAtIndex( v );
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -986,7 +985,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_pause:
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_pause();
+                    p_plugin->player().get_mp().setPause( true );
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -994,7 +993,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_togglepause:
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_togglePause();
+                    p_plugin->player().mlp().pause();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -1002,7 +1001,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_stop:
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_stop();
+                    p_plugin->player().mlp().stop();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -1010,7 +1009,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_next:
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_next();
+                    p_plugin->player().mlp().next();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -1018,7 +1017,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_prev:
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_prev();
+                    p_plugin->player().mlp().previous();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -1026,7 +1025,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_clear: /* deprecated */
                 if( argCount == 0 )
                 {
-                    p_plugin->playlist_clear();
+                    p_plugin->player().clear_items();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }
@@ -1038,7 +1037,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                 npapi::Variant v = args[0];
                 if ( v.is<int>() )
                 {
-                    if( !p_plugin->playlist_delete_item( v ) )
+                    if( !p_plugin->player().delete_item( v ) )
                         return INVOKERESULT_GENERIC_ERROR;
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;

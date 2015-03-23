@@ -312,9 +312,6 @@ NPError NPP_Destroy( NPP instance, NPSavedData** )
 
     instance->pdata = NULL;
 
-    if( p_plugin->playlist_isplaying() )
-        p_plugin->playlist_stop();
-
     p_plugin->destroy_windows();
 
     delete p_plugin;
@@ -365,7 +362,7 @@ NPError NPP_SetWindow( NPP instance, NPWindow* window )
             {
                 if( p_plugin->psz_target )
                 {
-                    if( p_plugin->playlist_add( p_plugin->psz_target ) != -1 )
+                    if( p_plugin->player().add_item( p_plugin->psz_target ) != -1 )
                     {
                         if( p_plugin->get_options().get_autoplay() )
                         {
@@ -466,7 +463,7 @@ void NPP_StreamAsFile( NPP instance, NPStream *stream, const char* )
         return;
     }
 
-    if( p_plugin->playlist_add( stream->url ) != -1 )
+    if( p_plugin->player().add_item( stream->url ) != -1 )
     {
         if( p_plugin->get_options().get_autoplay() )
         {

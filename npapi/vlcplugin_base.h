@@ -90,64 +90,7 @@ public:
     int      b_stream;
     char *   psz_target;
 
-    void playlist_play_item(int idx)
-    {
-        m_player.play(idx);
-    }
-    void playlist_stop()
-    {
-        m_player.stop();
-    }
-    void playlist_next()
-    {
-        m_player.next();
-    }
-    void playlist_prev()
-    {
-        m_player.prev();
-    }
-    void playlist_pause()
-    {
-        m_player.pause();
-    }
-    void playlist_togglePause()
-    {
-        m_player.togglePause();
-    }
-    int playlist_isplaying()
-    {
-        return m_player.is_playing();
-    }
-    int playlist_currentitem()
-    {
-        return m_player.current_item();
-    }
-    int playlist_add( const char * mrl)
-    {
-        return m_player.add_item(mrl);
-    }
-    int playlist_add_extended_untrusted( const char *mrl, const char *,
-                    int optc, const char **optv )
-    {
-        return m_player.add_item(mrl, optc, optv);
-    }
-    int playlist_delete_item( int idx)
-    {
-        return m_player.delete_item(idx);
-    }
-    void playlist_clear()
-    {
-        m_player.clear_items() ;
-    }
-    int  playlist_count()
-    {
-        return m_player.items_count();
-    }
-    bool playlist_select(int);
-
     void control_handler(vlc_toolbar_clicked_t);
-
-    bool  player_has_vout();
 
     vlc_player& player()
     {

@@ -37,13 +37,9 @@ class vlc_player
 public:
     bool open(VLC::Instance& inst);
 
-    bool is_playing();
-    libvlc_state_t get_state();
-    bool is_stopped() { return libvlc_Stopped == get_state(); }
-
     int add_item(const char * mrl, unsigned int optc, const char **optv);
     int add_item(const char * mrl)
-        { return add_item(mrl, 0, 0); }
+        { return add_item( mrl, 0, nullptr ); }
 
     int  current_item();
     int  items_count();
@@ -51,47 +47,16 @@ public:
     void clear_items();
 
     void play();
-    bool play(unsigned int idx);
-    void pause();
-    void togglePause();
-    void stop();
-
-    bool next();
-    bool prev();
-
-    float get_rate();
-    void set_rate(float);
-
-    float get_fps();
-
-    bool has_vout();
-
-    float get_position();
-    void  set_position(float);
-
-    libvlc_time_t get_time();
-    void set_time(libvlc_time_t);
-
-    libvlc_time_t get_length();
-
-    void set_mode(libvlc_playback_mode_t);
-
-    bool is_muted();
-    void toggle_mute();
-    void set_mute(bool);
-
-    unsigned int get_volume();
-    void set_volume(unsigned int);
-
-    unsigned int track_count();
-    unsigned int get_track();
-    void set_track(unsigned int);
-
-    unsigned int get_channel();
-    void set_channel(unsigned int);
 
     VLC::MediaPlayer& get_mp()
-        { return _mp; }
+    {
+        return _mp;
+    }
+
+    VLC::MediaListPlayer& mlp()
+    {
+        return _ml_p;
+    }
 
 private:
     VLC::Instance           _libvlc_instance;

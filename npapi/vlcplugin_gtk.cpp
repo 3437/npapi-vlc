@@ -206,7 +206,7 @@ void VlcPluginGtk::popup_menu()
 
     /* play/pause */
     menuitem = gtk_image_menu_item_new_from_stock(
-                        playlist_isplaying() ?
+                        player().mlp().isPlaying() ?
                         GTK_STOCK_MEDIA_PAUSE :
                         GTK_STOCK_MEDIA_PLAY, NULL);
     g_signal_connect(G_OBJECT(menuitem), "activate", G_CALLBACK(menu_handler), this);
@@ -364,7 +364,7 @@ static gboolean fullscreen_win_keypress_handler(GtkWidget *widget, GdkEventKey *
     switch (event->keyval)
     {
     case GDK_KEY_space:
-        plugin->playlist_togglePause();
+        plugin->player().mlp().pause();
         return True;
     case GDK_KEY_Escape:
         plugin->set_fullscreen(false);
@@ -387,7 +387,7 @@ void VlcPluginGtk::update_controls()
         GtkToolItem *toolbutton;
 
         /* play/pause button */
-        const gchar *stock_id = playlist_isplaying() ? GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY;
+        const gchar *stock_id = player().mlp().isPlaying() ? GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY;
         toolbutton = gtk_toolbar_get_nth_item(GTK_TOOLBAR(toolbar), 0);
         if (strcmp(gtk_tool_button_get_stock_id(GTK_TOOL_BUTTON(toolbutton)), stock_id)) {
             gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(toolbutton), stock_id);

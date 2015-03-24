@@ -477,13 +477,13 @@ private:
 // Private implementation namespace
 namespace details
 {
-    template <int Idx, typename T>
+    template <size_t Idx, typename T>
     void wrap( VariantArray& array, T arg )
     {
         array[Idx] = Variant(arg);
     }
 
-    template <int Idx, typename T, typename... Args>
+    template <size_t Idx, typename T, typename... Args>
     void wrap( VariantArray& array, T arg, Args... args )
     {
         wrap<Idx + 1>( array, std::forward<Args>( args )... );

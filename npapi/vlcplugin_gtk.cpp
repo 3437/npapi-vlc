@@ -55,10 +55,6 @@ VlcPluginGtk::VlcPluginGtk(NPP instance, NPuint16_t mode) :
     }
 }
 
-VlcPluginGtk::~VlcPluginGtk()
-{
-}
-
 void VlcPluginGtk::set_player_window()
 {
     player().get_mp().setXwindow( video_xwindow);

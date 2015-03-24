@@ -69,28 +69,24 @@ public:
 
     void set_autoplay(bool ap){
         _autoplay = ap;
-        on_option_change(po_autoplay);
     }
     bool get_autoplay() const
         {return _autoplay;}
 
     void set_show_toolbar(bool st){
         _show_toolbar = st;
-        on_option_change(po_show_toolbar);
     }
     bool get_show_toolbar() const
         {return _show_toolbar;}
 
     void set_enable_fs(bool ef){
         _enable_fullscreen = ef;
-        on_option_change(po_enable_fullscreen);
     }
     bool get_enable_fs() const
         {return _enable_fullscreen;}
 
     void set_bg_text(const std::string& bt){
         _bg_text = bt;
-        on_option_change(po_bg_text);
     }
     const std::string& get_bg_text() const {
         return _bg_text;
@@ -98,7 +94,6 @@ public:
 
     void set_bg_color(const std::string& bc){
         _bg_color = bc;
-        on_option_change(po_bg_color);
     }
     const std::string& get_bg_color() const {
         return _bg_color;
@@ -106,12 +101,9 @@ public:
 
     void set_enable_branding(bool st){
         _enable_branding = st;
-        on_option_change(po_enable_branding);
     }
     bool get_enable_branding() const
     {return _enable_branding;}
-
-    virtual void on_option_change(vlc_player_option_e ){};
 
 private:
     bool         _autoplay;

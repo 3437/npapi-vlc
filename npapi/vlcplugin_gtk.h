@@ -35,7 +35,6 @@ class VlcPluginGtk : public VlcPluginBase
 {
 public:
     VlcPluginGtk(NPP, NPuint16_t);
-    virtual ~VlcPluginGtk();
 
     bool create_windows();
     bool resize_windows();

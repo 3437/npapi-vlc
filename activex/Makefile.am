@@ -26,8 +26,8 @@ DIST_misc = \
 
 lib_LTLIBRARIES = axvlc.la
 
-AM_CPPFLAGS = $(LIBVLC_CFLAGS) -DUNICODE -D_UNICODE -D_MIDL_USE_GUIDDEF_
-AM_CXXFLAGS = ${CXXFLAGS} -fno-exceptions
+AM_CPPFLAGS = $(LIBVLC_CFLAGS) -DUNICODE -D_UNICODE -D_MIDL_USE_GUIDDEF_ -I$(top_srcdir)/vlcpp
+AM_CXXFLAGS = ${CXXFLAGS}
 
 axvlc_la_SOURCES = \
     main.cpp \

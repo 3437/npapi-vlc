@@ -228,7 +228,7 @@ dnl
 dnl check the const-ness of GetMIMEDesc, since it changed in latest npapi headers
 AC_MSG_CHECKING([if NP_GetMIMEDescription() returns const])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-   #ifdef WIN32
+   #ifdef _WIN32
    # define XP_WIN 1
    #else
    # ifdef __APPLE__

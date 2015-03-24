@@ -114,7 +114,7 @@ private:
     bool IsPlaying()
     {
         if( VP() )
-            return VP()->is_playing();
+            return VP()->mlp().isPlaying();
         return false;
     }
 

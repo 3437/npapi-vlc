@@ -287,7 +287,7 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                         case ID_FS_PLAY_PAUSE:{
                             if( VP() ){
                                 if( IsPlaying() )
-                                    VP()->pause();
+                                    VP()->mlp().pause();
                                 else
                                     VP()->play();
                             }
@@ -295,7 +295,7 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                         }
                         case ID_FS_MUTE:{
                             if( VP() ){
-                                VP()->set_mute( IsDlgButtonChecked(hWnd(), ID_FS_MUTE) != FALSE );
+                                VP()->get_mp().setMute( IsDlgButtonChecked(hWnd(), ID_FS_MUTE) != FALSE );
                                 SyncVolumeSliderWithVLCVolume();
                             }
                             break;
@@ -473,15 +473,14 @@ void VLCControlsWnd::NeedHideControls()
 void VLCControlsWnd::SyncVideoPosScrollPosWithVideoPos()
 {
     if( VP() ){
-        libvlc_time_t pos = VP()->get_time();
-        SetVideoPosScrollPosByVideoPos(pos);
+        SetVideoPosScrollPosByVideoPos( VP()->get_mp().position() );
     }
 }
 
 void VLCControlsWnd::SetVideoPosScrollRangeByVideoLen()
 {
     if( VP() ){
-        libvlc_time_t MaxLen = VP()->get_length();
+        libvlc_time_t MaxLen = VP()->get_mp().length();
         VideoPosShiftBits = 0;
         while(MaxLen>0xffff){
             MaxLen >>= 1;
@@ -500,7 +499,7 @@ void VLCControlsWnd::SetVideoPos(float Pos) //0-start, 1-end
 {
     if( VP() ){
         vlc_player& vp = *VP();
-        vp.set_time( static_cast<libvlc_time_t>( vp.get_length()*Pos ) );
+        vp.get_mp().setPosition( Pos );
         SyncVideoPosScrollPosWithVideoPos();
     }
 }
@@ -509,12 +508,12 @@ void VLCControlsWnd::SyncVolumeSliderWithVLCVolume()
 {
     if( VP() ){
         vlc_player& vp = *VP();
-        unsigned int vol = vp.get_volume();
+        unsigned int vol = vp.get_mp().volume();
         const LRESULT SliderPos = SendMessage(hVolumeSlider, (UINT) TBM_GETPOS, 0, 0);
         if((UINT)SliderPos!=vol)
             SendMessage(hVolumeSlider, (UINT) TBM_SETPOS, (WPARAM) TRUE, (LPARAM) vol);
 
-        bool muted = vp.is_muted();
+        bool muted = vp.get_mp().mute();
         int MuteButtonState = SendMessage(hMuteButton, (UINT) BM_GETCHECK, 0, 0);
         if((muted&&(BST_UNCHECKED==MuteButtonState))||(!muted&&(BST_CHECKED==MuteButtonState))){
             SendMessage(hMuteButton, BM_SETCHECK, (WPARAM)(muted?BST_CHECKED:BST_UNCHECKED), 0);
@@ -534,9 +533,9 @@ void VLCControlsWnd::SetVLCVolumeBySliderPos(int CurPos)
 {
     if( VP() ){
         vlc_player& vp = *VP();
-        vp.set_volume(CurPos);
+        vp.get_mp().setVolume( CurPos );
         if(0==CurPos){
-            vp.set_mute( IsDlgButtonChecked( hWnd(), ID_FS_MUTE) != FALSE );
+            vp.get_mp().setMute( IsDlgButtonChecked( hWnd(), ID_FS_MUTE) != FALSE );
         }
         SyncVolumeSliderWithVLCVolume();
     }

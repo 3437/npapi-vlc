@@ -301,10 +301,10 @@ static bool video_expose_handler(GtkWidget *widget, GdkEvent *event, gpointer us
 static gboolean do_time_slider_handler(gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
-    libvlc_media_player_t *md = plugin->getMD();
+    auto md = plugin->getMD();
     if (md) {
         gdouble value = gtk_range_get_value(GTK_RANGE(plugin->time_slider));
-        libvlc_media_player_set_position(md, value/100.0);
+        md.setPosition( value / 100.0 );
     }
 
     plugin->time_slider_timeout_id = 0;
@@ -326,10 +326,10 @@ static bool time_slider_handler(GtkRange *range, GtkScrollType scroll, gdouble v
 static gboolean do_vol_slider_handler(gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
-    libvlc_media_player_t *md = plugin->getMD();
+    auto md = plugin->getMD();
     if (md) {
         gdouble value = gtk_range_get_value(GTK_RANGE(plugin->vol_slider));
-        libvlc_audio_set_volume(md, value);
+        md.setVolume( value );
     }
 
     plugin->vol_slider_timeout_id = 0;

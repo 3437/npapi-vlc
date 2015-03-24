@@ -182,8 +182,7 @@ bool VlcPluginWin::create_windows()
 
     _WindowsManager.CreateWindows(drawable);
 
-    if( get_player().is_open() )
-        _WindowsManager.LibVlcAttach(&get_player());
+    _WindowsManager.LibVlcAttach(&player());
 
     return true;
 }
@@ -218,7 +217,7 @@ bool VlcPluginWin::destroy_windows()
 
 void VlcPluginWin::on_media_player_new()
 {
-    _WindowsManager.LibVlcAttach(&get_player());
+    _WindowsManager.LibVlcAttach(&player());
 }
 
 void VlcPluginWin::on_media_player_release()

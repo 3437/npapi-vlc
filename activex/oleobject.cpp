@@ -43,17 +43,13 @@ VLCOleObject::~VLCOleObject()
 STDMETHODIMP VLCOleObject::Advise(IAdviseSink *pAdvSink, DWORD *dwConnection)
 {
     return _p_advise_holder->Advise(pAdvSink, dwConnection);
-};
+}
 
 STDMETHODIMP VLCOleObject::Close(DWORD dwSaveOption)
 {
-    if( _p_instance->isRunning() )
-    {
-        _p_advise_holder->SendOnClose();
-        return _p_instance->onClose(dwSaveOption);
-    }
-    return S_OK;
-};
+    _p_advise_holder->SendOnClose();
+    return _p_instance->onClose(dwSaveOption);
+}
 
 STDMETHODIMP VLCOleObject::DoVerb(LONG iVerb, LPMSG lpMsg, LPOLECLIENTSITE pActiveSite,
                                     LONG, HWND hwndParent, LPCRECT lprcPosRect)

@@ -58,6 +58,14 @@ public:
         return _ml_p;
     }
 
+    int currentAudioTrack();
+    int currentSubtitleTrack();
+
+private:
+    // Returns a 0-based track index, instead of the internal libvlc one
+    int getTrack( int currentId, const std::vector<VLC::TrackDescription>& tracks );
+
+
 private:
     VLC::Instance           _libvlc_instance;
     VLC::MediaPlayer        _mp;

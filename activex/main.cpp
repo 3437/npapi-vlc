@@ -56,7 +56,7 @@ using namespace std;
 #define THREADING_MODEL "Apartment"
 #define MISC_STATUS     "131473"
 
-#define PROGID_STR COMPANY_STR"."PROGRAM_STR
+#define PROGID_STR COMPANY_STR "." PROGRAM_STR
 
 #define GUID_STRLEN 39
 

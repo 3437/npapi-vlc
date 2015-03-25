@@ -31,6 +31,7 @@
 #include <olectl.h>
 
 #include "../common/win32_fullscreen.h"
+#include "../common/vlc_player.h"
 
 extern "C" const GUID CLSID_VLCPlugin;
 extern "C" const GUID CLSID_VLCPlugin2;
@@ -38,11 +39,6 @@ extern "C" const GUID LIBID_AXVLC;
 extern "C" const GUID DIID_DVLCEvents;
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-
-typedef struct {
-    const libvlc_event_type_t libvlc_type; /* libvlc event type */
-    libvlc_callback_t libvlc_callback;     /* libvlc callback function */
-} vlcplugin_event_t;
 
 class VLCPluginClass : public IClassFactory
 {
@@ -82,7 +78,7 @@ private:
 };
 
 class VLCPlugin
-    : public IUnknown, private vlc_player_options, private vlc_player
+    : public IUnknown, private vlc_player_options
 {
 public:
     VLCPlugin(VLCPluginClass *p_class, LPUNKNOWN pUnkOuter);
@@ -99,8 +95,7 @@ public:
 
     vlc_player& get_player()
     {
-        if( !vlc_player::is_open() ) initVLC();
-        return *static_cast<vlc_player*>(this);
+        return m_player;
     }
 
     vlc_player_options& get_options()
@@ -129,10 +124,8 @@ public:
     inline void setAutoLoop(BOOL autoloop)
     {
         _b_autoloop = autoloop;
-        if( vlc_player::is_open() ){
-            vlc_player::set_mode(autoloop ? libvlc_playback_mode_loop :
-                                            libvlc_playback_mode_default);
-        }
+        get_player().mlp().setPlaybackMode( autoloop ? libvlc_playback_mode_loop :
+                                            libvlc_playback_mode_default );
         setDirty(TRUE);
     };
     inline BOOL getAutoLoop(void) { return _b_autoloop;};
@@ -218,20 +211,6 @@ public:
     inline BOOL isDirty(void) { return _b_dirty; };
     inline void setDirty(BOOL dirty) { _b_dirty = dirty; };
 
-    inline BOOL isRunning(void) { return NULL != _p_libvlc; };
-
-    HRESULT getVLC(libvlc_instance_t** pp_libvlc)
-    {
-        if( !isRunning() )
-            initVLC();
-        *pp_libvlc = _p_libvlc;
-        return _p_libvlc ? S_OK : E_FAIL;
-    }
-    HRESULT getMD(libvlc_media_player_t **pp_md)
-    {
-        *pp_md = get_player().get_mp();
-        return *pp_md ? S_OK : E_FAIL;
-    }
     void setErrorInfo(REFIID riid, const char *description);
 
     // control geometry within container
@@ -288,58 +267,6 @@ public:
     // controlling IUnknown interface
     LPUNKNOWN pUnkOuter;
 
-    /*
-    ** libvlc interface
-    */
-    bool isPlaying()
-    {
-        return get_player().is_playing();
-    }
-    int playlist_get_current_index()
-    {
-        return get_player().current_item();
-    }
-    int playlist_add_extended_untrusted(const char *mrl, int optc, const char **optv)
-    {
-        return get_player().add_item(mrl, optc, optv);
-    }
-    void playlist_delete_item(int idx)
-    {
-        get_player().delete_item(idx);
-    }
-    void playlist_clear()
-    {
-        get_player().clear_items();
-    }
-    int  playlist_count()
-    {
-         return get_player().items_count();
-    }
-    void playlist_pause()
-    {
-        get_player().pause();
-    }
-    void playlist_play()
-    {
-        get_player().play();
-    }
-    void playlist_play_item(int idx)
-    {
-        get_player().play(idx);
-    }
-    void playlist_stop()
-    {
-        get_player().stop();
-    }
-    void playlist_next()
-    {
-        get_player().next();
-    }
-    void playlist_prev()
-    {
-        get_player().prev();
-    }
-
 protected:
     virtual ~VLCPlugin();
 
@@ -347,7 +274,6 @@ private:
     void initVLC();
     void set_player_window();
     void player_register_events();
-    void player_unregister_events();
 
     //implemented interfaces
     class VLCOleObject *vlcOleObject;
@@ -374,7 +300,7 @@ private:
     VLCPluginClass* _p_class;
     ULONG _i_ref;
 
-    libvlc_instance_t     *_p_libvlc;
+    vlc_player m_player;
 
     UINT _i_codepage;
     BOOL _b_usermode;

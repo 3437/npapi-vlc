@@ -131,17 +131,15 @@ STDMETHODIMP VLCControl::play(void)
 
 STDMETHODIMP VLCControl::pause(void)
 {
-    _p_instance->get_player().pause();
-
+    _p_instance->get_player().mlp().pause();
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::stop(void)
 {
-    _p_instance->get_player().stop();
-
+    _p_instance->get_player().mlp().stop();
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::get_Playing(VARIANT_BOOL *isPlaying)
 {
@@ -149,48 +147,48 @@ STDMETHODIMP VLCControl::get_Playing(VARIANT_BOOL *isPlaying)
         return E_POINTER;
 
     vlc_player& p = _p_instance->get_player();
-    *isPlaying = p.is_playing() ? VARIANT_TRUE : VARIANT_FALSE;
+    *isPlaying = p.mlp().isPlaying() ? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::get_Position(float *position)
 {
     if( NULL == position )
         return E_POINTER;
 
-    *position = _p_instance->get_player().get_position();
+    *position = _p_instance->get_player().get_mp().position();
 
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::put_Position(float position)
 {
-    _p_instance->get_player().set_position(position);
-
+    _p_instance->get_player().get_mp().setPosition( position );
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::get_Time(int *seconds)
 {
     if( NULL == seconds )
         return E_POINTER;
 
-    *seconds = static_cast<int>(_p_instance->get_player().get_time());
+    //FIXME: time is in microseconds, this looks fishy
+    *seconds = static_cast<int>( _p_instance->get_player().get_mp().time() );
 
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::put_Time(int seconds)
 {
     /* setTime function of the plugin sets the time. */
     _p_instance->setTime(seconds);
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::shuttle(int seconds)
 {
-    _p_instance->get_player().set_time(seconds);
+    _p_instance->setTime( seconds );
 
     return S_OK;
 };
@@ -207,21 +205,21 @@ STDMETHODIMP VLCControl::get_Length(int *seconds)
     if( NULL == seconds )
         return E_POINTER;
 
-    *seconds = static_cast<int>(_p_instance->get_player().get_length());
+    *seconds = _p_instance->get_player().get_mp().length();
 
     return S_OK;
 };
 
 STDMETHODIMP VLCControl::playFaster(void)
 {
-    _p_instance->get_player().set_rate(2.f);
+    _p_instance->get_player().get_mp().setRate(2.f);
 
     return S_OK;
 };
 
 STDMETHODIMP VLCControl::playSlower(void)
 {
-    _p_instance->get_player().set_rate(0.5f);
+    _p_instance->get_player().get_mp().setRate(.5f);
 
     return S_OK;
 };
@@ -233,46 +231,36 @@ STDMETHODIMP VLCControl::get_Volume(int *volume)
 
     *volume  = _p_instance->getVolume();
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::put_Volume(int volume)
 {
     _p_instance->setVolume(volume);
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::toggleMute(void)
 {
-    _p_instance->get_player().toggle_mute();
+    _p_instance->get_player().get_mp().toggleMute();
 
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::setVariable(BSTR, VARIANT)
 {
-    libvlc_instance_t* p_libvlc;
-    HRESULT result = _p_instance->getVLC(&p_libvlc);
-    if( SUCCEEDED(result) )
-    {
-        _p_instance->setErrorInfo(IID_IVLCControl,
-            "setVariable() is an unsafe interface to use. "
-            "It has been removed because of security implications." );
-    }
+    _p_instance->setErrorInfo(IID_IVLCControl,
+        "setVariable() is an unsafe interface to use. "
+        "It has been removed because of security implications." );
     return E_FAIL;
-};
+}
 
 STDMETHODIMP VLCControl::getVariable(BSTR, VARIANT *)
 {
-    libvlc_instance_t* p_libvlc;
-    HRESULT result = _p_instance->getVLC(&p_libvlc);
-    if( SUCCEEDED(result) )
-    {
-        _p_instance->setErrorInfo(IID_IVLCControl,
-            "getVariable() is an unsafe interface to use. "
-            "It has been removed because of security implications." );
-    }
+    _p_instance->setErrorInfo(IID_IVLCControl,
+        "getVariable() is an unsafe interface to use. "
+        "It has been removed because of security implications." );
     return E_FAIL;
-};
+}
 
 void VLCControl::FreeTargetOptions(char **cOptions, int cOptionCount)
 {
@@ -598,39 +586,34 @@ STDMETHODIMP VLCControl::addTarget(BSTR uri, VARIANT options, enum VLCPlaylistMo
     if( 0 == SysStringLen(uri) )
         return E_INVALIDARG;
 
-    libvlc_instance_t *p_libvlc;
-    HRESULT hr = _p_instance->getVLC(&p_libvlc);
-    if( SUCCEEDED(hr) )
+    char *cUri = CStrFromBSTR(CP_UTF8, uri);
+    if( NULL == cUri )
+        return E_OUTOFMEMORY;
+
+    int cOptionsCount;
+    char **cOptions;
+
+    if( FAILED(CreateTargetOptions(CP_UTF8, &options, &cOptions, &cOptionsCount)) )
+        return E_INVALIDARG;
+
+    position = _p_instance->get_player().add_item( cUri, cOptionsCount,
+                                                   const_cast<const char**>( cOptions ) );
+
+    FreeTargetOptions(cOptions, cOptionsCount);
+    CoTaskMemFree(cUri);
+
+    if( position >= 0 )
     {
-        char *cUri = CStrFromBSTR(CP_UTF8, uri);
-        if( NULL == cUri )
-            return E_OUTOFMEMORY;
-
-        int cOptionsCount;
-        char **cOptions;
-
-        if( FAILED(CreateTargetOptions(CP_UTF8, &options, &cOptions, &cOptionsCount)) )
-            return E_INVALIDARG;
-
-        position = _p_instance->playlist_add_extended_untrusted(cUri,
-                       cOptionsCount, const_cast<const char**>(cOptions));
-
-        FreeTargetOptions(cOptions, cOptionsCount);
-        CoTaskMemFree(cUri);
-
-        if( position >= 0 )
-        {
-            if( mode & VLCPlayListAppendAndGo )
-                _p_instance->fireOnPlayEvent();
-        }
-        else
-        {
-            if( mode & VLCPlayListAppendAndGo )
-                _p_instance->fireOnStopEvent();
-        }
+        if( mode & VLCPlayListAppendAndGo )
+            _p_instance->fireOnPlayEvent();
     }
-    return hr;
-};
+    else
+    {
+        if( mode & VLCPlayListAppendAndGo )
+            _p_instance->fireOnStopEvent();
+    }
+    return S_OK;
+}
 
 STDMETHODIMP VLCControl::get_PlaylistIndex(int *index)
 {
@@ -650,18 +633,18 @@ STDMETHODIMP VLCControl::get_PlaylistCount(int *count)
     *count = _p_instance->get_player().items_count();
 
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCControl::playlistNext(void)
 {
-    _p_instance->get_player().next();
+    _p_instance->get_player().mlp().next();
 
     return S_OK;
 };
 
 STDMETHODIMP VLCControl::playlistPrev(void)
 {
-    _p_instance->get_player().prev();
+    _p_instance->get_player().mlp().previous();
 
     return S_OK;
 };

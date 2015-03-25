@@ -34,23 +34,20 @@ public:
     VLCInterfaceBase(VLCPlugin *p): _plug(p), _ti(NULL) { }
     virtual ~VLCInterfaceBase() { if( _ti ) _ti->Release(); }
 
-    VLCPlugin *Instance() const { return _plug; }
-    HRESULT getVLC(libvlc_instance_t **pp) const { return _plug->getVLC(pp); }
-    HRESULT getMD(libvlc_media_player_t **pp) const { return _plug->getMD(pp); }
-
 protected:
     HRESULT loadTypeInfo(REFIID riid);
     ITypeInfo *TypeInfo() const { return _ti; }
 
     STDMETHODIMP_(ULONG) AddRef(void) { return _plug->pUnkOuter->AddRef(); };
     STDMETHODIMP_(ULONG) Release(void) { return _plug->pUnkOuter->Release(); };
-private:
+
     VLCPlugin *_plug;
+private:
     ITypeInfo *_ti;
 };
 
 template<class T,class I>
-class VLCInterface: public I, private VLCInterfaceBase
+class VLCInterface: public I, protected VLCInterfaceBase
 {
 private:
     typedef VLCInterfaceBase Base;
@@ -64,12 +61,6 @@ private:
 
 public:
     VLCInterface(VLCPlugin *p): Base(p) { }
-    VLCPlugin *Instance() const { return Base::Instance(); }
-
-    virtual ~VLCInterface() { }
-
-    HRESULT getVLC(libvlc_instance_t **pp) const { return Base::getVLC(pp); }
-    HRESULT getMD(libvlc_media_player_t **pp) const { return Base::getMD(pp); }
 
     STDMETHODIMP QueryInterface(REFIID riid, void **ppv)
     {
@@ -146,7 +137,7 @@ public:
     STDMETHODIMP get_channel(long*);
     STDMETHODIMP put_channel(long);
     STDMETHODIMP toggleMute();
-    STDMETHODIMP description(long, BSTR*);
+    STDMETHODIMP description(long trackId, BSTR*);
 };
 
 class VLCInput: public VLCInterface<VLCInput,IVLCInput>

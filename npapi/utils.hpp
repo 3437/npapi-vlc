@@ -412,6 +412,30 @@ public:
         return &m_variant;
     }
 
+    template <typename T>
+    bool operator<(const T& rhs) const
+    {
+        return (const T)*this < rhs;
+    }
+
+    template <typename T>
+    bool operator<=(const T& rhs) const
+    {
+        return (const T)*this <= rhs;
+    }
+
+    template <typename T>
+    bool operator>(const T& rhs) const
+    {
+        return (const T)*this > rhs;
+    }
+
+    template <typename T>
+    bool operator>=(const T& rhs) const
+    {
+        return (const T)*this >= rhs;
+    }
+
     ~Variant()
     {
         release();

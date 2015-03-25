@@ -35,7 +35,6 @@
 #include "utils.hpp"
 
 #include <vector>
-#include <set>
 #include <utility>
 #include <unordered_map>
 
@@ -139,9 +138,6 @@ protected:
     NPWindow  npwindow;
 
     vlc_player m_player;
-
-private:
-    static std::set<VlcPluginBase*> _instances;
 
 private:
     std::vector<std::tuple<std::string, NPObject*, VLC::EventManager::RegisteredEvent>> m_events;

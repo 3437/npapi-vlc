@@ -484,7 +484,7 @@ namespace details
     }
 
     template <size_t Idx, typename T, typename... Args>
-    void wrap( VariantArray& array, T arg, Args... args )
+    void wrap( VariantArray& array, T arg, Args&&... args )
     {
         wrap<Idx + 1>( array, std::forward<Args>( args )... );
         array[Idx] = Variant(arg);
@@ -495,7 +495,7 @@ namespace details
 // the template index parameter (to avoid filling to array in reverse order with
 // sizeof...()
 template <typename... Args>
-VariantArray wrap(Args... args)
+VariantArray wrap(Args&&... args)
 {
     auto array = VariantArray{sizeof...(args)};
     details::wrap<0>( array, std::forward<Args>( args )... );

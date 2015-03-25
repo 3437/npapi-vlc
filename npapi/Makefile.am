@@ -47,7 +47,7 @@ npapi-sdk:
 	svn export http://npapi-sdk.googlecode.com/svn/trunk/headers npapi-sdk-svn -r HEAD
 	mv npapi-sdk-svn npapi-sdk
 
-if HAVE_DARWIN
+if HAVE_XCB
 
 # Unix (x11) platforms
 #

@@ -252,23 +252,8 @@ LibvlcAudioNPObject::getProperty(int index, NPVariant &result)
             }
             case ID_audio_track:
             {
-                /* get the current internal audio track ID */
-                int actualTrack = mp.audioTrack();
-
-                int audioTrackCount = mp.audioTrackCount();
-                if (audioTrackCount < 0) {
-                    INT32_TO_NPVARIANT(actualTrack, result);
-                    return INVOKERESULT_NO_ERROR;
-                }
-
-                auto tracks = mp.audioTrackDescription();
-                auto t = std::find_if(begin(tracks), end(tracks), [actualTrack](const VLC::TrackDescription& td) {
-                    return td.id() == actualTrack;
-                });
-                if ( t == end( tracks ) )
-                    INT32_TO_NPVARIANT(tracks.size(), result);
-                else
-                    INT32_TO_NPVARIANT(actualTrack, result);
+                int track = p_plugin->player().currentAudioTrack();
+                INT32_TO_NPVARIANT(track, result);
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_audio_count:
@@ -324,8 +309,10 @@ LibvlcAudioNPObject::setProperty(int index, const NPVariant &value)
             case ID_audio_track:
                 if( v.is<int>() )
                 {
-                    int trackIdx = v;
-                    if ( mp.setAudioTrack( trackIdx ) )
+                    auto tracks = mp.audioTrackDescription();
+                    if ( v >= tracks.size() )
+                        return INVOKERESULT_INVALID_VALUE;
+                    if ( mp.setAudioTrack( tracks[v].id() ) )
                         return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
@@ -383,18 +370,13 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
                 if ( argCount < 1 )
                     return INVOKERESULT_INVALID_ARGS;
                 auto v = npapi::Variant( args[0] );
-                if( !v.is<int>() )
+                if( v.is<int>() )
                 {
-                    int fakeTrackIndex = v;
                     auto tracks = mp.audioTrackDescription();
-                    auto track = std::find_if( begin( tracks ), end( tracks ), [fakeTrackIndex](const VLC::TrackDescription& t) {
-                        return t.id() == fakeTrackIndex;
-                    });
-                    if (track == end( tracks ) )
+                    if ( v >= tracks.size() )
                         return INVOKERESULT_INVALID_VALUE;
-
                     /* display the name of the track chosen */
-                    return invokeResultString( (*track).name().c_str(), result );
+                    return invokeResultString( tracks[v].name().c_str(), result );
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
             }
@@ -1217,7 +1199,7 @@ LibvlcSubtitleNPObject::getProperty(int index, NPVariant &result)
             case ID_subtitle_track:
             {
                 /* get the current internal subtitles track ID */
-                int actualTrack = mp.spu();
+                int actualTrack = p_plugin->player().currentSubtitleTrack();
                 INT32_TO_NPVARIANT(actualTrack, result);
                 return INVOKERESULT_NO_ERROR;
             }
@@ -1252,7 +1234,10 @@ LibvlcSubtitleNPObject::setProperty(int index, const NPVariant &value)
                 auto v = npapi::Variant( value );
                 if( v.is<int>() )
                 {
-                    if ( mp.setSpu( v ) )
+                    auto tracks = mp.spuDescription();
+                    if ( v >= tracks.size() )
+                        return INVOKERESULT_INVALID_ARGS;
+                    if ( mp.setSpu( tracks[ v ].id() ) )
                         return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
@@ -1294,16 +1279,11 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
                 auto v = npapi::Variant( args[0] );
                 if ( v.is<int>() )
                 {
-                    int fakeTrackIndex = v;
                     auto tracks = mp.spuDescription();
-                    auto track = std::find_if( begin( tracks ), end( tracks ), [fakeTrackIndex](const VLC::TrackDescription& t) {
-                        return t.id() == fakeTrackIndex;
-                    });
-                    if (track == end( tracks ) )
+                    if ( v >= tracks.size() )
                         return INVOKERESULT_INVALID_VALUE;
-
                     /* display the name of the track chosen */
-                    return invokeResultString( (*track).name().c_str(), result );
+                    return invokeResultString( tracks[v].name().c_str(), result );
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
             }

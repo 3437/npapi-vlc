@@ -104,26 +104,20 @@ void vlc_player::play()
 
 int vlc_player::currentAudioTrack()
 {
-    auto current = _mp.spu();
-    if ( current < 0 )
-        return -1;
-    auto tracks = _mp.spuDescription();
+    auto current = _mp.audioTrack();
+    auto tracks = _mp.audioTrackDescription();
     return getTrack( current, tracks );
 }
 
 int vlc_player::currentSubtitleTrack()
 {
     auto current = _mp.spu();
-    if ( current < 0 )
-        return -1;
     auto tracks = _mp.spuDescription();
     return getTrack( current, tracks );
 }
 
 int vlc_player::getTrack( int currentId, const std::vector<VLC::TrackDescription>& tracks )
 {
-    if ( currentId < 0 )
-        return -1;
     if ( tracks.empty() )
         return -1;
 

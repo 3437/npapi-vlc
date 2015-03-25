@@ -97,7 +97,7 @@ protected:
         _class = const_cast<NPClass *>(aClass);
         referenceCount = 1;
     };
-    virtual ~RuntimeNPObject() {};
+    virtual ~RuntimeNPObject() = default;
 
     friend void RuntimeNPClassDeallocate(NPObject *npobj);
     friend void RuntimeNPClassInvalidate(NPObject *npobj);

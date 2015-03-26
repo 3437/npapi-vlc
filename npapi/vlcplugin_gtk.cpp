@@ -463,6 +463,15 @@ bool VlcPluginGtk::create_windows()
     toolitem = gtk_tool_button_new_from_stock(GTK_STOCK_MEDIA_PLAY);
     g_signal_connect(G_OBJECT(toolitem), "clicked", G_CALLBACK(toolbar_handler), this);
     gtk_toolbar_insert(GTK_TOOLBAR(toolbar), toolitem, -1);
+    m_player.get_mp().eventManager().onPaused([this, toolitem]() {
+        gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(toolitem), GTK_STOCK_MEDIA_PLAY);
+    });
+    m_player.get_mp().eventManager().onPlaying([this, toolitem]() {
+        gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(toolitem), GTK_STOCK_MEDIA_PAUSE);
+    });
+    m_player.get_mp().eventManager().onStopped([this, toolitem]() {
+        gtk_tool_button_set_stock_id(GTK_TOOL_BUTTON(toolitem), GTK_STOCK_MEDIA_PLAY);
+    });
     /* stop */
     toolitem = gtk_tool_button_new_from_stock(GTK_STOCK_MEDIA_STOP);
     g_signal_connect(G_OBJECT(toolitem), "clicked", G_CALLBACK(toolbar_handler), this);

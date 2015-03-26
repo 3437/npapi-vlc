@@ -233,6 +233,11 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     /* new APIs */
     p_scriptClass = RuntimeNPClass<LibvlcRootNPObject>::getClass();
 
+    // Update the UI if required when we switch media
+    m_player.mlp().eventManager().onNextItemSet([this](VLC::MediaPtr) {
+        update_controls();
+    });
+
     return NPERR_NO_ERROR;
 }
 

@@ -93,7 +93,7 @@ inline bool to_bool( const NPVariant& v )
     }
     else if( NPVARIANT_IS_STRING(v) )
     {
-        if(!strcasecmp(NPVARIANT_TO_STRING(v).UTF8Characters, "true"))
+        if( !strcmp( NPVARIANT_TO_STRING(v).UTF8Characters, "1" ) )
             return true;
     }
     else if ( NPVARIANT_IS_INT32(v) )

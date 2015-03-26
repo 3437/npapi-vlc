@@ -27,6 +27,7 @@
 #include "vlcplugin_base.h"
 
 #include <gtk/gtk.h>
+#include <mutex>
 #include <X11/Xlib.h>
 
 #define VLCPLUGINGTK_MENU_TOOLBAR "Show toolbar"
@@ -35,6 +36,7 @@ class VlcPluginGtk : public VlcPluginBase
 {
 public:
     VlcPluginGtk(NPP, NPuint16_t);
+    virtual ~VlcPluginGtk();
 
     bool create_windows();
     bool resize_windows();
@@ -54,10 +56,11 @@ public:
 
     GdkPixbuf *cone_icon;
     GtkWidget *time_slider, *vol_slider;
-    guint time_slider_timeout_id, vol_slider_timeout_id;
+
 private:
     void set_player_window();
     Display *get_display() { return display; }
+    static gboolean update_time_slider(gpointer user_data);
 
     unsigned int     i_width, i_height;
     GtkWidget *parent, *parent_vbox, *video_container;
@@ -69,6 +72,8 @@ private:
     Window video_xwindow;
     XColor bg_color;
     bool is_fullscreen, is_toolbar_visible;
+    std::mutex m_timer_lock;
+    guint m_timer_update_timeout;
 };
 
 #endif /* __VLCPLUGIN_GTK_H__ */

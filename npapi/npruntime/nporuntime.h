@@ -38,6 +38,8 @@
 #include <npruntime.h>
 #include <stdlib.h>
 
+#include <memory>
+
 class RuntimeNPObject : public NPObject
 {
 public:
@@ -232,8 +234,8 @@ protected:
     int indexOfProperty(NPIdentifier name) const;
 
 private:
-    NPIdentifier *propertyIdentifiers;
-    NPIdentifier *methodIdentifiers;
+    std::unique_ptr<NPIdentifier[]> propertyIdentifiers;
+    std::unique_ptr<NPIdentifier[]> methodIdentifiers;
 };
 
 template<class T>
@@ -249,19 +251,17 @@ RuntimeNPClass<T>::RuntimeNPClass()
     // retreive property identifiers from names
     if( T::propertyCount > 0 )
     {
-        propertyIdentifiers = new NPIdentifier[T::propertyCount];
-        if( propertyIdentifiers )
-            NPN_GetStringIdentifiers(const_cast<const NPUTF8**>(T::propertyNames),
-                T::propertyCount, propertyIdentifiers);
+        propertyIdentifiers.reset( new NPIdentifier[T::propertyCount] );
+        NPN_GetStringIdentifiers(const_cast<const NPUTF8**>(T::propertyNames),
+            T::propertyCount, propertyIdentifiers.get() );
     }
 
     // retreive method identifiers from names
     if( T::methodCount > 0 )
     {
-        methodIdentifiers = new NPIdentifier[T::methodCount];
-        if( methodIdentifiers )
-            NPN_GetStringIdentifiers(const_cast<const NPUTF8**>(T::methodNames),
-                T::methodCount, methodIdentifiers);
+        methodIdentifiers.reset( new NPIdentifier[T::methodCount] );
+        NPN_GetStringIdentifiers(const_cast<const NPUTF8**>(T::methodNames),
+            T::methodCount, methodIdentifiers.get() );
     }
 
     // fill in NPClass structure
@@ -283,8 +283,6 @@ RuntimeNPClass<T>::RuntimeNPClass()
 template<class T>
 RuntimeNPClass<T>::~RuntimeNPClass()
 {
-    delete[] propertyIdentifiers;
-    delete[] methodIdentifiers;
 }
 
 template<class T>
@@ -292,7 +290,7 @@ int RuntimeNPClass<T>::indexOfMethod(NPIdentifier name) const
 {
     if( methodIdentifiers )
     {
-        for(int c=0; c< T::methodCount; ++c )
+        for(int c = 0; c< T::methodCount; ++c )
         {
             if( name == methodIdentifiers[c] )
                 return c;
@@ -306,7 +304,7 @@ int RuntimeNPClass<T>::indexOfProperty(NPIdentifier name) const
 {
     if( propertyIdentifiers )
     {
-        for(int c=0; c< T::propertyCount; ++c )
+        for(int c = 0; c< T::propertyCount; ++c )
         {
             if( name == propertyIdentifiers[c] )
                 return c;

@@ -103,13 +103,22 @@ void VlcWindowlessBase::video_display_cb(void * /*picture*/)
 }
 
 void VlcWindowlessBase::set_player_window() {
-    libvlc_video_set_format_callbacks(getMD(),
-                                      video_format_proxy,
-                                      video_cleanup_proxy);
-    libvlc_video_set_callbacks(getMD(),
-                               video_lock_proxy,
-                               video_unlock_proxy,
-                               video_display_proxy,
-                               this);
+    getMD().setVideoFormatCallbacks([this](char *chroma, unsigned *width,
+                                    unsigned *height, unsigned *pitches, unsigned *lines) {
+        return video_format_cb( chroma, width, height, pitches, lines );
+    },
+    [this] {
+        video_cleanup_cb();
+    });
+
+    getMD().setVideoCallbacks([this](void** planes) {
+        return video_lock_cb( planes );
+    },
+    [this]( void* picture, void* const* planes ) {
+        video_unlock_cb( picture, planes );
+    },
+    [this](void* picture) {
+        video_display_cb( picture );
+    });
 }
 

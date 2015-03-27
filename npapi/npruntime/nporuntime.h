@@ -101,12 +101,6 @@ protected:
 
     friend void RuntimeNPClassDeallocate(NPObject *npobj);
     friend void RuntimeNPClassInvalidate(NPObject *npobj);
-    template <class RuntimeNPObject> static bool RuntimeNPClassGetProperty(NPObject *npobj, NPIdentifier name, NPVariant *result);
-    template <class RuntimeNPObject> static bool RuntimeNPClassSetProperty(NPObject *npobj, NPIdentifier name, const NPVariant *value);
-    template <class RuntimeNPObject> static bool RuntimeNPClassRemoveProperty(NPObject *npobj, NPIdentifier name);
-    template <class RuntimeNPObject> static bool RuntimeNPClassInvoke(NPObject *npobj, NPIdentifier name,
-                                                    const NPVariant *args, uint32_t argCount,
-                                                    NPVariant *result);
     friend bool RuntimeNPClassInvokeDefault(NPObject *npobj,
                                             const NPVariant *args,
                                             uint32_t argCount,

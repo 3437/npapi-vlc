@@ -7,6 +7,7 @@
  *
  * Authors: Damien Fouilleul <damien.fouilleul@laposte.net>
  *          JP Dinger <jpd@videolan.org>
+ *          Hugo Beauzée-Luyssen <hugo@beauzee.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,13 +38,6 @@
 #include <npruntime.h>
 #include <stdlib.h>
 
-static void RuntimeNPClassDeallocate(NPObject *npobj);
-static void RuntimeNPClassInvalidate(NPObject *npobj);
-static bool RuntimeNPClassInvokeDefault(NPObject *npobj,
-                                        const NPVariant *args,
-                                        uint32_t argCount,
-                                        NPVariant *result);
-
 class RuntimeNPObject : public NPObject
 {
 public:
@@ -54,7 +48,7 @@ public:
     bool isValid()
     {
         return _instance != NULL;
-    };
+    }
 
     enum InvokeResult
     {
@@ -99,13 +93,6 @@ protected:
     };
     virtual ~RuntimeNPObject() = default;
 
-    friend void RuntimeNPClassDeallocate(NPObject *npobj);
-    friend void RuntimeNPClassInvalidate(NPObject *npobj);
-    friend bool RuntimeNPClassInvokeDefault(NPObject *npobj,
-                                            const NPVariant *args,
-                                            uint32_t argCount,
-                                            NPVariant *result);
-
     bool isPluginRunning()
     {
         return (_instance->pdata != NULL);
@@ -116,9 +103,13 @@ protected:
     }
 
     NPP _instance;
+
+    template <typename>
+    friend class RuntimeNPClass;
 };
 
-template<class T> class RuntimeNPClass : public NPClass
+template<class T>
+class RuntimeNPClass : public NPClass
 {
 public:
     static NPClass *getClass()
@@ -131,17 +122,111 @@ protected:
     RuntimeNPClass();
     virtual ~RuntimeNPClass();
 
-    template <class RuntimeNPObject> friend NPObject *RuntimeNPClassAllocate(NPP instance, NPClass *aClass);
-    template <class RuntimeNPObject> friend bool RuntimeNPClassHasMethod(NPObject *npobj, NPIdentifier name);
-    template <class RuntimeNPObject> friend bool RuntimeNPClassHasProperty(NPObject *npobj, NPIdentifier name);
-    template <class RuntimeNPObject> friend bool RuntimeNPClassGetProperty(NPObject *npobj, NPIdentifier name, NPVariant *result);
-    template <class RuntimeNPObject> friend bool RuntimeNPClassSetProperty(NPObject *npobj, NPIdentifier name, const NPVariant *value);
-    template <class RuntimeNPObject> friend bool RuntimeNPClassRemoveProperty(NPObject *npobj, NPIdentifier name);
-    template <class RuntimeNPObject> friend bool RuntimeNPClassInvoke(NPObject *npobj, NPIdentifier name,
-                                                                      const NPVariant *args, uint32_t argCount,
-                                                                      NPVariant *result);
+    static NPObject *Allocate(NPP instance, NPClass *aClass)
+    {
+        const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(aClass);
+        return new T(instance, vClass);
+    }
 
-    RuntimeNPObject *create(NPP instance) const;
+    static void Deallocate(NPObject *npobj)
+    {
+        RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
+        delete vObj;
+    }
+
+    static void Invalidate(NPObject *npobj)
+    {
+        RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
+        vObj->_instance = NULL;
+    }
+
+    static bool HasMethod(NPObject *npobj, NPIdentifier name)
+    {
+        const RuntimeNPClass* vClass = static_cast<RuntimeNPClass*>(npobj->_class);
+        return vClass->indexOfMethod(name) != -1;
+    }
+
+    static bool HasProperty(NPObject *npobj, NPIdentifier name)
+    {
+        const RuntimeNPClass* vClass = static_cast<RuntimeNPClass*>(npobj->_class);
+        return vClass->indexOfProperty(name) != -1;
+    }
+
+    static bool GetProperty(NPObject *npobj, NPIdentifier name, NPVariant *result)
+    {
+        RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
+        if( vObj->isValid() )
+        {
+            const RuntimeNPClass* vClass = static_cast<RuntimeNPClass*>(npobj->_class);
+            int index = vClass->indexOfProperty(name);
+            if( index != -1 )
+            {
+                return vObj->returnInvokeResult(vObj->getProperty(index, *result));
+            }
+        }
+        return false;
+    }
+
+    static bool SetProperty(NPObject *npobj, NPIdentifier name, const NPVariant *value)
+    {
+        RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
+        if( vObj->isValid() )
+        {
+            const RuntimeNPClass* vClass = static_cast<RuntimeNPClass*>(npobj->_class);
+            int index = vClass->indexOfProperty(name);
+            if( index != -1 )
+            {
+                return vObj->returnInvokeResult(vObj->setProperty(index, *value));
+            }
+        }
+        return false;
+    }
+
+    static bool RemoveProperty(NPObject *npobj, NPIdentifier name)
+    {
+        RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
+        if( vObj->isValid() )
+        {
+            const RuntimeNPClass* vClass = static_cast<RuntimeNPClass*>(npobj->_class);
+            int index = vClass->indexOfProperty(name);
+            if( index != -1 )
+            {
+                return vObj->returnInvokeResult(vObj->removeProperty(index));
+            }
+        }
+        return false;
+    }
+
+    static bool ClassInvoke(NPObject *npobj, NPIdentifier name,
+                                        const NPVariant *args, uint32_t argCount,
+                                        NPVariant *result)
+    {
+        RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
+        if( vObj->isValid() )
+        {
+            const RuntimeNPClass* vClass = static_cast<RuntimeNPClass*>(npobj->_class);
+            int index = vClass->indexOfMethod(name);
+            if( index != -1 )
+            {
+                return vObj->returnInvokeResult(vObj->invoke(index, args, argCount, *result));
+
+            }
+        }
+        return false;
+    }
+
+    static bool InvokeDefault(NPObject *npobj,
+                                               const NPVariant *args,
+                                               uint32_t argCount,
+                                               NPVariant *result)
+    {
+        RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
+        if( vObj->isValid() )
+        {
+            return vObj->returnInvokeResult(vObj->invokeDefault(args, argCount, *result));
+        }
+        return false;
+    }
 
     int indexOfMethod(NPIdentifier name) const;
     int indexOfProperty(NPIdentifier name) const;
@@ -156,120 +241,6 @@ inline void RuntimeNPObject::InstantObj( NPObject *&obj )
 {
     if( !obj )
         obj = NPN_CreateObject(_instance, RuntimeNPClass<T>::getClass());
-}
-
-template<class T>
-static NPObject *RuntimeNPClassAllocate(NPP instance, NPClass *aClass)
-{
-    const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(aClass);
-    return vClass->create(instance);
-}
-
-static void RuntimeNPClassDeallocate(NPObject *npobj)
-{
-    RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
-    vObj->_class = NULL;
-    delete vObj;
-}
-
-static void RuntimeNPClassInvalidate(NPObject *npobj)
-{
-    RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
-    vObj->_instance = NULL;
-}
-
-template<class T>
-static bool RuntimeNPClassHasMethod(NPObject *npobj, NPIdentifier name)
-{
-    const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(npobj->_class);
-    return vClass->indexOfMethod(name) != -1;
-}
-
-template<class T>
-static bool RuntimeNPClassHasProperty(NPObject *npobj, NPIdentifier name)
-{
-    const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(npobj->_class);
-    return vClass->indexOfProperty(name) != -1;
-}
-
-template<class T>
-static bool RuntimeNPClassGetProperty(NPObject *npobj, NPIdentifier name, NPVariant *result)
-{
-    RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
-    if( vObj->isValid() )
-    {
-        const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(npobj->_class);
-        int index = vClass->indexOfProperty(name);
-        if( index != -1 )
-        {
-            return vObj->returnInvokeResult(vObj->getProperty(index, *result));
-        }
-    }
-    return false;
-}
-
-template<class T>
-static bool RuntimeNPClassSetProperty(NPObject *npobj, NPIdentifier name, const NPVariant *value)
-{
-    RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
-    if( vObj->isValid() )
-    {
-        const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(npobj->_class);
-        int index = vClass->indexOfProperty(name);
-        if( index != -1 )
-        {
-            return vObj->returnInvokeResult(vObj->setProperty(index, *value));
-        }
-    }
-    return false;
-}
-
-template<class T>
-static bool RuntimeNPClassRemoveProperty(NPObject *npobj, NPIdentifier name)
-{
-    RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
-    if( vObj->isValid() )
-    {
-        const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(npobj->_class);
-        int index = vClass->indexOfProperty(name);
-        if( index != -1 )
-        {
-            return vObj->returnInvokeResult(vObj->removeProperty(index));
-        }
-    }
-    return false;
-}
-
-template<class T>
-static bool RuntimeNPClassInvoke(NPObject *npobj, NPIdentifier name,
-                                    const NPVariant *args, uint32_t argCount,
-                                    NPVariant *result)
-{
-    RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
-    if( vObj->isValid() )
-    {
-        const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(npobj->_class);
-        int index = vClass->indexOfMethod(name);
-        if( index != -1 )
-        {
-            return vObj->returnInvokeResult(vObj->invoke(index, args, argCount, *result));
-
-        }
-    }
-    return false;
-}
-
-static bool RuntimeNPClassInvokeDefault(NPObject *npobj,
-                                           const NPVariant *args,
-                                           uint32_t argCount,
-                                           NPVariant *result)
-{
-    RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
-    if( vObj->isValid() )
-    {
-        return vObj->returnInvokeResult(vObj->invokeDefault(args, argCount, *result));
-    }
-    return false;
 }
 
 template<class T>
@@ -295,16 +266,16 @@ RuntimeNPClass<T>::RuntimeNPClass()
 
     // fill in NPClass structure
     structVersion  = NP_CLASS_STRUCT_VERSION;
-    allocate       = &RuntimeNPClassAllocate<T>;
-    deallocate     = &RuntimeNPClassDeallocate;
-    invalidate     = &RuntimeNPClassInvalidate;
-    hasMethod      = &RuntimeNPClassHasMethod<T>;
-    invoke         = &RuntimeNPClassInvoke<T>;
-    invokeDefault  = &RuntimeNPClassInvokeDefault;
-    hasProperty    = &RuntimeNPClassHasProperty<T>;
-    getProperty    = &RuntimeNPClassGetProperty<T>;
-    setProperty    = &RuntimeNPClassSetProperty<T>;
-    removeProperty = &RuntimeNPClassRemoveProperty<T>;
+    allocate       = &Allocate;
+    deallocate     = &Deallocate;
+    invalidate     = &Invalidate;
+    hasMethod      = &HasMethod;
+    invoke         = &ClassInvoke;
+    invokeDefault  = &InvokeDefault;
+    hasProperty    = &HasProperty;
+    getProperty    = &GetProperty;
+    setProperty    = &SetProperty;
+    removeProperty = &RemoveProperty;
     enumerate      = 0;
     construct      = 0;
 }
@@ -314,12 +285,6 @@ RuntimeNPClass<T>::~RuntimeNPClass()
 {
     delete[] propertyIdentifiers;
     delete[] methodIdentifiers;
-}
-
-template<class T>
-RuntimeNPObject *RuntimeNPClass<T>::create(NPP instance) const
-{
-    return new T(instance, this);
 }
 
 template<class T>

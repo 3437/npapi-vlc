@@ -17,7 +17,6 @@ AM_CPPFLAGS = $(LIBVLC_CFLAGS) -Inpapi-sdk $(MOZILLA_CFLAGS) -I$(top_srcdir)/vlc
 
 libvlcplugin_la_SOURCES = \
 	common.h \
-	locking.h \
 	vlcshell.h \
 	vlcshell.cpp \
 	vlcplugin.h \

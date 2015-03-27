@@ -77,8 +77,6 @@
     typedef int32_t NPint32_t;
 #endif
 
-#include "locking.h"
-
 /*
  * Define PLUGIN_TRACE to have the wrapper functions print
  * messages to stderr whenever they are called.

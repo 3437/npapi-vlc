@@ -27,7 +27,9 @@
 #include <npruntime.h>
 #include <memory>
 #include <type_traits>
+
 #include <cstring>
+#include <cassert>
 
 using CStr = std::unique_ptr<char, void(*)(void*)>;
 

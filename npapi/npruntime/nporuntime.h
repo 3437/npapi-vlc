@@ -126,8 +126,7 @@ protected:
 
     static NPObject *Allocate(NPP instance, NPClass *aClass)
     {
-        const RuntimeNPClass<T> *vClass = static_cast<RuntimeNPClass<T> *>(aClass);
-        return new T(instance, vClass);
+        return new T(instance, aClass);
     }
 
     static void Deallocate(NPObject *npobj)

@@ -44,7 +44,7 @@ namespace details
     template <typename T>
     using PointerLess = typename std::remove_pointer<T>::type;
 
-    // Remove the const & volatile
+    // Remove const and volatile
     template <typename T>
     using Decayed = typename std::remove_cv<PointerLess<T>>::type;
 }
@@ -272,6 +272,11 @@ struct traits<NPString>
 
     static void from( NPString s, NPVariant& v )
     {
+        if ( s.UTF8Characters == nullptr )
+        {
+            NULL_TO_NPVARIANT( v );
+            return;
+        }
         auto raw = strdup( s.UTF8Characters );
         STRINGZ_TO_NPVARIANT( raw, v );
     }
@@ -290,8 +295,13 @@ struct traits<NPUTF8*>
         return to_tmp_string( v );
     }
 
-    static void from( const char* str, NPVariant& v )
+    static void from( const NPUTF8* str, NPVariant& v )
     {
+        if ( str == nullptr )
+        {
+            NULL_TO_NPVARIANT( v );
+            return;
+        }
         auto copy = strdup( str );
         STRINGZ_TO_NPVARIANT( copy, v );
     }
@@ -317,38 +327,157 @@ struct traits<std::string>
     }
 };
 
-// This needs to be the exact size of a NPVariant
-// That means no smart pointer, no virtual function, just
-// good old functions to wrap a type.
+namespace details
+{
+namespace policy
+{
+struct Embeded
+{
+    using VariantType = NPVariant;
+
+    Embeded()
+    {
+        memset( &v, 0, sizeof( v ) );
+    }
+
+    Embeded( const Embeded& ) = default;
+
+    // Allow btiwise copy, assuming that the called has handled releasing
+    // previously held resources
+    Embeded& operator=( const Embeded& ) = default;
+
+    Embeded( Embeded&& e )
+    {
+        v = e.v;
+        memset( &e.v, 0, sizeof( e.v ) );
+    }
+
+    Embeded( const NPVariant& npv )
+    {
+        memcpy( &v, &npv, sizeof( npv ) );
+    }
+
+    Embeded& operator=( const NPVariant& npv )
+    {
+        memcpy( &v, &npv, sizeof( npv ) );
+        return *this;
+    }
+
+    ~Embeded()
+    {
+        NPN_ReleaseVariantValue( &v );
+    }
+
+    NPVariant* ptr()
+    {
+        return &v;
+    }
+
+    const NPVariant* ptr() const
+    {
+        return &v;
+    }
+
+    NPVariant& ref()
+    {
+        return v;
+    }
+
+    const NPVariant& ref() const
+    {
+        return v;
+    }
+
+    NPVariant v;
+};
+
+///
+/// \brief This storage policy is meant to wrap an output variant.
+/// This means we don't have to release the content upon destruction, and mostly
+/// care about storing a pointer upon construction.
+///
+struct Wrapped
+{
+    using VariantType = NPVariant*;
+
+    Wrapped() = default;
+
+    Wrapped( NPVariant* vt )
+        : v( vt )
+    {
+        memset( v, 0, sizeof( *v ) );
+    }
+
+    // We don't want to release anything, as NPAPI will use the Wrapped NPVariant
+    // we are currently writing to.
+    ~Wrapped() = default;
+
+    Wrapped( const Wrapped& ) = delete;
+    Wrapped& operator=( const Wrapped& ) = delete;
+
+    Wrapped(Wrapped&& w)
+    {
+        *this = std::move( w );
+    }
+
+    Wrapped& operator=( Wrapped&& w )
+    {
+        v = w.v;
+        w.v = nullptr;
+        return *this;
+    }
+
+    NPVariant* ptr()
+    {
+        return v;
+    }
+
+    const NPVariant* ptr() const
+    {
+        return v;
+    }
+
+    NPVariant& ref()
+    {
+        return *v;
+    }
+
+    const NPVariant& ref() const
+    {
+        return *v;
+    }
+
+    NPVariant* v;
+};
+
+}
+
+template <typename StoragePolicy = details::policy::Embeded>
 class Variant
 {
 public:
-    Variant()
-        : m_variant{}
-    {
-        memset( &m_variant, 0, sizeof( m_variant ) );
-    }
+    Variant() = default;
+    // Let the storage policy handle the resources release.
+    ~Variant() = default;
 
-    Variant( const NPVariant& v )
+    //FIXME: This results in a reference to pointer for the Wrapped policy.
+    // That's an unneeded indirection
+    Variant( const typename StoragePolicy::VariantType& v )
         : m_variant( v )
     {
-        if (is<NPString>() )
-            traits<NPString>::from( (NPString)*this, m_variant );
-        else if ( is<NPObject>() )
-            traits<NPObject>::from( (NPObject*)*this, m_variant );
+        retainOrCopy();
     }
 
     Variant(const Variant& v)
+        : m_variant( v.m_variant )
     {
-        memset( &m_variant, 0, sizeof( m_variant ) );
-        *this = v;
+        retainOrCopy();
     }
 
     template <typename T>
-    Variant(const T& t)
+    explicit Variant(const T& t)
     {
-        memset( &m_variant, 0, sizeof( m_variant ) );
-        traits<TraitsType<T>>::from( t, m_variant );
+        traits<TraitsType<T>>::from( t, m_variant.ref() );
     }
 
     Variant& operator=(const Variant& v)
@@ -356,35 +485,27 @@ public:
         if ( &v == this )
             return *this;
         release();
-        if (v.is<NPString>())
-        {
-            traits<NPString>::from( (NPString)v, m_variant );
-            return *this;
-        }
+
         m_variant = v.m_variant;
-        if (v.is<NPObject>())
-            NPN_RetainObject( *this );
+        retainOrCopy();
+
         return *this;
     }
 
-    Variant(Variant&& v)
-    {
-        m_variant = v.m_variant;
-        memset( &v.m_variant, 0, sizeof( v.m_variant ) );
-    }
+    Variant(Variant&& v) = default;
 
     Variant& operator=(Variant&& v)
     {
         release();
-        m_variant = v.m_variant;
-        memset( &v.m_variant, 0, sizeof( v.m_variant ) );
+        m_variant = std::move( v.m_variant );
+        return *this;
     }
 
 
     template <typename T>
     bool is() const
     {
-        return traits<TraitsType<T>>::is( m_variant );
+        return traits<TraitsType<T>>::is( m_variant.ref() );
     }
 
     // /!\ Warning /!\ This does not retain the value for strings & objects
@@ -393,23 +514,23 @@ public:
     template <typename T>
     operator T() const
     {
-        assert(traits<TraitsType<T>>::is( m_variant ));
-        return traits<TraitsType<T>>::to( m_variant );
+        assert(traits<TraitsType<T>>::is( m_variant.ref() ));
+        return traits<TraitsType<T>>::to( m_variant.ref() );
     }
 
     operator const NPVariant() const
     {
-        return m_variant;
+        return m_variant.ref();
     }
 
     operator const NPVariant*() const
     {
-        return &m_variant;
+        return m_variant.ptr();
     }
 
     operator NPVariant*()
     {
-        return &m_variant;
+        return m_variant.ptr();
     }
 
     template <typename T>
@@ -436,19 +557,27 @@ public:
         return (const T)*this >= rhs;
     }
 
-    ~Variant()
-    {
-        release();
-    }
-
     void release()
     {
-        NPN_ReleaseVariantValue( &m_variant );
+        NPN_ReleaseVariantValue( m_variant.ptr() );
     }
 
 private:
-    NPVariant m_variant;
+    void retainOrCopy()
+    {
+        if (is<NPObject>())
+            NPN_RetainObject( *this );
+        else if (is<NPString>())
+            traits<NPString>::from( (NPString)*this, m_variant.ref() );
+    }
+
+private:
+    StoragePolicy m_variant;
 };
+
+}
+
+using Variant = details::Variant<>;
 
 class VariantArray
 {
@@ -504,14 +633,16 @@ namespace details
     template <size_t Idx, typename T>
     void wrap( VariantArray& array, T arg )
     {
-        array[Idx] = Variant(arg);
+        array[Idx] = Variant<details::policy::Embeded>(arg);
     }
 
     template <size_t Idx, typename T, typename... Args>
     void wrap( VariantArray& array, T arg, Args&&... args )
     {
         wrap<Idx + 1>( array, std::forward<Args>( args )... );
-        array[Idx] = Variant(arg);
+        // This needs the Variant wrapper to be the exact size of a NPVariant
+        // For future proofness, we make this explicit:
+        array[Idx] = Variant<details::policy::Embeded>(arg);
     }
 }
 

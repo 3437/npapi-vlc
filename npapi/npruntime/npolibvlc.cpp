@@ -1157,7 +1157,7 @@ void LibvlcPlaylistNPObject::parseOptions(NPObject *obj, int *i_options,
                         options = moreOptions;
                     }
 
-                    options[nOptions++] = strdup(((NPString)(value)).UTF8Characters);
+                    options[nOptions++] = strdup(value);
                 }
                 *i_options = nOptions;
                 *ppsz_options = options;

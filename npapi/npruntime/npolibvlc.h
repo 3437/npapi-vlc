@@ -53,7 +53,7 @@ protected:
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 
 private:
     NPObject *audioObj;
@@ -76,13 +76,13 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
-    InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result)  override;
 };
 
 class LibvlcInputNPObject: public RuntimeNPObject
@@ -98,8 +98,8 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
-    InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
@@ -118,7 +118,8 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 };
@@ -135,12 +136,12 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 };
 
 class LibvlcPlaylistNPObject: public RuntimeNPObject
@@ -157,12 +158,12 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 
     void parseOptions(const NPString& s, int *i_options, char*** ppsz_options);
     void parseOptions(NPObject *obj, int *i_options, char*** ppsz_options);
@@ -183,13 +184,13 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
-    InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 };
 
 
@@ -206,13 +207,13 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
-    InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 
 private:
     NPObject *marqueeObj;
@@ -232,13 +233,13 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
-    InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 };
 
 class LibvlcLogoNPObject: public RuntimeNPObject
@@ -253,13 +254,13 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
-    InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 };
 
 class LibvlcDeinterlaceNPObject: public RuntimeNPObject
@@ -274,12 +275,12 @@ protected:
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
 
-    InvokeResult getProperty(int index, NPVariant &result);
-    InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult getProperty(int index, NPVariant &result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
 
     static const int methodCount;
     static const NPUTF8 * const methodNames[];
 
-    InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result) override;
 };
 

@@ -611,7 +611,6 @@ LibvlcMediaDescriptionNPObject::getProperty(int index, npapi::OutVariant &result
         auto media = mp.media();
         if( !media )
             RETURN_ON_ERROR;
-        const char *info;
         switch( index )
         {
             case ID_meta_title:
@@ -707,7 +706,7 @@ enum LibvlcPlaylistItemsNPObjectMethodIds
 
 RuntimeNPObject::InvokeResult
 LibvlcPlaylistItemsNPObject::invoke(int index, const NPVariant *args,
-                                    uint32_t argCount, npapi::OutVariant& result)
+                                    uint32_t argCount, npapi::OutVariant& )
 {
     /* is plugin still running */
     if( isPluginRunning() )
@@ -726,7 +725,7 @@ LibvlcPlaylistItemsNPObject::invoke(int index, const NPVariant *args,
             case ID_playlistitems_remove:
             {
                 if ( argCount < 1 )
-                    INVOKERESULT_INVALID_ARGS;
+                    return INVOKERESULT_INVALID_ARGS;
                 auto v = npapi::Variant( args[0] );
                 if( v.is<int>() )
                 {
@@ -1484,7 +1483,7 @@ enum LibvlcVideoNPObjectMethodIds
 
 RuntimeNPObject::InvokeResult
 LibvlcVideoNPObject::invoke(int index, const NPVariant *,
-                            uint32_t argCount, npapi::OutVariant& result)
+                            uint32_t argCount, npapi::OutVariant&)
 {
     /* is plugin still running */
     if( isPluginRunning() )
@@ -1665,7 +1664,7 @@ enum LibvlcMarqueeNPObjectMethodIds
 
 RuntimeNPObject::InvokeResult
 LibvlcMarqueeNPObject::invoke(int index, const NPVariant *,
-                              uint32_t, npapi::OutVariant& result)
+                              uint32_t, npapi::OutVariant&)
 {
     if( !isPluginRunning() )
         return INVOKERESULT_GENERIC_ERROR;
@@ -1885,8 +1884,6 @@ RuntimeNPObject::InvokeResult
 LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
                                   uint32_t argCount, npapi::OutVariant &)
 {
-    char *psz;
-
     if( !isPluginRunning() )
         return INVOKERESULT_GENERIC_ERROR;
 

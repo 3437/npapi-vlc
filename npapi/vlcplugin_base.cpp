@@ -259,7 +259,7 @@ NPError VlcPluginBase::get_root_layer(void *value)
 }
 #endif
 
-bool VlcPluginBase::handle_event(void *event)
+bool VlcPluginBase::handle_event(void *)
 {
     return false;
 }

@@ -472,7 +472,7 @@ void NPP_StreamAsFile( NPP instance, NPStream *stream, const char* )
     }
 }
 
-void NPP_URLNotify( NPP instance, const char* ,
+void NPP_URLNotify( NPP, const char* ,
                     NPReason, void* )
 {
     /***** Insert NPP_URLNotify code here *****\

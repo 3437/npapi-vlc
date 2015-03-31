@@ -56,7 +56,7 @@ RuntimeNPObject::InvokeResult RuntimeNPObject::invoke(int, const NPVariant *, ui
     return INVOKERESULT_GENERIC_ERROR;
 }
 
-RuntimeNPObject::InvokeResult RuntimeNPObject::invokeDefault(const NPVariant *, uint32_t, npapi::OutVariant& result)
+RuntimeNPObject::InvokeResult RuntimeNPObject::invokeDefault(const NPVariant *, uint32_t, npapi::OutVariant&)
 {
     /* return void */
     return INVOKERESULT_NO_ERROR;

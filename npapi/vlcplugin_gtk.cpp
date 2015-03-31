@@ -37,10 +37,10 @@ VlcPluginGtk::VlcPluginGtk(NPP instance, NPuint16_t mode) :
     parent(NULL),
     parent_vbox(NULL),
     video_container(NULL),
+    fullscreen_win(NULL),
     toolbar(NULL),
     time_slider(NULL),
     vol_slider(NULL),
-    fullscreen_win(NULL),
     is_fullscreen(false),
     is_toolbar_visible(false),
     m_timer_update_timeout( 0 )
@@ -176,9 +176,9 @@ static void toolbar_handler(GtkToolButton *btn, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     const gchar *stock_id = gtk_tool_button_get_stock_id(btn);
-    for (int i = 0; i < sizeof(tool_actions)/sizeof(tool_actions_t); ++i) {
-        if (!strcmp(stock_id, tool_actions[i].stock_id)) {
-            plugin->control_handler(tool_actions[i].clicked);
+    for (auto a : tool_actions ) {
+        if (!strcmp(stock_id, a.stock_id)) {
+            plugin->control_handler(a.clicked);
             return;
         }
     }
@@ -193,9 +193,10 @@ static void menu_handler(GtkMenuItem *menuitem, gpointer user_data)
         plugin->set_toolbar_visible(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(menuitem)));
         return;
     }
-    for (int i = 0; i < sizeof(tool_actions)/sizeof(tool_actions_t); ++i) {
-        if (!strcmp(stock_id, tool_actions[i].stock_id)) {
-            plugin->control_handler(tool_actions[i].clicked);
+    for (auto a : tool_actions)
+    {
+        if (!strcmp(stock_id, a.stock_id)) {
+            plugin->control_handler(a.clicked);
             return;
         }
     }
@@ -241,7 +242,7 @@ void VlcPluginGtk::popup_menu()
                    0, gtk_get_current_event_time());
 }
 
-static bool video_button_handler(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+static bool video_button_handler(GtkWidget*, GdkEventButton *event, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     if (event->button == 3 && event->type == GDK_BUTTON_PRESS) {
@@ -254,21 +255,21 @@ static bool video_button_handler(GtkWidget *widget, GdkEventButton *event, gpoin
     return false;
 }
 
-static bool video_popup_handler(GtkWidget *widget, gpointer user_data)
+static bool video_popup_handler(GtkWidget*, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     plugin->popup_menu();
     return true;
 }
 
-static bool video_size_handler(GtkWidget *widget, GdkRectangle *rect, gpointer user_data)
+static bool video_size_handler(GtkWidget*, GdkRectangle *rect, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     plugin->resize_video_xwindow(rect);
     return true;
 }
 
-static bool video_expose_handler(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+static bool video_expose_handler(GtkWidget*, GdkEvent *event, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     GdkEventExpose *event_expose = (GdkEventExpose *) event;
@@ -318,14 +319,14 @@ gboolean VlcPluginGtk::update_time_slider(gpointer user_data)
     return FALSE;
 }
 
-static bool time_slider_handler(GtkRange *range, GtkScrollType scroll, gdouble value, gpointer user_data)
+static bool time_slider_handler(GtkRange*, GtkScrollType, gdouble value, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     plugin->getMD().setPosition( value / 100.0 );
     return false;
 }
 
-static bool vol_slider_handler(GtkRange *range, GtkScrollType scroll, gdouble value, gpointer user_data)
+static bool vol_slider_handler(GtkRange*, GtkScrollType, gdouble value, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     plugin->getMD().setVolume( value );
@@ -338,7 +339,7 @@ static void fullscreen_win_visibility_handler(GtkWidget *widget, gpointer user_d
     plugin->do_set_fullscreen(gtk_widget_get_visible(widget));
 }
 
-static gboolean fullscreen_win_keypress_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+static gboolean fullscreen_win_keypress_handler(GtkWidget*, GdkEventKey *event, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
     switch (event->keyval)

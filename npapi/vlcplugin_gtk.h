@@ -55,7 +55,6 @@ public:
     void resize_video_xwindow(GdkRectangle *rect);
 
     GdkPixbuf *cone_icon;
-    GtkWidget *time_slider, *vol_slider;
 
 private:
     void set_player_window();
@@ -66,6 +65,7 @@ private:
     GtkWidget *parent, *parent_vbox, *video_container;
     GtkWidget *fullscreen_win;
     GtkWidget *toolbar;
+    GtkWidget *time_slider, *vol_slider;
     gulong video_container_size_handler_id;
 
     Display *display;

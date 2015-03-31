@@ -51,8 +51,6 @@
 /***********************************************************************
  * Globals
  ***********************************************************************/
-#pragma mark -
-#pragma mark Globals
 
 NPNetscapeFuncs  *gNetscapeFuncs;    /* Netscape Function table */
 static const char       *gUserAgent;        /* User agent string */

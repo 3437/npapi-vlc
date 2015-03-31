@@ -125,7 +125,7 @@ bool VlcWindowlessXCB::handle_event(void *event)
                     m_media_width * m_media_height * 4,
                     (const uint8_t *)&m_frame_buf[0]);
 
-        if (err = xcb_request_check(m_conn, cookie))
+        if ((err = xcb_request_check(m_conn, cookie)))
         {
             fprintf(stderr, "Unable to put picture into drawable. Error %d\n",
                             err->error_code);

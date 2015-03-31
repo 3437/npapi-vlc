@@ -47,8 +47,10 @@
 /***********************************************************************
  * Globals
  ***********************************************************************/
+#ifdef __APPLE__
 #pragma mark -
 #pragma mark Globals
+#endif
 
 extern NPNetscapeFuncs  *gNetscapeFuncs; /* Netscape Function table */
 static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }

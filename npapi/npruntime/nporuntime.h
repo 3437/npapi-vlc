@@ -40,6 +40,8 @@
 
 #include <memory>
 
+#include "utils.hpp"
+
 class RuntimeNPObject : public NPObject
 {
 public:
@@ -62,15 +64,13 @@ public:
         INVOKERESULT_OUT_OF_MEMORY  = 5,    /* throws out of memory */
     };
 
-    virtual InvokeResult getProperty(int index, NPVariant &result);
+    virtual InvokeResult getProperty(int index, npapi::OutVariant &result);
     virtual InvokeResult setProperty(int index, const NPVariant &value);
     virtual InvokeResult removeProperty(int index);
-    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
-    virtual InvokeResult invokeDefault(const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, npapi::OutVariant &result);
+    virtual InvokeResult invokeDefault(const NPVariant *args, uint32_t argCount, npapi::OutVariant &result);
 
     bool returnInvokeResult(InvokeResult result);
-
-    static InvokeResult invokeResultString(const char *,NPVariant &);
 
 protected:
     void *operator new(size_t n)
@@ -162,7 +162,8 @@ protected:
             int index = vClass->indexOfProperty(name);
             if( index != -1 )
             {
-                return vObj->returnInvokeResult(vObj->getProperty(index, *result));
+                npapi::OutVariant res{ result };
+                return vObj->returnInvokeResult(vObj->getProperty(index, res));
             }
         }
         return false;
@@ -209,8 +210,8 @@ protected:
             int index = vClass->indexOfMethod(name);
             if( index != -1 )
             {
-                return vObj->returnInvokeResult(vObj->invoke(index, args, argCount, *result));
-
+                npapi::OutVariant res{ result };
+                return vObj->returnInvokeResult(vObj->invoke(index, args, argCount, res));
             }
         }
         return false;
@@ -224,7 +225,8 @@ protected:
         RuntimeNPObject *vObj = static_cast<RuntimeNPObject *>(npobj);
         if( vObj->isValid() )
         {
-            return vObj->returnInvokeResult(vObj->invokeDefault(args, argCount, *result));
+            npapi::OutVariant res{ result };
+            return vObj->returnInvokeResult(vObj->invokeDefault(args, argCount, res ));
         }
         return false;
     }

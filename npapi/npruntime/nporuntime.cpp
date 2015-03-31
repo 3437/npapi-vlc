@@ -32,7 +32,7 @@
 
 #include "nporuntime.h"
 
-RuntimeNPObject::InvokeResult RuntimeNPObject::getProperty(int, NPVariant &)
+RuntimeNPObject::InvokeResult RuntimeNPObject::getProperty(int, npapi::OutVariant&)
 {
     /* default behaviour */
     return INVOKERESULT_GENERIC_ERROR;
@@ -50,16 +50,15 @@ RuntimeNPObject::InvokeResult RuntimeNPObject::removeProperty(int)
     return INVOKERESULT_GENERIC_ERROR;
 }
 
-RuntimeNPObject::InvokeResult RuntimeNPObject::invoke(int, const NPVariant *, uint32_t, NPVariant &)
+RuntimeNPObject::InvokeResult RuntimeNPObject::invoke(int, const NPVariant *, uint32_t, npapi::OutVariant& )
 {
     /* default beahviour */
     return INVOKERESULT_GENERIC_ERROR;
 }
 
-RuntimeNPObject::InvokeResult RuntimeNPObject::invokeDefault(const NPVariant *, uint32_t, NPVariant &result)
+RuntimeNPObject::InvokeResult RuntimeNPObject::invokeDefault(const NPVariant *, uint32_t, npapi::OutVariant& result)
 {
     /* return void */
-    VOID_TO_NPVARIANT(result);
     return INVOKERESULT_NO_ERROR;
 }
 
@@ -85,24 +84,4 @@ bool RuntimeNPObject::returnInvokeResult(RuntimeNPObject::InvokeResult result)
             break;
     }
     return false;
-}
-
-RuntimeNPObject::InvokeResult
-RuntimeNPObject::invokeResultString(const char *psz, NPVariant &result)
-{
-    if( !psz )
-        NULL_TO_NPVARIANT(result);
-    else
-    {
-        size_t len = strlen(psz);
-        NPUTF8* retval = (NPUTF8*)NPN_MemAlloc(len);
-        if( !retval )
-            return INVOKERESULT_OUT_OF_MEMORY;
-        else
-        {
-            memcpy(retval, psz, len);
-            STRINGN_TO_NPVARIANT(retval, len, result);
-        }
-    }
-    return INVOKERESULT_NO_ERROR;
 }

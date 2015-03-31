@@ -520,6 +520,30 @@ public:
         return traits<TraitsType<T>>::to( m_variant.ref() );
     }
 
+    // Enable by value parameter for pointers & fundamental type
+    template <typename T>
+    typename std::enable_if<
+        std::is_fundamental<T>::value ||
+        std::is_pointer<T>::value,
+    Variant>::type &
+    operator=(const T t)
+    {
+        traits<TraitsType<T>>::from( t, m_variant.ref() );
+        return *this;
+    }
+
+    // By const-ref parameter passing for bigger & non-pointer types
+    template <typename T>
+    typename std::enable_if<
+        !std::is_fundamental<T>::value &&
+        !std::is_pointer<T>::value,
+    Variant>::type &
+    operator=(const T& t)
+    {
+        traits<TraitsType<T>>::from( t, m_variant.ref() );
+        return *this;
+    }
+
     operator const NPVariant() const
     {
         return m_variant.ref();
@@ -579,7 +603,8 @@ private:
 
 }
 
-using Variant = details::Variant<>;
+using Variant = details::Variant<details::policy::Embeded>;
+using OutVariant = details::Variant<details::policy::Wrapped>;
 
 class VariantArray
 {

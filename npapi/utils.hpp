@@ -280,7 +280,9 @@ struct traits<NPString>
             NULL_TO_NPVARIANT( v );
             return;
         }
-        auto raw = strdup( s.UTF8Characters );
+        auto raw = static_cast<NPUTF8*>( NPN_MemAlloc( s.UTF8Length + 1 ) );
+        memcpy( raw, s.UTF8Characters, s.UTF8Length );
+        raw[s.UTF8Length] = 0;
         STRINGZ_TO_NPVARIANT( raw, v );
     }
 };
@@ -305,7 +307,9 @@ struct traits<NPUTF8*>
             NULL_TO_NPVARIANT( v );
             return;
         }
-        auto copy = strdup( str );
+        auto len = strlen(str);
+        auto copy = static_cast<NPUTF8*>( NPN_MemAlloc( len + 1 ) );
+        strcpy(copy, str);
         STRINGZ_TO_NPVARIANT( copy, v );
     }
 };
@@ -325,8 +329,7 @@ struct traits<std::string>
 
     static void from( const std::string& str, NPVariant& v )
     {
-        auto copy = strdup( str.c_str() );
-        STRINGZ_TO_NPVARIANT( copy, v );
+        traits<char*>::from( str.c_str(), v );
     }
 };
 

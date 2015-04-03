@@ -266,7 +266,7 @@ bool VlcPluginBase::handle_event(void *)
 
 struct AsyncEventWrapper
 {
-    AsyncEventWrapper(NPP b, npapi::Variant l, npapi::VariantArray a)
+    AsyncEventWrapper(NPP b, npapi::Variant&& l, npapi::VariantArray&& a)
         : browser( b )
         , listener( std::move( l ) )
         , args( std::move( a ) )

@@ -27,6 +27,7 @@
 #include <npruntime.h>
 #include <memory>
 #include <type_traits>
+#include <string>
 
 #include <cstring>
 #include <cassert>

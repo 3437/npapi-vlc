@@ -60,6 +60,10 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
+#ifdef XP_WIN
+# include <Windows.h>
+#endif
+
 // Include stdint before NP*.h
 #include <stdint.h>
 

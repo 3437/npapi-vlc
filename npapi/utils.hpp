@@ -494,7 +494,14 @@ public:
         return *this;
     }
 
+#ifndef _MSC_VER
     Variant(Variant&& v) = default;
+#else
+    Variant(Variant&& v)
+        : m_variant( std::move( v.m_variant ) )
+    {
+    }
+#endif
 
     Variant& operator=(Variant&& v)
     {
@@ -647,8 +654,27 @@ public:
         return m_size;
     }
 
-    VariantArray(const Variant&) = delete;
-    VariantArray& operator=(const Variant&) = delete;
+    VariantArray(const VariantArray&) = delete;
+    VariantArray& operator=(const VariantArray&) = delete;
+#ifndef _MSC_VER
+    VariantArray(VariantArray&&) = default;
+    VariantArray& operator=(VariantArray&&) = default;
+#else
+    VariantArray(VariantArray&& v)
+        : m_variants(std::move( v.m_variants ) )
+        , m_size( v.m_size )
+    {
+    }
+
+    VariantArray& operator=(VariantArray&& v)
+    {
+        if (&v == this)
+            return *this;
+        m_variants = std::move(v.m_variants);
+        m_size = v.m_size;
+    }
+
+#endif
 private:
     VPtr m_variants;
     size_t m_size;

@@ -304,7 +304,16 @@ public:
     }
 
     CallbackClosure(const CallbackClosure&) = delete;
+
+#ifndef _MSC_VER
     CallbackClosure(CallbackClosure&&) = default;
+#else
+    CallbackClosure(CallbackClosure&& c)
+        : _browser( std::move(c._browser) )
+        , _listener( std::move(c._listener) )
+    {
+    }
+#endif
 
     template <typename... Args>
     void operator()(Args&&... params) const

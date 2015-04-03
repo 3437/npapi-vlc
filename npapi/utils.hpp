@@ -354,8 +354,14 @@ struct Embeded
 
     Embeded( Embeded&& e )
     {
+        *this = std::move(e);
+    }
+
+    Embeded& operator=(Embeded&& e)
+    {
         v = e.v;
         memset( &e.v, 0, sizeof( e.v ) );
+        return *this;
     }
 
     Embeded( const NPVariant& npv )

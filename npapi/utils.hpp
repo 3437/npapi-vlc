@@ -682,6 +682,7 @@ public:
             return *this;
         m_variants = std::move(v.m_variants);
         m_size = v.m_size;
+        return *this;
     }
 
 #endif

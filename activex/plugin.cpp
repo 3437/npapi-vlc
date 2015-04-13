@@ -525,8 +525,6 @@ void VLCPlugin::initVLC()
             pClientSite->Release();
         }
     }
-
-    set_player_window();
 };
 
 void VLCPlugin::setErrorInfo(REFIID riid, const char *description)
@@ -690,6 +688,8 @@ HRESULT VLCPlugin::onActivateInPlace(LPMSG, HWND hwndParent, LPCRECT lprcPosRect
 
     if( isVisible() )
         ShowWindow(_inplacewnd, SW_SHOW);
+
+    set_player_window();
 
     return S_OK;
 };
@@ -1130,7 +1130,8 @@ void VLCPlugin::fireOnMediaPlayerLengthChangedEvent(long length)
 
 void VLCPlugin::set_player_window()
 {
-    _WindowsManager.LibVlcAttach( &get_player() );
+    if (_WindowsManager.getHolderWnd())
+        m_player.get_mp().setHwnd( _WindowsManager.getHolderWnd()->hWnd() );
 }
 
 #define B(val) ((val) ? 0xFFFF : 0x0000)

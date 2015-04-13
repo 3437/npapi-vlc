@@ -56,13 +56,9 @@ public:
     void update_controls();
     void popup_menu(){};
 
-protected:
-    virtual void on_media_player_new();
-    virtual void on_media_player_release();
-
 private:
     static LRESULT CALLBACK NPWndProcR(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-    void set_player_window(){};
+    virtual void set_player_window() override;
 
     WNDPROC _NPWndProc;
     VLCViewResources  _ViewRC;

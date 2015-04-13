@@ -219,7 +219,7 @@ extern HMODULE DllGetModule();
 
 VLCPlugin::VLCPlugin(VLCPluginClass *p_class, LPUNKNOWN pUnkOuter) :
     _inplacewnd(NULL),
-    _WindowsManager(DllGetModule(), _ViewRC, this),
+    _WindowsManager(DllGetModule(), _ViewRC, &m_player, this),
     _p_class(p_class),
     _i_ref(1UL),
     _i_codepage(CP_ACP),

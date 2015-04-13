@@ -86,7 +86,7 @@ LRESULT CALLBACK VlcPluginWin::NPWndProcR(HWND hWnd, UINT uMsg, WPARAM wParam, L
 
 VlcPluginWin::VlcPluginWin(NPP instance, NPuint16_t mode) :
     VlcPluginBase(instance, mode), _NPWndProc(0),
-    _WindowsManager(DllGetModule(), _ViewRC, &get_options())
+    _WindowsManager(DllGetModule(), _ViewRC, &m_player, &get_options())
 {
     _ViewRC.hDeFullscreenBitmap =
         LoadImage(DllGetModule(), MAKEINTRESOURCE(3),
@@ -182,8 +182,6 @@ bool VlcPluginWin::create_windows()
 
     _WindowsManager.CreateWindows(drawable);
 
-    _WindowsManager.LibVlcAttach(&player());
-
     return true;
 }
 
@@ -215,12 +213,7 @@ bool VlcPluginWin::destroy_windows()
     return true;
 }
 
-void VlcPluginWin::on_media_player_new()
+void VlcPluginWin::set_player_window()
 {
-    _WindowsManager.LibVlcAttach(&player());
-}
-
-void VlcPluginWin::on_media_player_release()
-{
-    _WindowsManager.LibVlcDetach();
+    player().get_mp().setHwnd(_WindowsManager.getHolderWnd()->hWnd());
 }

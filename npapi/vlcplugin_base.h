@@ -123,11 +123,6 @@ public:
     void subscribe(const char* eventName, npapi::Variant listener);
     void unsubscribe( const char* eventName, npapi::Variant listener );
 protected:
-    // called after libvlc_media_player_new_from_media
-    virtual void on_media_player_new()     {}
-    // called before libvlc_media_player_release
-    virtual void on_media_player_release() {}
-
     NPClass             *p_scriptClass;
 
     /* browser reference */

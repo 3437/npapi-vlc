@@ -30,13 +30,20 @@
 #include "vlc_player_options.h"
 #include "vlc_player.h"
 
+enum{
+    WM_MOUSE_EVENT_NOTIFY = WM_APP + 1,
+    WM_MOUSE_EVENT_REPOST,
+    WM_MOUSE_EVENT_NOTIFY_SUCCESS = 0xFF
+};
+
+
 struct VLCViewResources
 {
     VLCViewResources()
         :hNewMessageBitmap(0), hFullscreenBitmap(0), hDeFullscreenBitmap(0), hPauseBitmap(0),
          hPlayBitmap(0), hVolumeBitmap(0), hVolumeMutedBitmap(0),
          hBackgroundIcon(0)
-    {};
+    {}
     ~VLCViewResources()
     {
         if( hNewMessageBitmap )   DeleteObject( hNewMessageBitmap );
@@ -89,27 +96,23 @@ public:
 
     void NeedShowControls();
 
+
     //libvlc events arrives from separate thread
-    void OnLibVlcEvent(const libvlc_event_t* event);
+    void UpdateFullscreenButton(bool fullscreen);
 
 protected:
     virtual void PreRegisterWindowClass(WNDCLASS* wc);
     virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 private:
-    void SetVideoPosScrollRangeByVideoLen();
-    void SyncVideoPosScrollPosWithVideoPos();
     void SetVideoPos(float Pos); //0-start, 1-end
 
     void SyncVolumeSliderWithVLCVolume();
     void SetVLCVolumeBySliderPos(int CurScrollPos);
     void SetVideoPosScrollPosByVideoPos(libvlc_time_t CurScrollPos);
-    void UpdateButtons();
+    void RegisterToVLCEvents();
 
     void NeedHideControls();
-
-    void handle_position_changed_event(const libvlc_event_t* event);
-    void handle_input_state_event(const libvlc_event_t* event);
 
     bool IsPlaying()
     {
@@ -154,7 +157,7 @@ public:
 protected:
     VLCHolderWnd(HINSTANCE hInstance, VLCWindowsManager* WM)
         : VLCWnd(hInstance), _hMouseHook(NULL), _MouseHookThreadId(0),
-         _wm(WM), _hBgBrush(0), _CtrlsWnd(0) {};
+        _wm(WM), _hBgBrush(0), _CtrlsWnd(0), _oldMouseCoords() {}
     bool Create(HWND hWndParent);
 
     virtual void PreRegisterWindowClass(WNDCLASS* wc);
@@ -163,14 +166,10 @@ protected:
 public:
     void DestroyWindow();
 
-    void LibVlcAttach();
-    void LibVlcDetach();
-
-    void NeedShowControls()
-        { if(_CtrlsWnd) _CtrlsWnd->NeedShowControls(); }
-
-    //libvlc events arrives from separate thread
-    void OnLibVlcEvent(const libvlc_event_t* event);
+    VLCControlsWnd* ControlWindow()
+    {
+        return _CtrlsWnd;
+    }
 
 private:
     static LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam);
@@ -180,6 +179,7 @@ private:
     HHOOK _hMouseHook;
     DWORD _MouseHookThreadId;
     void MouseHook(bool SetHook);
+    void TrackMouse();
 
     VLCWindowsManager& WM()
         {return *_wm;}
@@ -195,6 +195,7 @@ private:
     VLCWindowsManager* _wm;
     HBRUSH _hBgBrush;
     VLCControlsWnd*    _CtrlsWnd;
+    POINTS _oldMouseCoords;
 };
 
 ///////////////////////
@@ -229,10 +230,6 @@ private:
     inline vlc_player* VP() const;
     inline const VLCViewResources& RC() const;
 
-public:
-    //libvlc events arrives from separate thread
-    void OnLibVlcEvent(const libvlc_event_t* ) {};
-
 private:
     void NeedHideControls();
 
@@ -258,14 +255,11 @@ class VLCWindowsManager
 {
 public:
     VLCWindowsManager(HMODULE hModule, const VLCViewResources& rc,
-                      const vlc_player_options* = 0);
+                    vlc_player* player, const vlc_player_options* = 0);
     ~VLCWindowsManager();
 
     void CreateWindows(HWND hWindowedParentWnd);
     void DestroyWindows();
-
-    void LibVlcAttach(vlc_player*);
-    void LibVlcDetach();
 
     void StartFullScreen();
     void EndFullScreen();
@@ -289,9 +283,7 @@ public:
     void OnMouseEvent(UINT uMouseMsg);
 
 private:
-    void VlcEvents(bool Attach);
     //libvlc events arrives from separate thread
-    static void OnLibVlcEvent_proxy(const libvlc_event_t* event, void *param);
     void OnLibVlcEvent(const libvlc_event_t* event);
 
 private:

@@ -319,7 +319,7 @@ STDMETHODIMP VLCConnectionPoint::EnumConnections(IEnumConnections **ppEnum)
     if( NULL == ppEnum )
         return E_POINTER;
 
-    *ppEnum = dynamic_cast<LPENUMCONNECTIONS>(new VLCEnumConnections(_connections));
+    *ppEnum = new VLCEnumConnections(_connections);
 
     return (NULL != *ppEnum ) ? S_OK : E_OUTOFMEMORY;
 };
@@ -390,15 +390,13 @@ extern HMODULE DllGetModule();
 VLCConnectionPointContainer::VLCConnectionPointContainer(VLCPlugin *p_instance) :
     _ESProxyWnd(0), _p_instance(p_instance), isRunning(TRUE), freeze(FALSE)
 {
-    _p_events = new VLCConnectionPoint(dynamic_cast<LPCONNECTIONPOINTCONTAINER>(this),
-            _p_instance->getDispEventID());
+    _p_events = new VLCConnectionPoint(this, _p_instance->getDispEventID());
 
-    _v_cps.push_back(dynamic_cast<LPCONNECTIONPOINT>(_p_events));
+    _v_cps.push_back(_p_events);
 
-    _p_props = new VLCConnectionPoint(dynamic_cast<LPCONNECTIONPOINTCONTAINER>(this),
-            IID_IPropertyNotifySink);
+    _p_props = new VLCConnectionPoint(this, IID_IPropertyNotifySink);
 
-    _v_cps.push_back(dynamic_cast<LPCONNECTIONPOINT>(_p_props));
+    _v_cps.push_back(_p_props);
 
     // init protection
     InitializeCriticalSection(&csEvents);
@@ -432,7 +430,7 @@ STDMETHODIMP VLCConnectionPointContainer::EnumConnectionPoints(LPENUMCONNECTIONP
     if( NULL == ppEnum )
         return E_POINTER;
 
-    *ppEnum = dynamic_cast<LPENUMCONNECTIONPOINTS>(new VLCEnumConnectionPoints(_v_cps));
+    *ppEnum = new VLCEnumConnectionPoints(_v_cps);
 
     return (NULL != *ppEnum ) ? S_OK : E_OUTOFMEMORY;
 };
@@ -445,18 +443,12 @@ STDMETHODIMP VLCConnectionPointContainer::FindConnectionPoint(REFIID riid, IConn
     *ppCP = NULL;
 
     if( IID_IPropertyNotifySink == riid )
-    {
-        _p_props->AddRef();
-        *ppCP = dynamic_cast<LPCONNECTIONPOINT>(_p_props);
-    }
+        *ppCP = _p_props;
     else if( _p_instance->getDispEventID() == riid )
-    {
-        _p_events->AddRef();
-        *ppCP = dynamic_cast<LPCONNECTIONPOINT>(_p_events);
-    }
+        *ppCP = _p_events;
     else
         return CONNECT_E_NOCONNECTION;
-
+    (*ppCP)->AddRef();
     return NOERROR;
 };
 

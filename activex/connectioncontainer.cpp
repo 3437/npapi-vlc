@@ -26,6 +26,8 @@
 #include "connectioncontainer.h"
 #include "utils.h"
 
+#include <atomic>
+
 using namespace std;
 
 #ifdef __MINGW32__
@@ -131,7 +133,7 @@ public:
 
 private:
     VLCConnectionPointContainer *_pCPC;
-    volatile bool _HasUnprocessedNotify;
+    std::atomic_bool _HasUnprocessedNotify;
 };
 
 HINSTANCE EventSystemProxyWnd::_hInstance=0;

@@ -50,7 +50,6 @@
 #include <servprov.h>
 #include <shlwapi.h>
 #include <wininet.h>
-#include <assert.h>
 
 using namespace std;
 

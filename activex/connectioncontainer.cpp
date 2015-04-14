@@ -51,22 +51,11 @@ struct VLCEnumConnectionsDereference
     }
 };
 
-class VLCEnumConnections : public VLCEnumIterator<IID_IEnumConnections,
-    IEnumConnections,
-    CONNECTDATA,
-    std::map<DWORD,LPUNKNOWN>::iterator,
-    VLCEnumConnectionsDereference>
-{
-public:
-    VLCEnumConnections(std::map<DWORD,LPUNKNOWN> &m) :
-        VLCEnumIterator<IID_IEnumConnections,
-            IEnumConnections,
-            CONNECTDATA,
-            std::map<DWORD,LPUNKNOWN>::iterator,
-            VLCEnumConnectionsDereference> (m.begin(), m.end())
-    {
-    }
-};
+using VLCEnumConnections = VLCEnumIterator<IID_IEnumConnections,
+                            IEnumConnections,
+                            CONNECTDATA,
+                            std::map<DWORD,LPUNKNOWN>,
+                            VLCEnumConnectionsDereference>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -81,23 +70,11 @@ struct VLCEnumConnectionPointsDereference
     }
 };
 
-class VLCEnumConnectionPoints: public VLCEnumIterator<IID_IEnumConnectionPoints,
-    IEnumConnectionPoints,
-    LPCONNECTIONPOINT,
-    std::vector<LPCONNECTIONPOINT>::iterator,
-    VLCEnumConnectionPointsDereference>
-{
-public:
-    VLCEnumConnectionPoints(std::vector<LPCONNECTIONPOINT>& v) :
-        VLCEnumIterator<IID_IEnumConnectionPoints,
-            IEnumConnectionPoints,
-            LPCONNECTIONPOINT,
-            std::vector<LPCONNECTIONPOINT>::iterator,
-            VLCEnumConnectionPointsDereference> (v.begin(), v.end())
-    {
-    }
-};
-
+using VLCEnumConnectionPoints = VLCEnumIterator<IID_IEnumConnectionPoints,
+                                    IEnumConnectionPoints,
+                                    LPCONNECTIONPOINT,
+                                    std::vector<LPCONNECTIONPOINT>,
+                                    VLCEnumConnectionPointsDereference>;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // EventSystemProxyWnd
 ////////////////////////////////////////////////////////////////////////////////////////////////

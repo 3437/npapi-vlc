@@ -46,19 +46,10 @@ static const FORMATETC _enhMetaFileFormatEtc =
     TYMED_ENHMF,
 };
 
-class VLCEnumFORMATETC : public VLCEnumIterator<IID_IEnumFORMATETC,
-    IEnumFORMATETC,
-    FORMATETC,
-    vector<FORMATETC>::iterator>
-{
-public:
-    VLCEnumFORMATETC(vector<FORMATETC> v) :
-        VLCEnumIterator<IID_IEnumFORMATETC,
-        IEnumFORMATETC,
-        FORMATETC,
-        vector<FORMATETC>::iterator>(v.begin(), v.end())
-    {};
-};
+using VLCEnumFORMATETC = VLCEnumIterator<IID_IEnumFORMATETC,
+                            IEnumFORMATETC,
+                            FORMATETC,
+                            std::vector<FORMATETC>>;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -246,7 +237,7 @@ STDMETHODIMP VLCDataObject::QueryGetData(LPFORMATETC pFormatEtc)
         default:
             return DV_E_FORMATETC;
     }
- 
+
     if( pFormatEtc->dwAspect != formatEtc->dwAspect )
         return DV_E_DVASPECT;
 

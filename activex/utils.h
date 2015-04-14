@@ -52,32 +52,26 @@ struct VLCDereference
     T operator()(const Iterator& i) const
     {
         return *i;
-    };
+    }
 };
 
-template<REFIID EnumeratorIID, class Enumerator, typename T, class Iterator, typename Dereference = VLCDereference<T, Iterator> >
+template<REFIID EnumeratorIID, class Enumerator, typename T, class Container, typename Dereference = VLCDereference<T, typename Container::iterator> >
 class VLCEnumIterator : public Enumerator
 {
 
 public:
 
-    VLCEnumIterator(const Iterator& from, const Iterator& to) :
+    VLCEnumIterator(Container& container) :
         _refcount(1),
-        _begin(from),
-        _curr(from),
-        _end(to)
-    {};
+        _begin(begin(container)),
+        _curr(_begin),
+        _end(end(container))
+    {
+    }
 
-    VLCEnumIterator(const VLCEnumIterator& e) :
-        Enumerator(),
-        _refcount(e._refcount),
-        _begin(e._begin),
-        _curr(e._curr),
-        _end(e._end)
-    {};
+    VLCEnumIterator(const VLCEnumIterator& e) = default;
 
-    virtual ~VLCEnumIterator()
-    {};
+    virtual ~VLCEnumIterator() = default;
 
     // IUnknown methods
     STDMETHODIMP QueryInterface(REFIID riid, void **ppv)
@@ -93,12 +87,12 @@ public:
         }
         // standalone object
         return E_NOINTERFACE;
-    };
+    }
 
-    STDMETHODIMP_(ULONG) AddRef(void)
+    STDMETHODIMP_(ULONG) AddRef()
     {
         return InterlockedIncrement(&_refcount);
-    };
+    }
 
     STDMETHODIMP_(ULONG) Release(void)
     {
@@ -109,7 +103,7 @@ public:
             return 0;
         }
         return refcount;
-    };
+    }
 
 
     // IEnumXXXX methods
@@ -134,7 +128,7 @@ public:
             *pceltFetched = c;
 
         return (c == celt) ? S_OK : S_FALSE;
-    };
+    }
 
     STDMETHODIMP Skip(ULONG celt)
     {
@@ -146,29 +140,28 @@ public:
             ++c;
         }
         return (c == celt) ? S_OK : S_FALSE;
-    };
+    }
 
-    STDMETHODIMP Reset(void)
+    STDMETHODIMP Reset()
     {
         _curr = _begin;
         return S_OK;
-    };
+    }
 
     STDMETHODIMP Clone(Enumerator **ppEnum)
     {
         if( NULL == ppEnum )
             return E_POINTER;
-        *ppEnum = dynamic_cast<Enumerator *>(new VLCEnumIterator(*this));
+        *ppEnum = new VLCEnumIterator(*this);
         return (NULL != *ppEnum ) ? S_OK : E_OUTOFMEMORY;
-    };
+    }
 
 private:
 
     LONG     _refcount;
-    Iterator _begin, _curr, _end;
+    typename Container::iterator _begin, _curr, _end;
 
     Dereference dereference;
-
 };
 
 #endif

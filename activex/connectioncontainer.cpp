@@ -28,8 +28,6 @@
 
 #include <atomic>
 
-using namespace std;
-
 #ifdef __MINGW32__
 # include <_mingw.h>
 # if defined(__MINGW32_MAJOR_VERSION) && !defined(__MINGW64_VERSION_MAJOR)
@@ -41,7 +39,7 @@ const CLSID CLSID_StdGlobalInterfaceTable = { 0x00000323, 0, 0, {0xc0, 0, 0, 0, 
 /* this function object is used to return the value from a map pair */
 struct VLCEnumConnectionsDereference
 {
-    CONNECTDATA operator()(const map<DWORD,LPUNKNOWN>::iterator& i)
+    CONNECTDATA operator()(const std::map<DWORD,LPUNKNOWN>::iterator& i)
     {
         CONNECTDATA cd;
 
@@ -50,23 +48,24 @@ struct VLCEnumConnectionsDereference
         cd.dwCookie = i->first;
         cd.pUnk     = i->second;
         return cd;
-    };
+    }
 };
 
 class VLCEnumConnections : public VLCEnumIterator<IID_IEnumConnections,
     IEnumConnections,
     CONNECTDATA,
-    map<DWORD,LPUNKNOWN>::iterator,
+    std::map<DWORD,LPUNKNOWN>::iterator,
     VLCEnumConnectionsDereference>
 {
 public:
-    VLCEnumConnections(map<DWORD,LPUNKNOWN> &m) :
+    VLCEnumConnections(std::map<DWORD,LPUNKNOWN> &m) :
         VLCEnumIterator<IID_IEnumConnections,
             IEnumConnections,
             CONNECTDATA,
-            map<DWORD,LPUNKNOWN>::iterator,
+            std::map<DWORD,LPUNKNOWN>::iterator,
             VLCEnumConnectionsDereference> (m.begin(), m.end())
-    {};
+    {
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +73,7 @@ public:
 /* this function object is used to retain the dereferenced iterator value */
 struct VLCEnumConnectionPointsDereference
 {
-    LPCONNECTIONPOINT operator()(const vector<LPCONNECTIONPOINT>::iterator& i)
+    LPCONNECTIONPOINT operator()(const std::vector<LPCONNECTIONPOINT>::iterator& i)
     {
         LPCONNECTIONPOINT cp = *i;
         cp->AddRef();
@@ -85,17 +84,18 @@ struct VLCEnumConnectionPointsDereference
 class VLCEnumConnectionPoints: public VLCEnumIterator<IID_IEnumConnectionPoints,
     IEnumConnectionPoints,
     LPCONNECTIONPOINT,
-    vector<LPCONNECTIONPOINT>::iterator,
+    std::vector<LPCONNECTIONPOINT>::iterator,
     VLCEnumConnectionPointsDereference>
 {
 public:
-    VLCEnumConnectionPoints(vector<LPCONNECTIONPOINT>& v) :
+    VLCEnumConnectionPoints(std::vector<LPCONNECTIONPOINT>& v) :
         VLCEnumIterator<IID_IEnumConnectionPoints,
             IEnumConnectionPoints,
             LPCONNECTIONPOINT,
-            vector<LPCONNECTIONPOINT>::iterator,
+            std::vector<LPCONNECTIONPOINT>::iterator,
             VLCEnumConnectionPointsDereference> (v.begin(), v.end())
-    {};
+    {
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ private:
     enum{
         WM_NEW_EVENT_NOTIFY = WM_USER+1
     };
-    static LPCTSTR getClassName(void) { return TEXT("VLC ActiveX ESP Class"); };
+    static LPCTSTR getClassName(void) { return TEXT("VLC ActiveX ESP Class"); }
     static void RegisterWndClassName();
     static void UnRegisterWndClassName();
     static LRESULT CALLBACK ESPWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -121,12 +121,15 @@ public:
 
 private:
     EventSystemProxyWnd(HWND hWnd, VLCConnectionPointContainer *pCPC)
-        : _hWnd(hWnd), _pCPC(pCPC), _HasUnprocessedNotify(false){};
+        : _hWnd(hWnd), _pCPC(pCPC), _HasUnprocessedNotify(false)
+    {
+    }
     void ProcessNotify();
 
 public:
     void DestroyWindow()
-        {::DestroyWindow(_hWnd);};
+        {::DestroyWindow(_hWnd);}
+
 
     //allowed to invoke from any thread
     void NewEventNotify();
@@ -252,61 +255,60 @@ void EventSystemProxyWnd::ProcessNotify()
 VLCConnectionPoint::VLCConnectionPoint(IConnectionPointContainer *p_cpc, REFIID iid) :
         _iid(iid), _p_cpc(p_cpc)
 {
-};
+}
 
 VLCConnectionPoint::~VLCConnectionPoint()
 {
     // Revoke interfaces from the GIT:
-    map<DWORD,LPUNKNOWN>::iterator end = _connections.end();
-    map<DWORD,LPUNKNOWN>::iterator iter = _connections.begin();
-
-    while( iter != end )
+    for (auto& p : _connections)
     {
-        iter->second->Release();
-        ++iter;
+        p.second->Release();
     }
     _connections.clear();
-};
+}
 
 STDMETHODIMP VLCConnectionPoint::GetConnectionInterface(IID *iid)
 {
-    if( NULL == iid )
+    if( iid == nullptr )
         return E_POINTER;
 
     *iid = _iid;
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCConnectionPoint::GetConnectionPointContainer(LPCONNECTIONPOINTCONTAINER *ppCPC)
 {
-    if( NULL == ppCPC )
+    if( ppCPC == nullptr )
         return E_POINTER;
 
     _p_cpc->AddRef();
     *ppCPC = _p_cpc;
     return S_OK;
-};
+}
 
 STDMETHODIMP VLCConnectionPoint::Advise(IUnknown *pUnk, DWORD *pdwCookie)
 {
     static DWORD dwCookieCounter = 0;
     HRESULT hr;
 
-    if( (NULL == pUnk) || (NULL == pdwCookie) )
+    if( (pUnk == nullptr) || (pdwCookie == nullptr) )
         return E_POINTER;
 
     hr = pUnk->QueryInterface(_iid, (LPVOID *)&pUnk);
     if( SUCCEEDED(hr) )
     {
         *pdwCookie = ++dwCookieCounter;
+        char buff[256];
+        sprintf(buff, "+++++++++++++++++ Adding listener in %p : %p\n", this, pUnk);
+        OutputDebugStringA(buff);
         _connections[*pdwCookie] = pUnk;
     }
     return hr;
-};
+}
 
 STDMETHODIMP VLCConnectionPoint::Unadvise(DWORD pdwCookie)
 {
-    map<DWORD,LPUNKNOWN>::iterator pcd = _connections.find((DWORD)pdwCookie);
+    auto pcd = _connections.find((DWORD)pdwCookie);
     if( pcd != _connections.end() )
     {
         pcd->second->Release();
@@ -314,7 +316,7 @@ STDMETHODIMP VLCConnectionPoint::Unadvise(DWORD pdwCookie)
         return S_OK;
     }
     return CONNECT_E_NOCONNECTION;
-};
+}
 
 STDMETHODIMP VLCConnectionPoint::EnumConnections(IEnumConnections **ppEnum)
 {
@@ -322,41 +324,32 @@ STDMETHODIMP VLCConnectionPoint::EnumConnections(IEnumConnections **ppEnum)
         return E_POINTER;
 
     *ppEnum = new VLCEnumConnections(_connections);
-
-    return (NULL != *ppEnum ) ? S_OK : E_OUTOFMEMORY;
-};
+    (*ppEnum)->AddRef();
+    return S_OK;
+}
 
 void VLCConnectionPoint::fireEvent(DISPID dispId, DISPPARAMS *pDispParams)
 {
-    map<DWORD,LPUNKNOWN>::iterator end = _connections.end();
-    map<DWORD,LPUNKNOWN>::iterator iter = _connections.begin();
-
-    HRESULT hr = S_OK;
-
-    while( iter != end )
+    for (auto& p : _connections)
     {
-        LPUNKNOWN pUnk = iter->second;
+        LPUNKNOWN pUnk = p.second;
 
         IDispatch *pDisp;
-        hr = pUnk->QueryInterface(_iid, (LPVOID *)&pDisp);
+        HRESULT hr = pUnk->QueryInterface(_iid, (LPVOID *)&pDisp);
         if( SUCCEEDED(hr) )
         {
             pDisp->Invoke(dispId, IID_NULL, LOCALE_USER_DEFAULT,
                           DISPATCH_METHOD, pDispParams, NULL, NULL, NULL);
             pDisp->Release();
         }
-        ++iter;
     }
-};
+}
 
 void VLCConnectionPoint::firePropChangedEvent(DISPID dispId)
 {
-    map<DWORD,LPUNKNOWN>::iterator end = _connections.end();
-    map<DWORD,LPUNKNOWN>::iterator iter = _connections.begin();
-
-    while( iter != end )
+    for (auto& p : _connections)
     {
-        LPUNKNOWN pUnk = iter->second;
+        LPUNKNOWN pUnk = p.second;
         HRESULT hr;
 
         IPropertyNotifySink *pPropSink;
@@ -366,24 +359,23 @@ void VLCConnectionPoint::firePropChangedEvent(DISPID dispId)
             pPropSink->OnChanged(dispId);
             pPropSink->Release();
         }
-        ++iter;
     }
-};
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 VLCDispatchEvent::~VLCDispatchEvent()
 {
     //clear event arguments
-    if( NULL != _dispParams.rgvarg )
+    if( _dispParams.rgvarg != nullptr )
     {
         for(unsigned int c = 0; c < _dispParams.cArgs; ++c)
             VariantClear(_dispParams.rgvarg + c);
         CoTaskMemFree(_dispParams.rgvarg);
     }
-    if( NULL != _dispParams.rgdispidNamedArgs )
+    if( _dispParams.rgdispidNamedArgs != nullptr )
         CoTaskMemFree(_dispParams.rgdispidNamedArgs);
-};
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // VLCConnectionPointContainer
@@ -404,7 +396,7 @@ VLCConnectionPointContainer::VLCConnectionPointContainer(VLCPlugin *p_instance) 
     InitializeCriticalSection(&csEvents);
 
     _ESProxyWnd = EventSystemProxyWnd::CreateESPWindow(DllGetModule(), this);
-};
+}
 
 VLCConnectionPointContainer::~VLCConnectionPointContainer()
 {
@@ -421,11 +413,11 @@ VLCConnectionPointContainer::~VLCConnectionPointContainer()
     while(!_q_events.empty()) {
         delete _q_events.front();
         _q_events.pop();
-    };
+    }
 
     delete _p_props;
     delete _p_events;
-};
+}
 
 STDMETHODIMP VLCConnectionPointContainer::EnumConnectionPoints(LPENUMCONNECTIONPOINTS *ppEnum)
 {
@@ -433,9 +425,10 @@ STDMETHODIMP VLCConnectionPointContainer::EnumConnectionPoints(LPENUMCONNECTIONP
         return E_POINTER;
 
     *ppEnum = new VLCEnumConnectionPoints(_v_cps);
+    (*ppEnum)->AddRef();
 
-    return (NULL != *ppEnum ) ? S_OK : E_OUTOFMEMORY;
-};
+    return S_OK;
+}
 
 STDMETHODIMP VLCConnectionPointContainer::FindConnectionPoint(REFIID riid, IConnectionPoint **ppCP)
 {
@@ -452,14 +445,14 @@ STDMETHODIMP VLCConnectionPointContainer::FindConnectionPoint(REFIID riid, IConn
         return CONNECT_E_NOCONNECTION;
     (*ppCP)->AddRef();
     return NOERROR;
-};
+}
 
 void VLCConnectionPointContainer::freezeEvents(BOOL bFreeze)
 {
     EnterCriticalSection(&csEvents);
     freeze = bFreeze;
     LeaveCriticalSection(&csEvents);
-};
+}
 
 void VLCConnectionPointContainer::fireEvent(DISPID dispId, DISPPARAMS* pDispParams)
 {
@@ -477,11 +470,11 @@ void VLCConnectionPointContainer::fireEvent(DISPID dispId, DISPPARAMS* pDispPara
         LeaveCriticalSection(&csEvents);
         _ESProxyWnd->NewEventNotify();
     }
-};
+}
 
 void VLCConnectionPointContainer::firePropChangedEvent(DISPID dispId)
 {
     if( ! freeze )
         _p_props->firePropChangedEvent(dispId);
-};
+}
 

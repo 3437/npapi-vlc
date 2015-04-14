@@ -31,6 +31,8 @@
 #include <map>
 #include <cguid.h>
 
+#include "plugin.h"
+
 class VLCConnectionPoint : public IConnectionPoint
 {
 
@@ -53,7 +55,7 @@ public:
         }
         // must be a standalone object
         return E_NOINTERFACE;
-    };
+    }
 
     STDMETHODIMP_(ULONG) AddRef(void) { return _p_cpc->AddRef(); };
     STDMETHODIMP_(ULONG) Release(void) { return _p_cpc->Release(); };
@@ -80,8 +82,9 @@ class VLCDispatchEvent {
 
 public:
     VLCDispatchEvent(DISPID dispId, DISPPARAMS dispParams) :
-        _dispId(dispId), _dispParams(dispParams) {};
-    VLCDispatchEvent(const VLCDispatchEvent&);
+        _dispId(dispId), _dispParams(dispParams)
+    {
+    }
     ~VLCDispatchEvent();
 
     DISPID      _dispId;
@@ -110,10 +113,10 @@ public:
             return NOERROR;
         }
         return _p_instance->pUnkOuter->QueryInterface(riid, ppv);
-    };
+    }
 
-    STDMETHODIMP_(ULONG) AddRef(void) { return _p_instance->pUnkOuter->AddRef(); };
-    STDMETHODIMP_(ULONG) Release(void) { return _p_instance->pUnkOuter->Release(); };
+    STDMETHODIMP_(ULONG) AddRef(void) { return _p_instance->pUnkOuter->AddRef(); }
+    STDMETHODIMP_(ULONG) Release(void) { return _p_instance->pUnkOuter->Release(); }
 
     // IConnectionPointContainer methods
     STDMETHODIMP EnumConnectionPoints(LPENUMCONNECTIONPOINTS *);
@@ -133,7 +136,7 @@ public:
     VLCConnectionPoint *_p_events;
     VLCConnectionPoint *_p_props;
     std::vector<LPCONNECTIONPOINT> _v_cps;
-    std::queue<class VLCDispatchEvent *> _q_events;
+    std::queue<VLCDispatchEvent *> _q_events;
 };
 
 #endif

@@ -98,8 +98,11 @@ public:
 
 private:
     EventSystemProxyWnd(HWND hWnd, VLCConnectionPointContainer *pCPC)
-        : _hWnd(hWnd), _pCPC(pCPC), _HasUnprocessedNotify(false)
+        : _hWnd(hWnd), _pCPC(pCPC)
     {
+        // Initialize this out of members initialization list because MSVC
+        // doesn't implement atomic_int constructor until VS 2015
+        _HasUnprocessedNotify = false;
     }
     void ProcessNotify();
 

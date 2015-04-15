@@ -364,7 +364,7 @@ public:
     virtual ~VLCControl2();
 
     // IUnknown methods
-    STDMETHODIMP QueryInterface(REFIID riid, void **ppv)
+    STDMETHODIMP QueryInterface(REFIID riid, void **ppv) override
     {
         if( NULL == ppv )
           return E_POINTER;
@@ -402,7 +402,7 @@ public:
     STDMETHODIMP get_StartTime(long *seconds);
     STDMETHODIMP put_StartTime(long seconds);
     STDMETHODIMP get_VersionInfo(BSTR *version);
-    STDMETHODIMP versionInfo(BSTR *version);
+    STDMETHODIMP getVersionInfo(BSTR *version);
     STDMETHODIMP get_Visible(VARIANT_BOOL *visible);
     STDMETHODIMP put_Visible(VARIANT_BOOL visible);
     STDMETHODIMP get_Volume(long *volume);

@@ -1204,21 +1204,11 @@ STDMETHODIMP VLCControl2::get_VersionInfo(BSTR *version)
     return E_FAIL;
 };
 
-STDMETHODIMP VLCControl2::versionInfo(BSTR *version)
+STDMETHODIMP VLCControl2::getVersionInfo(BSTR *version)
 {
-    if( NULL == version )
-        return E_POINTER;
-
-    const char *versionStr = libvlc_get_version();
-    if( NULL != versionStr )
-    {
-        *version = BSTRFromCStr(CP_UTF8, versionStr);
-
-        return (NULL == *version) ? E_OUTOFMEMORY : NOERROR;
-    }
-    *version = NULL;
-    return E_FAIL;
+    return get_VersionInfo(version);
 };
+
 
 STDMETHODIMP VLCControl2::get_Visible(VARIANT_BOOL *isVisible)
 {

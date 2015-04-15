@@ -49,14 +49,12 @@ DEFINE_GUID(CATID_SafeForScripting, \
 
 using namespace std;
 
-#define COMPANY_STR "VideoLAN"
-#define PROGRAM_STR "VLCPlugin"
 #define DESCRIPTION "VLC ActiveX Plugin and IE Web Plugin"
 
 #define THREADING_MODEL "Apartment"
 #define MISC_STATUS     "131473"
 
-#define PROGID_STR COMPANY_STR "." PROGRAM_STR
+#define PROGID_STR "VideoLAN.VLCPlugin"
 
 #define GUID_STRLEN 39
 

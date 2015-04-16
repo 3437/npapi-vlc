@@ -141,6 +141,7 @@ LibvlcRootNPObject::getProperty(int index, npapi::OutVariant &result)
 const NPUTF8 * const LibvlcRootNPObject::methodNames[] =
 {
     "versionInfo",
+    "getVersionInfo",
     "addEventListener",
     "removeEventListener",
 };
@@ -149,6 +150,7 @@ COUNTNAMES(LibvlcRootNPObject,methodCount,methodNames);
 enum LibvlcRootNPObjectMethodIds
 {
     ID_root_versionInfo,
+    ID_root_getVersionInfo,
     ID_root_addeventlistener,
     ID_root_removeeventlistener,
 };
@@ -163,6 +165,7 @@ RuntimeNPObject::InvokeResult LibvlcRootNPObject::invoke(int index,
     switch( index )
     {
     case ID_root_versionInfo:
+    case ID_root_getVersionInfo:
         if( 0 != argCount )
             return INVOKERESULT_NO_SUCH_METHOD;
         result = libvlc_get_version();

@@ -61,26 +61,8 @@ library AXVLC
         VLCPlayListCheckInsert  = 16
     } eVLCPlaylistMode;
 
-    // playlist target position
-    const int VLCPlayListEnd    = -666;
-
-    // DISPID definitions
-    const int DISPID_BackColor  = -501;
-
     const int DISPID_Visible    = 100;
-    const int DISPID_Playing    = 101;
-    const int DISPID_Position   = 102;
-    const int DISPID_Time       = 103;
-    const int DISPID_Length     = 104;
-    const int DISPID_Volume     = 105;
-    const int DISPID_MRL        = 106;
-    const int DISPID_AutoPlay   = 107;
-    const int DISPID_AutoLoop   = 108;
-    const int DISPID_StartTime  = 109;
-    const int DISPID_BaseURL    = 110;
-    const int DISPID_Toolbar    = 111;
-    const int DISPID_FSEnabled  = 112;
-    const int DISPID_Version    = 113;
+
 
     const int DISPID_PlayEvent  = 100;
     const int DISPID_PauseEvent = 101;
@@ -555,29 +537,29 @@ library AXVLC
     ]
     interface IVLCControl2 : IDispatch
     {
-        [id(DISPID_AutoLoop), propget, helpstring("Returns/sets a value that determines whether the playlist is looped")]
+        [propget, helpstring("Returns/sets a value that determines whether the playlist is looped")]
         HRESULT AutoLoop([out, retval] VARIANT_BOOL* autoloop);
-        [id(DISPID_AutoLoop), propput, helpstring("Returns/sets a value that determines whether the playlist is looped")]
+        [propput, helpstring("Returns/sets a value that determines whether the playlist is looped")]
         HRESULT AutoLoop([in] VARIANT_BOOL autoloop);
 
-        [id(DISPID_AutoPlay), propget, helpstring("Returns/sets a value that determines whether the playlist is played on startup")]
+        [propget, helpstring("Returns/sets a value that determines whether the playlist is played on startup")]
         HRESULT AutoPlay([out, retval] VARIANT_BOOL* autoplay);
-        [id(DISPID_AutoPlay), propput, helpstring("Returns/Sets a value that determines whether the playlist is played on startup")]
+        [propput, helpstring("Returns/Sets a value that determines whether the playlist is played on startup")]
         HRESULT AutoPlay([in] VARIANT_BOOL autoplay);
 
-        [id(DISPID_BaseURL), propget, helpstring("Returns/sets the base URL for relative paths")]
+        [propget, helpstring("Returns/sets the base URL for relative paths")]
         HRESULT BaseURL([out, retval] BSTR* url);
-        [id(DISPID_BaseURL), propput, helpstring("Returns/sets the base URL for relative paths")]
+        [propput, helpstring("Returns/sets the base URL for relative paths")]
         HRESULT BaseURL([in] BSTR url);
 
-        [id(DISPID_StartTime), propget, helpstring("Returns/sets playback start time of URL.")]
+        [propget, helpstring("Returns/sets playback start time of URL.")]
         HRESULT StartTime([out, retval] long* seconds);
-        [id(DISPID_StartTime), propput, helpstring("Returns/sets playback start time of URL.")]
+        [propput, helpstring("Returns/sets playback start time of URL.")]
         HRESULT StartTime([in] long seconds);
 
-        [id(DISPID_MRL), propget, helpstring("Returns/sets the default MRL in playlist")]
+        [propget, helpstring("Returns/sets the default MRL in playlist")]
         HRESULT MRL([out, retval] BSTR* mrl);
-        [id(DISPID_MRL), propput, helpstring("Returns/sets the default MRL in playlist")]
+        [propput, helpstring("Returns/sets the default MRL in playlist")]
         HRESULT MRL([in] BSTR mrl);
 
         [propget, helpstring("Returns the VLC version")]
@@ -586,19 +568,19 @@ library AXVLC
         [helpstring("Returns the VLC version")]
         HRESULT getVersionInfo([out, retval] BSTR* version);
 
-        [id(DISPID_Visible), propget, helpstring("Returns/sets a value that determines whether viewing area is visible or hidden.")]
+        [propget, helpstring("Returns/sets a value that determines whether viewing area is visible or hidden.")]
         HRESULT Visible([out, retval] VARIANT_BOOL* visible);
-        [id(DISPID_Visible), propput, helpstring("Returns/sets a value that determines whether viewing area is visible or hidden.")]
+        [propput, helpstring("Returns/sets a value that determines whether viewing area is visible or hidden.")]
         HRESULT Visible([in] VARIANT_BOOL visible);
 
-        [id(DISPID_Volume), propget, helpstring("Returns/sets default audio volume.")]
+        [propget, helpstring("Returns/sets default audio volume.")]
         HRESULT Volume([out, retval] long* volume);
-        [id(DISPID_Volume), propput, helpstring("Returns/sets default audio volume.")]
+        [propput, helpstring("Returns/sets default audio volume.")]
         HRESULT Volume([in] long volume);
 
-        [id(DISPID_BackColor), propget, helpstring("Returns/sets background color.")]
+        [propget, helpstring("Returns/sets background color.")]
         HRESULT BackColor([out, retval] OLE_COLOR* backcolor);
-        [id(DISPID_BackColor), propput, helpstring("Returns/sets background color.")]
+        [propput, helpstring("Returns/sets background color.")]
         HRESULT BackColor([in] OLE_COLOR backcolor);
 
         /*
@@ -606,9 +588,9 @@ library AXVLC
          * plugin. Official usage is through "toolbar" property for now,
          * which is compatibile with Firefox.
          */
-        [id(DISPID_Toolbar), propget, helpstring("Returns/sets visibility of the toolbar")]
+        [propget, helpstring("Returns/sets visibility of the toolbar")]
         HRESULT Toolbar([out, retval] VARIANT_BOOL* visible);
-        [id(DISPID_Toolbar), propput, helpstring("Returns/sets visibility of the toolbar")]
+        [propput, helpstring("Returns/sets visibility of the toolbar")]
         HRESULT Toolbar([in] VARIANT_BOOL visible);
 
         [propget, helpstring("Returns the audio object.")]
@@ -626,9 +608,9 @@ library AXVLC
         [propget, helpstring("Returns the video object.")]
         HRESULT video([out, retval] IVLCVideo** obj);
 
-        [id(DISPID_FSEnabled), propget, helpstring("Returns/sets availability of fullscreen mode.")]
+        [propget, helpstring("Returns/sets availability of fullscreen mode.")]
         HRESULT FullscreenEnabled([out, retval] VARIANT_BOOL* enabled);
-        [id(DISPID_FSEnabled), propput, helpstring("Returns/sets availability of fullscreen mode.")]
+        [propput, helpstring("Returns/sets availability of fullscreen mode.")]
         HRESULT FullscreenEnabled([in] VARIANT_BOOL enabled);
 
         [propget, helpstring("Returns the media description object.")]

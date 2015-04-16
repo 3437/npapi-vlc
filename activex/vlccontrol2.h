@@ -379,45 +379,45 @@ public:
         return _p_instance->pUnkOuter->QueryInterface(riid, ppv);
     };
 
-    STDMETHODIMP_(ULONG) AddRef(void) { return _p_instance->pUnkOuter->AddRef(); };
-    STDMETHODIMP_(ULONG) Release(void) { return _p_instance->pUnkOuter->Release(); };
+    STDMETHODIMP_(ULONG) AddRef(void) override { return _p_instance->pUnkOuter->AddRef(); }
+    STDMETHODIMP_(ULONG) Release(void) override { return _p_instance->pUnkOuter->Release(); }
 
     // IDispatch methods
-    STDMETHODIMP GetTypeInfoCount(UINT*);
-    STDMETHODIMP GetTypeInfo(UINT, LCID, LPTYPEINFO*);
-    STDMETHODIMP GetIDsOfNames(REFIID,LPOLESTR*,UINT,LCID,DISPID*);
-    STDMETHODIMP Invoke(DISPID,REFIID,LCID,WORD,DISPPARAMS*,VARIANT*,EXCEPINFO*,UINT*);
+    STDMETHODIMP GetTypeInfoCount(UINT*) override;
+    STDMETHODIMP GetTypeInfo(UINT, LCID, LPTYPEINFO*) override;
+    STDMETHODIMP GetIDsOfNames(REFIID, LPOLESTR*, UINT, LCID, DISPID*) override;
+    STDMETHODIMP Invoke(DISPID, REFIID, LCID, WORD, DISPPARAMS*, VARIANT*, EXCEPINFO*, UINT*) override;
 
     // IVLCControl2 methods
-    STDMETHODIMP get_AutoLoop(VARIANT_BOOL *autoloop);
-    STDMETHODIMP put_AutoLoop(VARIANT_BOOL autoloop);
-    STDMETHODIMP get_AutoPlay(VARIANT_BOOL *autoplay);
-    STDMETHODIMP put_AutoPlay(VARIANT_BOOL autoplay);
-    STDMETHODIMP get_BaseURL(BSTR *url);
-    STDMETHODIMP put_BaseURL(BSTR url);
-    STDMETHODIMP get_MRL(BSTR *mrl);
-    STDMETHODIMP put_MRL(BSTR mrl);
-    STDMETHODIMP get_Toolbar(VARIANT_BOOL *visible);
-    STDMETHODIMP put_Toolbar(VARIANT_BOOL visible);
-    STDMETHODIMP get_StartTime(long *seconds);
-    STDMETHODIMP put_StartTime(long seconds);
-    STDMETHODIMP get_VersionInfo(BSTR *version);
-    STDMETHODIMP getVersionInfo(BSTR *version);
-    STDMETHODIMP get_Visible(VARIANT_BOOL *visible);
-    STDMETHODIMP put_Visible(VARIANT_BOOL visible);
-    STDMETHODIMP get_Volume(long *volume);
-    STDMETHODIMP put_Volume(long volume);
-    STDMETHODIMP get_BackColor(OLE_COLOR *backcolor);
-    STDMETHODIMP put_BackColor(OLE_COLOR backcolor);
-    STDMETHODIMP get_FullscreenEnabled(VARIANT_BOOL* enabled);
-    STDMETHODIMP put_FullscreenEnabled(VARIANT_BOOL enabled);
+    STDMETHODIMP get_AutoLoop(VARIANT_BOOL *autoloop) override;
+    STDMETHODIMP put_AutoLoop(VARIANT_BOOL autoloop) override;
+    STDMETHODIMP get_AutoPlay(VARIANT_BOOL *autoplay) override;
+    STDMETHODIMP put_AutoPlay(VARIANT_BOOL autoplay) override;
+    STDMETHODIMP get_BaseURL(BSTR *url) override;
+    STDMETHODIMP put_BaseURL(BSTR url) override;
+    STDMETHODIMP get_MRL(BSTR *mrl) override;
+    STDMETHODIMP put_MRL(BSTR mrl) override;
+    STDMETHODIMP get_Toolbar(VARIANT_BOOL *visible) override;
+    STDMETHODIMP put_Toolbar(VARIANT_BOOL visible) override;
+    STDMETHODIMP get_StartTime(long *seconds) override;
+    STDMETHODIMP put_StartTime(long seconds) override;
+    STDMETHODIMP get_VersionInfo(BSTR *version) override;
+    STDMETHODIMP getVersionInfo(BSTR *version) override;
+    STDMETHODIMP get_Visible(VARIANT_BOOL *visible) override;
+    STDMETHODIMP put_Visible(VARIANT_BOOL visible) override;
+    STDMETHODIMP get_Volume(long *volume) override;
+    STDMETHODIMP put_Volume(long volume) override;
+    STDMETHODIMP get_BackColor(OLE_COLOR *backcolor) override;
+    STDMETHODIMP put_BackColor(OLE_COLOR backcolor) override;
+    STDMETHODIMP get_FullscreenEnabled(VARIANT_BOOL* enabled) override;
+    STDMETHODIMP put_FullscreenEnabled(VARIANT_BOOL enabled) override;
 
-    STDMETHODIMP get_audio(IVLCAudio**);
-    STDMETHODIMP get_input(IVLCInput**);
-    STDMETHODIMP get_playlist(IVLCPlaylist**);
-    STDMETHODIMP get_subtitle(IVLCSubtitle**);
-    STDMETHODIMP get_video(IVLCVideo**);
-    STDMETHODIMP get_mediaDescription(IVLCMediaDescription**);
+    STDMETHODIMP get_audio(IVLCAudio**) override;
+    STDMETHODIMP get_input(IVLCInput**) override;
+    STDMETHODIMP get_playlist(IVLCPlaylist**) override;
+    STDMETHODIMP get_subtitle(IVLCSubtitle**) override;
+    STDMETHODIMP get_video(IVLCVideo**) override;
+    STDMETHODIMP get_mediaDescription(IVLCMediaDescription**) override;
 
 protected:
     HRESULT loadTypeInfo();

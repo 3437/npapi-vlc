@@ -81,6 +81,8 @@ class VLCPlugin
 {
 public:
     VLCPlugin(VLCPluginClass *p_class, LPUNKNOWN pUnkOuter);
+    VLCPlugin(const VLCPlugin&) = delete;
+    VLCPlugin& operator=(const VLCPlugin&) = delete;
 
     /* IUnknown methods */
     STDMETHODIMP QueryInterface(REFIID riid, void **ppv);

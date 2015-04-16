@@ -257,6 +257,8 @@ public:
     VLCWindowsManager(HMODULE hModule, const VLCViewResources& rc,
                     vlc_player* player, const vlc_player_options* = 0);
     ~VLCWindowsManager();
+    VLCWindowsManager(const VLCWindowsManager&) = delete;
+    VLCWindowsManager& operator=(const VLCWindowsManager&) = delete;
 
     void CreateWindows(HWND hWindowedParentWnd);
     void DestroyWindows();

@@ -72,7 +72,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
 
     *ppv = NULL;
 
-    if( (CLSID_VLCPlugin == rclsid) || (CLSID_VLCPlugin2 == rclsid) )
+    if( CLSID_VLCPlugin2 == rclsid )
     {
         VLCPluginClass *plugin =
             new VLCPluginClass(&i_class_ref, h_instance, rclsid);
@@ -170,8 +170,6 @@ STDAPI DllUnregisterServer(VOID)
             CATID_SafeForScripting,
         };
 
-        pcr->UnRegisterClassImplCategories(CLSID_VLCPlugin,
-                sizeof(implCategories)/sizeof(CATID), implCategories);
         pcr->UnRegisterClassImplCategories(CLSID_VLCPlugin2,
                 sizeof(implCategories)/sizeof(CATID), implCategories);
         pcr->Release();
@@ -181,7 +179,6 @@ STDAPI DllUnregisterServer(VOID)
 
     SHDeleteKey(HKEY_CLASSES_ROOT, TEXT("MIME\\Database\\Content Type\\application/x-vlc-plugin"));
 
-    UnregisterProgID(CLSID_VLCPlugin, 2);
     UnregisterProgID(CLSID_VLCPlugin2, 1);
 
     return S_OK;
@@ -347,7 +344,6 @@ STDAPI DllRegisterServer(VOID)
                                       0, KEY_CREATE_SUB_KEY, &hBaseKey) )
         return SELFREG_E_CLASS;
 
-    RegisterClassID(hBaseKey, CLSID_VLCPlugin, 1, FALSE, DllPath, DllPathLen);
     RegisterClassID(hBaseKey, CLSID_VLCPlugin2, 2, TRUE, DllPath, DllPathLen);
 
     RegCloseKey(hBaseKey);
@@ -364,8 +360,6 @@ STDAPI DllRegisterServer(VOID)
             CATID_SafeForScripting,
         };
 
-        pcr->RegisterClassImplCategories(CLSID_VLCPlugin,
-                sizeof(implCategories)/sizeof(CATID), implCategories);
         pcr->RegisterClassImplCategories(CLSID_VLCPlugin2,
                 sizeof(implCategories)/sizeof(CATID), implCategories);
         pcr->Release();

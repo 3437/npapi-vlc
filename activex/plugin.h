@@ -33,7 +33,6 @@
 #include "../common/win32_fullscreen.h"
 #include "../common/vlc_player.h"
 
-extern "C" const GUID CLSID_VLCPlugin;
 extern "C" const GUID CLSID_VLCPlugin2;
 extern "C" const GUID LIBID_AXVLC;
 extern "C" const GUID DIID_DVLCEvents;
@@ -286,7 +285,6 @@ private:
     class VLCProvideClassInfo *vlcProvideClassInfo;
     class VLCConnectionPointContainer *vlcConnectionPointContainer;
     class VLCObjectSafety *vlcObjectSafety;
-    class VLCControl *vlcControl;
     class VLCControl2 *vlcControl2;
     class VLCViewObject *vlcViewObject;
     class VLCDataObject *vlcDataObject;

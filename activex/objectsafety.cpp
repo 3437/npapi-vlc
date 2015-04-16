@@ -42,7 +42,6 @@ STDMETHODIMP VLCObjectSafety::GetInterfaceSafetyOptions(
     *pdwSupportedOptions = INTERFACESAFE_FOR_UNTRUSTED_DATA|INTERFACESAFE_FOR_UNTRUSTED_CALLER;
 
     if( (IID_IDispatch == riid)
-     || (IID_IVLCControl == riid)
      || (IID_IVLCControl2 == riid) )
     {
         *pdwEnabledOptions = INTERFACESAFE_FOR_UNTRUSTED_CALLER;
@@ -67,7 +66,6 @@ STDMETHODIMP VLCObjectSafety::SetInterfaceSafetyOptions(
 )
 {
     if( (IID_IDispatch == riid)
-     || (IID_IVLCControl == riid)
      || (IID_IVLCControl2 == riid) )
     {
         if( (INTERFACESAFE_FOR_UNTRUSTED_CALLER == dwOptionSetMask)

@@ -35,7 +35,6 @@
 #include "provideclassinfo.h"
 #include "connectioncontainer.h"
 #include "objectsafety.h"
-#include "vlccontrol.h"
 #include "vlccontrol2.h"
 #include "viewobject.h"
 #include "dataobject.h"
@@ -263,7 +262,6 @@ VLCPlugin::VLCPlugin(VLCPluginClass *p_class, LPUNKNOWN pUnkOuter) :
     vlcProvideClassInfo = new VLCProvideClassInfo(this);
     vlcConnectionPointContainer = new VLCConnectionPointContainer(this);
     vlcObjectSafety = new VLCObjectSafety(this);
-    vlcControl = new VLCControl(this);
     vlcControl2 = new VLCControl2(this);
     vlcViewObject = new VLCViewObject(this);
     vlcDataObject = new VLCDataObject(this);
@@ -289,7 +287,6 @@ VLCPlugin::~VLCPlugin()
     delete vlcDataObject;
     delete vlcViewObject;
     delete vlcControl2;
-    delete vlcControl;
     delete vlcConnectionPointContainer;
     delete vlcProvideClassInfo;
     delete vlcPersistPropertyBag;
@@ -340,15 +337,9 @@ STDMETHODIMP VLCPlugin::QueryInterface(REFIID riid, void **ppv)
         *ppv = reinterpret_cast<LPVOID>(vlcProvideClassInfo);
     else if( IID_IConnectionPointContainer == riid )
         *ppv = reinterpret_cast<LPVOID>(vlcConnectionPointContainer);
-    else if( IID_IObjectSafety == riid )
+    else if (IID_IObjectSafety == riid)
         *ppv = reinterpret_cast<LPVOID>(vlcObjectSafety);
-    else if( IID_IDispatch == riid )
-        *ppv = (CLSID_VLCPlugin2 == getClassID()) ?
-                reinterpret_cast<LPVOID>(vlcControl2) :
-                reinterpret_cast<LPVOID>(vlcControl);
-    else if( IID_IVLCControl == riid )
-        *ppv = reinterpret_cast<LPVOID>(vlcControl);
-    else if( IID_IVLCControl2 == riid )
+    else if( IID_IVLCControl2 == riid || IID_IDispatch == riid)
         *ppv = reinterpret_cast<LPVOID>(vlcControl2);
     else if( IID_IViewObject == riid )
         *ppv = reinterpret_cast<LPVOID>(vlcViewObject);

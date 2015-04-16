@@ -31,7 +31,6 @@
 #include "utils.h"
 #include "plugin.h"
 #include "vlccontrol2.h"
-#include "vlccontrol.h"
 
 #include "../common/position.h"
 
@@ -85,6 +84,321 @@ HRESULT object_get(I **dst, I *src)
 
 static inline
 VARIANT_BOOL varbool(bool b) { return b ? VARIANT_TRUE : VARIANT_FALSE; }
+
+static HRESULT parseStringOptions(int codePage, BSTR bstr, char*** cOptions, int *cOptionCount)
+{
+    HRESULT hr = E_INVALIDARG;
+    if (SysStringLen(bstr) > 0)
+    {
+        hr = E_OUTOFMEMORY;
+        char *s = CStrFromBSTR(codePage, bstr);
+        char *val = s;
+        if (val)
+        {
+            long capacity = 16;
+            char **options = (char **) CoTaskMemAlloc(capacity*sizeof(char *));
+            if (options)
+            {
+                int nOptions = 0;
+
+                char *end = val + strlen(val);
+                while (val < end)
+                {
+                    // skip leading blanks
+                    while ((val < end)
+                        && ((*val == ' ') || (*val == '\t')))
+                        ++val;
+
+                    char *start = val;
+                    // skip till we get a blank character
+                    while ((val < end)
+                        && (*val != ' ')
+                        && (*val != '\t'))
+                    {
+                        char c = *(val++);
+                        if (('\'' == c) || ('"' == c))
+                        {
+                            // skip till end of string
+                            while ((val < end) && (*(val++) != c));
+                        }
+                    }
+
+                    if (val > start)
+                    {
+                        if (nOptions == capacity)
+                        {
+                            capacity += 16;
+                            char **moreOptions = (char **) CoTaskMemRealloc(options, capacity*sizeof(char*));
+                            if (!moreOptions)
+                            {
+                                /* failed to allocate more memory */
+                                CoTaskMemFree(s);
+                                /* return what we got so far */
+                                *cOptionCount = nOptions;
+                                *cOptions = options;
+                                return NOERROR;
+                            }
+                            options = moreOptions;
+                        }
+                        *(val++) = '\0';
+                        options[nOptions] = (char *) CoTaskMemAlloc(val - start);
+                        if (options[nOptions])
+                        {
+                            memcpy(options[nOptions], start, val - start);
+                            ++nOptions;
+                        }
+                        else
+                        {
+                            /* failed to allocate memory */
+                            CoTaskMemFree(s);
+                            /* return what we got so far */
+                            *cOptionCount = nOptions;
+                            *cOptions = options;
+                            return NOERROR;
+                        }
+                    }
+                    else
+                        // must be end of string
+                        break;
+                }
+                *cOptionCount = nOptions;
+                *cOptions = options;
+                hr = NOERROR;
+            }
+            CoTaskMemFree(s);
+        }
+    }
+    return hr;
+}
+
+static void FreeTargetOptions(char **cOptions, int cOptionCount)
+{
+    // clean up
+    if (NULL != cOptions)
+    {
+        for (int pos = 0; pos<cOptionCount; ++pos)
+        {
+            char *cOption = cOptions[pos];
+            if (NULL != cOption)
+                CoTaskMemFree(cOption);
+            else
+                break;
+        }
+        CoTaskMemFree(cOptions);
+    }
+};
+
+static HRESULT CreateTargetOptions(int codePage, VARIANT *options, char ***cOptions, int *cOptionCount)
+{
+    HRESULT hr = E_INVALIDARG;
+    if (VT_ERROR == V_VT(options))
+    {
+        if (DISP_E_PARAMNOTFOUND == V_ERROR(options))
+        {
+            // optional parameter not set
+            *cOptions = NULL;
+            *cOptionCount = 0;
+            return NOERROR;
+        }
+    }
+    else if ((VT_EMPTY == V_VT(options)) || (VT_NULL == V_VT(options)))
+    {
+        // null parameter
+        *cOptions = NULL;
+        *cOptionCount = 0;
+        return NOERROR;
+    }
+    else if (VT_DISPATCH == V_VT(options))
+    {
+        // if object is a collection, retrieve enumerator
+        VARIANT colEnum;
+        V_VT(&colEnum) = VT_UNKNOWN;
+        hr = GetObjectProperty(V_DISPATCH(options), DISPID_NEWENUM, colEnum);
+        if (SUCCEEDED(hr))
+        {
+            IEnumVARIANT *enumVar;
+            hr = V_UNKNOWN(&colEnum)->QueryInterface(IID_IEnumVARIANT, (LPVOID *) &enumVar);
+            if (SUCCEEDED(hr))
+            {
+                long pos = 0;
+                long capacity = 16;
+                VARIANT option;
+
+                *cOptions = (char **) CoTaskMemAlloc(capacity*sizeof(char *));
+                if (NULL != *cOptions)
+                {
+                    ZeroMemory(*cOptions, sizeof(char *)*capacity);
+                    while (SUCCEEDED(hr) && (S_OK == enumVar->Next(1, &option, NULL)))
+                    {
+                        if (VT_BSTR == V_VT(&option))
+                        {
+                            char *cOption = CStrFromBSTR(codePage, V_BSTR(&option));
+                            (*cOptions)[pos] = cOption;
+                            if (NULL != cOption)
+                            {
+                                ++pos;
+                                if (pos == capacity)
+                                {
+                                    char **moreOptions = (char **) CoTaskMemRealloc(*cOptions, (capacity + 16)*sizeof(char *));
+                                    if (NULL != moreOptions)
+                                    {
+                                        ZeroMemory(moreOptions + capacity, sizeof(char *) * 16);
+                                        capacity += 16;
+                                        *cOptions = moreOptions;
+                                    }
+                                    else
+                                        hr = E_OUTOFMEMORY;
+                                }
+                            }
+                            else
+                                hr = (SysStringLen(V_BSTR(&option)) > 0) ?
+                            E_OUTOFMEMORY : E_INVALIDARG;
+                        }
+                        else
+                            hr = E_INVALIDARG;
+
+                        VariantClear(&option);
+                    }
+                    *cOptionCount = pos;
+                    if (FAILED(hr))
+                    {
+                        // free already processed elements
+                        FreeTargetOptions(*cOptions, *cOptionCount);
+                    }
+                }
+                else
+                    hr = E_OUTOFMEMORY;
+
+                enumVar->Release();
+            }
+        }
+        else
+        {
+            // coerce object into a string and parse it
+            VARIANT v_name;
+            VariantInit(&v_name);
+            hr = VariantChangeType(&v_name, options, 0, VT_BSTR);
+            if (SUCCEEDED(hr))
+            {
+                hr = parseStringOptions(codePage, V_BSTR(&v_name), cOptions, cOptionCount);
+                VariantClear(&v_name);
+            }
+        }
+    }
+    else if (V_ISARRAY(options))
+    {
+        // array parameter
+        SAFEARRAY *array = V_ISBYREF(options) ? *V_ARRAYREF(options) : V_ARRAY(options);
+
+        if (SafeArrayGetDim(array) != 1)
+            return E_INVALIDARG;
+
+        long lBound = 0;
+        long uBound = 0;
+        SafeArrayGetLBound(array, 1, &lBound);
+        SafeArrayGetUBound(array, 1, &uBound);
+
+        // have we got any options
+        if (uBound >= lBound)
+        {
+            VARTYPE vType;
+            hr = SafeArrayGetVartype(array, &vType);
+            if (FAILED(hr))
+                return hr;
+
+            long pos;
+
+            // marshall options into an array of C strings
+            if (VT_VARIANT == vType)
+            {
+                *cOptions = (char **) CoTaskMemAlloc(sizeof(char *)*(uBound - lBound + 1));
+                if (NULL == *cOptions)
+                    return E_OUTOFMEMORY;
+
+                ZeroMemory(*cOptions, sizeof(char *)*(uBound - lBound + 1));
+                for (pos = lBound; (pos <= uBound) && SUCCEEDED(hr); ++pos)
+                {
+                    VARIANT option;
+                    hr = SafeArrayGetElement(array, &pos, &option);
+                    if (SUCCEEDED(hr))
+                    {
+                        if (VT_BSTR == V_VT(&option))
+                        {
+                            char *cOption = CStrFromBSTR(codePage, V_BSTR(&option));
+                            (*cOptions)[pos - lBound] = cOption;
+                            if (NULL == cOption)
+                                hr = (SysStringLen(V_BSTR(&option)) > 0) ?
+                            E_OUTOFMEMORY : E_INVALIDARG;
+                        }
+                        else
+                            hr = E_INVALIDARG;
+                        VariantClear(&option);
+                    }
+                }
+            }
+            else if (VT_BSTR == vType)
+            {
+                *cOptions = (char **) CoTaskMemAlloc(sizeof(char *)*(uBound - lBound + 1));
+                if (NULL == *cOptions)
+                    return E_OUTOFMEMORY;
+
+                ZeroMemory(*cOptions, sizeof(char *)*(uBound - lBound + 1));
+                for (pos = lBound; (pos <= uBound) && SUCCEEDED(hr); ++pos)
+                {
+                    BSTR option;
+                    hr = SafeArrayGetElement(array, &pos, &option);
+                    if (SUCCEEDED(hr))
+                    {
+                        char *cOption = CStrFromBSTR(codePage, option);
+
+                        (*cOptions)[pos - lBound] = cOption;
+                        if (NULL == cOption)
+                            hr = (SysStringLen(option) > 0) ?
+                        E_OUTOFMEMORY : E_INVALIDARG;
+                        SysFreeString(option);
+                    }
+                }
+            }
+            else
+            {
+                // unsupported type
+                return E_INVALIDARG;
+            }
+
+            *cOptionCount = pos - lBound;
+            if (FAILED(hr))
+            {
+                // free already processed elements
+                FreeTargetOptions(*cOptions, *cOptionCount);
+            }
+        }
+        else
+        {
+            // empty array
+            *cOptions = NULL;
+            *cOptionCount = 0;
+            return NOERROR;
+        }
+    }
+    else if (VT_UNKNOWN == V_VT(options))
+    {
+        // coerce object into a string and parse it
+        VARIANT v_name;
+        VariantInit(&v_name);
+        hr = VariantChangeType(&v_name, options, 0, VT_BSTR);
+        if (SUCCEEDED(hr))
+        {
+            hr = parseStringOptions(codePage, V_BSTR(&v_name), cOptions, cOptionCount);
+            VariantClear(&v_name);
+        }
+    }
+    else if (VT_BSTR == V_VT(options))
+    {
+        hr = parseStringOptions(codePage, V_BSTR(options), cOptions, cOptionCount);
+    }
+    return hr;
+}
+
 
 // ---------
 
@@ -457,7 +771,7 @@ STDMETHODIMP VLCPlaylist::add(BSTR uri, VARIANT name, VARIANT options, long* ite
     int i_options;
     char **ppsz_options;
 
-    hr = VLCControl::CreateTargetOptions(CP_UTF8, &options, &ppsz_options, &i_options);
+    hr = CreateTargetOptions(CP_UTF8, &options, &ppsz_options, &i_options);
     if( FAILED(hr) )
     {
         CoTaskMemFree(psz_uri);
@@ -478,7 +792,7 @@ STDMETHODIMP VLCPlaylist::add(BSTR uri, VARIANT name, VARIANT options, long* ite
     *item = _plug->get_player().add_item( psz_uri, i_options,
                                                const_cast<const char **>(ppsz_options));
 
-    VLCControl::FreeTargetOptions(ppsz_options, i_options);
+    FreeTargetOptions(ppsz_options, i_options);
     CoTaskMemFree(psz_uri);
     if( psz_name ) /* XXX Do we even need to check? */
         CoTaskMemFree(psz_name);

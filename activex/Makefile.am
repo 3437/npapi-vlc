@@ -59,8 +59,6 @@ axvlc_la_SOURCES = \
     viewobject.h \
     supporterrorinfo.cpp \
     supporterrorinfo.h \
-    vlccontrol.cpp \
-    vlccontrol.h \
     vlccontrol2.cpp \
     vlccontrol2.h \
     plugin.cpp \

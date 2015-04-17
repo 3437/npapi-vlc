@@ -669,6 +669,8 @@ STDMETHODIMP VLCMarquee::get_text(BSTR *val)
 STDMETHODIMP VLCMarquee::put_text(BSTR val)
 {
     char *psz_text = CStrFromBSTR(CP_UTF8, val);
+    if ( psz_text == nullptr )
+        return E_OUTOFMEMORY;
     _plug->get_player().get_mp().setMarqueeString( libvlc_marquee_Text, psz_text );
     CoTaskMemFree(psz_text);
     return S_OK;

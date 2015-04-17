@@ -511,6 +511,8 @@ STDMETHODIMP VLCDeinterlace::disable()
 STDMETHODIMP VLCDeinterlace::enable(BSTR mode)
 {
     char *psz_mode = CStrFromBSTR(CP_UTF8, mode);
+    if ( psz_mode == nullptr )
+        return E_OUTOFMEMORY;
     _plug->get_player().get_mp().setDeinterlace( psz_mode );
     CoTaskMemFree(psz_mode);
     return S_OK;

@@ -880,10 +880,8 @@ void VLCWindowsManager::EndFullScreen()
 
         ShowWindow(_FSWnd->getHWND(), SW_HIDE);
 
-        if(_FSWnd){
-            _FSWnd->DestroyWindow();
-        }
-        _FSWnd = 0;
+        _FSWnd->DestroyWindow();
+        _FSWnd = nullptr;
    }
 }
 

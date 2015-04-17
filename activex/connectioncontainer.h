@@ -41,6 +41,9 @@ public:
     VLCConnectionPoint(IConnectionPointContainer *p_cpc, REFIID iid);
     virtual ~VLCConnectionPoint();
 
+    VLCConnectionPoint(const VLCConnectionPoint&) = delete;
+    VLCConnectionPoint& operator=(const VLCConnectionPoint&) = delete;
+
     // IUnknown methods
     STDMETHODIMP QueryInterface(REFIID riid, void **ppv)
     {

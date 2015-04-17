@@ -78,10 +78,6 @@ void* VlcWindowlessBase::video_lock_cb(void **planes)
     return 0;
 }
 
-void VlcWindowlessBase::video_unlock_cb(void* /*picture*/, void *const * /*planes*/)
-{
-}
-
 void VlcWindowlessBase::invalidate_window()
 {
     NPRect rect;
@@ -114,9 +110,7 @@ void VlcWindowlessBase::set_player_window() {
     getMD().setVideoCallbacks([this](void** planes) {
         return video_lock_cb( planes );
     },
-    [this]( void* picture, void* const* planes ) {
-        video_unlock_cb( picture, planes );
-    },
+    nullptr,
     [this](void* picture) {
         video_display_cb( picture );
     });

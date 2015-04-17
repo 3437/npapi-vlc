@@ -54,7 +54,6 @@ public:
 
     //for libvlc_video_set_callbacks
     void* video_lock_cb(void **planes);
-    void video_unlock_cb(void *picture, void *const *planes);
     void video_display_cb(void *picture);
     //end (for libvlc_video_set_callbacks)
 

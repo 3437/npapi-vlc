@@ -247,6 +247,7 @@ relativeurl:
                     if( L'/' != *href )
                     {
                         /* baseURL is not an absolute path */
+                        CoTaskMemFree(href);
                         return NULL;
                     }
                     pathstart = href;

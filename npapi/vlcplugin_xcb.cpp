@@ -43,27 +43,27 @@ VlcPluginXcb::VlcPluginXcb(NPP instance, NPuint16_t mode) :
 
 void VlcPluginXcb::set_player_window()
 {
-    get_player().get_mp().setXwindow( (uint32_t) video );
+    player().get_mp().setXwindow( (uint32_t) video );
 }
 
 void VlcPluginXcb::toggle_fullscreen()
 {
     if (!get_options().get_enable_fs()) return;
-    if (playlist_isplaying())
-        libvlc_toggle_fullscreen(get_player().get_mp());
+    if (player().mlp().isPlaying())
+        player().get_mp().toggleFullscreen();
 }
 
 void VlcPluginXcb::set_fullscreen(int yes)
 {
     if (!get_options().get_enable_fs()) return;
-    if (playlist_isplaying())
-        get_player().get_mp().setFullscreen( yes );
+    if (player().mlp().isPlaying())
+        player().get_mp().setFullscreen( yes );
 }
 
 int VlcPluginXcb::get_fullscreen()
 {
-    if (playlist_isplaying())
-        return get_player().get_mp().fullscreen();
+    if (player().mlp().isPlaying())
+        return player().get_mp().fullscreen();
     return 0;
 }
 
@@ -142,4 +142,5 @@ bool VlcPluginXcb::destroy_windows()
     xcb_destroy_window(conn, parent);
     xcb_free_colors(conn, colormap, 0, 1, &colorpixel);
     xcb_disconnect(conn);
+    return true;
 }

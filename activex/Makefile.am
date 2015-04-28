@@ -29,6 +29,8 @@ lib_LTLIBRARIES = axvlc.la
 AM_CPPFLAGS = $(LIBVLC_CFLAGS) -DUNICODE -D_UNICODE -D_MIDL_USE_GUIDDEF_ -I$(top_srcdir)/vlcpp
 AM_CXXFLAGS = ${CXXFLAGS}
 
+BUILT_SOURCES = axvlc_idl.h axvlc_idl.c
+
 axvlc_la_SOURCES = \
     main.cpp \
     utils.cpp \

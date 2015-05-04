@@ -1,8 +1,14 @@
 Changes between VLC plugins 2.2.1 and 2.2.2:
 --------------------------------------------
 
-Important rework and rewrite of the plugins using libVLCpp
+Common:
+ * Rewrite using libvlcpp
+ * Fix various memleaks
+ * Improve stability
+ * Cleanup
 
+NPAPI:
+ * Add missing GTK UI updates
 
 Changes between VLC plugins 2.2.0 and 2.2.1:
 --------------------------------------------

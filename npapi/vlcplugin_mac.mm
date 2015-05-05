@@ -255,7 +255,7 @@ void VlcPluginMac::set_fullscreen(int i_value)
     this->update_controls();
 }
 
-int  VlcPluginMac::get_fullscreen()
+bool  VlcPluginMac::get_fullscreen()
 {
     return libvlc_get_fullscreen(getMD());
 }

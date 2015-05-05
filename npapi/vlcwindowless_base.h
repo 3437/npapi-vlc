@@ -70,7 +70,7 @@ public:
 
     void toggle_fullscreen() { /* STUB */ }
     void set_fullscreen( int ) { /* STUB */ }
-    int  get_fullscreen() { return false; }
+    bool get_fullscreen() { return false; }
 
     void set_toolbar_visible(bool)  { /* STUB */ }
     bool get_toolbar_visible()  { return false; }

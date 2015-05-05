@@ -137,7 +137,7 @@ void VlcPluginWin::set_fullscreen(int yes)
     }
 }
 
-int  VlcPluginWin::get_fullscreen()
+bool VlcPluginWin::get_fullscreen()
 {
     return _WindowsManager.IsFullScreen();
 }

@@ -44,7 +44,7 @@ public:
 
     void toggle_fullscreen();
     void set_fullscreen(int);
-    int get_fullscreen();
+    bool get_fullscreen();
     void do_set_fullscreen(bool);
 
     void set_toolbar_visible(bool);

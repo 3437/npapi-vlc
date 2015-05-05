@@ -41,7 +41,7 @@ public:
 
     void toggle_fullscreen();
     void set_fullscreen( int );
-    int  get_fullscreen();
+    bool get_fullscreen();
 
     bool create_windows();
     bool resize_windows();

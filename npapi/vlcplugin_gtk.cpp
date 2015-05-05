@@ -121,7 +121,7 @@ void VlcPluginGtk::set_fullscreen(int yes)
     }
 }
 
-int VlcPluginGtk::get_fullscreen()
+bool VlcPluginGtk::get_fullscreen()
 {
     return is_fullscreen;
 }

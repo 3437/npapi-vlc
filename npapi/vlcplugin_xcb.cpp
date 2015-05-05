@@ -60,7 +60,7 @@ void VlcPluginXcb::set_fullscreen(int yes)
         player().get_mp().setFullscreen( yes );
 }
 
-int VlcPluginXcb::get_fullscreen()
+bool VlcPluginXcb::get_fullscreen()
 {
     if (player().mlp().isPlaying())
         return player().get_mp().fullscreen();

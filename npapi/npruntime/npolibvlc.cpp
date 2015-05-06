@@ -177,7 +177,7 @@ RuntimeNPObject::InvokeResult LibvlcRootNPObject::invoke(int index,
             return INVOKERESULT_INVALID_ARGS;
 
         // Don't wrap eventName as it would copy the string even though it's not required.
-        auto listener = npapi::Variant( args[1] );
+        const npapi::Variant listener( args[1] );
 
         if ( !npapi::is_string( args[0] ) ||
             !listener.is<NPObject>() )
@@ -285,7 +285,7 @@ LibvlcAudioNPObject::setProperty(int index, const NPVariant &value)
         if( !mp )
             RETURN_ON_ERROR;
 
-        auto v = npapi::Variant( value );
+        const npapi::Variant v( value );
         switch( index )
         {
             case ID_audio_mute:
@@ -364,7 +364,7 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
             {
                 if ( argCount < 1 )
                     return INVOKERESULT_INVALID_ARGS;
-                auto v = npapi::Variant( args[0] );
+                const npapi::Variant v( args[0] );
                 if( v.is<int>() )
                 {
                     auto tracks = mp.audioTrackDescription();
@@ -485,7 +485,7 @@ LibvlcInputNPObject::setProperty(int index, const NPVariant &value)
         if( !mp )
             RETURN_ON_ERROR;
 
-        auto v = npapi::Variant( value );
+        const npapi::Variant v( value );
         switch( index )
         {
             case ID_input_position:
@@ -729,7 +729,7 @@ LibvlcPlaylistItemsNPObject::invoke(int index, const NPVariant *args,
             {
                 if ( argCount < 1 )
                     return INVOKERESULT_INVALID_ARGS;
-                auto v = npapi::Variant( args[0] );
+                const npapi::Variant v( args[0] );
                 if( v.is<int>() )
                 {
                     if( !p_plugin->player().delete_item( v ) )
@@ -893,7 +893,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                 // grab options if available
                 if( argCount > 2 )
                 {
-                    npapi::Variant v = args[2];
+                    const npapi::Variant v( args[2] );
                     if( v.is<std::nullptr_t>() )
                     {
                         // do nothing
@@ -937,7 +937,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             {
                 if ( argCount < 1 )
                     return INVOKERESULT_INVALID_ARGS;
-                npapi::Variant v = args[0];
+                const npapi::Variant v( args[0] );
                 if ( v.is<int>() )
                 {
                     p_plugin->player().mlp().playItemAtIndex( v );
@@ -991,7 +991,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             {
                 if ( argCount < 1 )
                     return INVOKERESULT_INVALID_ARGS;
-                npapi::Variant v = args[0];
+                const npapi::Variant v( args[0] );
                 if ( v.is<int>() )
                 {
                     if( !p_plugin->player().delete_item( v ) )
@@ -1203,7 +1203,7 @@ LibvlcSubtitleNPObject::setProperty(int index, const NPVariant &value)
         {
             case ID_subtitle_track:
             {
-                auto v = npapi::Variant( value );
+                const npapi::Variant v( value );
                 if( v.is<int>() )
                 {
                     auto tracks = mp.spuDescription();
@@ -1248,7 +1248,7 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
             {
                 if ( argCount < 1 )
                     return INVOKERESULT_INVALID_ARGS;
-                auto v = npapi::Variant( args[0] );
+                const npapi::Variant v( args[0] );
                 if ( v.is<int>() )
                 {
                     auto tracks = mp.spuDescription();
@@ -1407,7 +1407,7 @@ LibvlcVideoNPObject::setProperty(int index, const NPVariant &value)
         if( !mp )
             RETURN_ON_ERROR;
 
-        auto v = npapi::Variant( value );
+        const npapi::Variant v( value );
 
         switch( index )
         {
@@ -1616,7 +1616,7 @@ LibvlcMarqueeNPObject::setProperty(int index, const NPVariant &value)
     if( !mp )
         RETURN_ON_ERROR;
 
-    auto v = npapi::Variant( value );
+    const npapi::Variant v( value );
     switch( index )
     {
     case ID_marquee_color:
@@ -1755,7 +1755,7 @@ LibvlcLogoNPObject::setProperty(int index, const NPVariant &value)
     if( !mp )
         RETURN_ON_ERROR;
 
-    auto v = npapi::Variant( value );
+    const npapi::Variant v( value );
 
     switch( index )
     {
@@ -1904,7 +1904,7 @@ LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
     {
         if( argCount < 1 )
             return INVOKERESULT_INVALID_VALUE;
-        auto v = npapi::Variant( args[0] );
+        const npapi::Variant v( args[0] );
         if ( !v.is<const char*>() )
             return INVOKERESULT_INVALID_VALUE;
 

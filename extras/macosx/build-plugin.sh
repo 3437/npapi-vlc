@@ -100,6 +100,8 @@ info "Bootstrapping"
 ./autogen.sh
 fi
 
+git submodule update --init
+
 info "Creating builddir and configuration"
 mkdir -p ${ARCH}-build && cd ${ARCH}-build
 ../configure --build=${ARCH}-apple-darwin10

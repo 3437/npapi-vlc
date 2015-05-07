@@ -449,7 +449,7 @@ STDMETHODIMP VLCAudio::put_track(long track)
 {
     auto tracks = _plug->get_player().get_mp().audioTrackDescription();
     if ( track >= tracks.size() )
-        return E_FAIL;
+        return E_INVALIDARG;
     _plug->get_player().get_mp().setAudioTrack( tracks[track].id() );
     return S_OK;
 }
@@ -887,7 +887,7 @@ STDMETHODIMP VLCSubtitle::put_track(long spu)
 {
     auto tracks = _plug->get_player().get_mp().spuDescription();
     if ( spu >= tracks.size() )
-        return E_FAIL;
+        return E_INVALIDARG;
     _plug->get_player().get_mp().setSpu( tracks[spu].id() );
     return S_OK;
 }
@@ -908,7 +908,7 @@ STDMETHODIMP VLCSubtitle::description(long nameID, BSTR* name)
 
     auto tracks = _plug->get_player().get_mp().spuDescription();
     if ( nameID >= tracks.size() )
-        return E_FAIL;
+        return E_INVALIDARG;
     *name = BSTRFromCStr( CP_UTF8, tracks[nameID].name().c_str() );
     return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
 }

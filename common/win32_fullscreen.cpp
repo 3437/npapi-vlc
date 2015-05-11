@@ -145,7 +145,7 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                              ControlWidth, ControlsHeight, hWnd(),
                              (HMENU)ID_FS_PLAY_PAUSE, 0, 0);
             SendMessage(hPlayPauseButton, BM_SETIMAGE,
-                        (WPARAM)IMAGE_BITMAP, (LPARAM)RC().hPauseBitmap);
+                        (WPARAM)IMAGE_BITMAP, (LPARAM)RC().hPlayBitmap);
             HorizontalOffset+=ControlWidth+xControlsSpace;
 
             ControlWidth = 200;
@@ -393,6 +393,10 @@ void VLCControlsWnd::RegisterToVLCEvents()
     });
 
     VP()->get_mp().eventManager().onPaused([this] {
+        PostMessage(hPlayPauseButton, BM_SETIMAGE, (WPARAM) IMAGE_BITMAP, (LPARAM) RC().hPlayBitmap);
+    });
+
+    VP()->get_mp().eventManager().onStopped([this] {
         PostMessage(hPlayPauseButton, BM_SETIMAGE, (WPARAM) IMAGE_BITMAP, (LPARAM) RC().hPlayBitmap);
     });
 }

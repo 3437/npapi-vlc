@@ -286,8 +286,8 @@ void VlcPluginMac::update_controls()
     }
 
     if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil) {
-        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setMediaPosition: libvlc_media_player_get_position(getMD())];
-        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setIsPlaying: playlist_isplaying()];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setMediaPosition: m_player.get_mp().position()];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setIsPlaying: player().mlp().isPlaying()];
         [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setIsFullscreen:this->get_fullscreen()];
         [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setNeedsDisplay];
     }
@@ -414,7 +414,7 @@ bool VlcPluginMac::handle_event(void *event)
                 toggle_fullscreen();
                 return true;
             } else if (cocoaEvent->data.key.keyCode == 49) {
-                playlist_togglePause();
+                m_player.mlp().pause();
                 return true;
             }
         }
@@ -865,7 +865,7 @@ bool VlcPluginMac::handle_event(void *event)
     }
 
     if (CGRectContainsPoint([self _playPauseButtonRect], point)) {
-        self.cppPlugin->playlist_togglePause();
+        self.cppPlugin->player().mlp().pause();
         return;
     }
     if (CGRectContainsPoint([self _fullscreenButtonRect], point)) {
@@ -979,7 +979,7 @@ bool VlcPluginMac::handle_event(void *event)
                 _cppPlugin->toggle_fullscreen();
                 return;
             } else if (key == ' ') {
-                _cppPlugin->playlist_togglePause();
+                _cppPlugin->player().mlp().pause();
                 return;
             }
         }

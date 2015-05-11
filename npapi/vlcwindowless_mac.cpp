@@ -249,7 +249,7 @@ bool VlcWindowlessMac::handle_event(void *event)
 
         CGContextClearRect(cgContext, CGRectMake(0, 0, npwindow.width, npwindow.height) );
 
-        if (m_media_width == 0 || m_media_height == 0 || (!lastFrame && !VlcPluginBase::playlist_isplaying()) || !get_player().is_open()) {
+        if (m_media_width == 0 || m_media_height == 0 || (!lastFrame && !player().mlp().isPlaying())) {
             drawNoPlayback(cgContext);
             return true;
         }

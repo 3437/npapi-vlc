@@ -54,7 +54,7 @@ public:
 
     //for libvlc_video_set_callbacks
     void* video_lock_cb(void **planes);
-    void video_display_cb(void *picture);
+    virtual void video_display_cb(void *picture);
     //end (for libvlc_video_set_callbacks)
 
     static void invalidate_window_proxy(void *opaque)

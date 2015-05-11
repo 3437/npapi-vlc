@@ -34,11 +34,7 @@ public:
 
     bool handle_event(void *event);
     NPError get_root_layer(void *value);
-    void video_display_cb(void *picture);
-    void set_player_window();
-
-    static void video_display_proxy(void *opaque, void *picture)
-    { reinterpret_cast<VlcWindowlessMac*>(opaque)->video_display_cb(picture); }
+    virtual void video_display_cb(void *picture) override;
 
 protected:
     void drawNoPlayback(CGContextRef cgContext);

@@ -334,14 +334,3 @@ void VlcWindowlessMac::video_display_cb(void * /*picture*/)
             invalidate_window();
     }
 }
-
-void VlcWindowlessMac::set_player_window() {
-    libvlc_video_set_format_callbacks(getMD(),
-                                      video_format_proxy,
-                                      video_cleanup_proxy);
-    libvlc_video_set_callbacks(getMD(),
-                               video_lock_proxy,
-                               video_unlock_proxy,
-                               video_display_proxy,
-                               this);
-}

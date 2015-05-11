@@ -44,7 +44,7 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_DEFINE([_FORTIFY_SOURCE], 2, [Define to '2' to get glibc warnings.])
 AC_PROG_CXX
 AC_PROG_OBJCXX
-AX_CXX_COMPILE_STDCXX_11([], [mandatory])
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
 dnl override platform specific check for dependent libraries
 dnl otherwise libtool linking of shared libraries will
@@ -90,8 +90,8 @@ case "${host_os}" in
     esac
 
     CFLAGS="${CFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
-    CXXFLAGS="${CXXFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
-    OBJCXXFLAGS="${OBJCXXFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
+    CXXFLAGS="${CXXFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag} -stdlib=libc++"
+    OBJCXXFLAGS="${OBJCXXFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag} -stdlib=libc++ -std=c++11"
     CPPFLAGS="${CPPFLAGS} ${ARCH_flag}"
     LDFLAGS="${LDFLAGS} -Wl,-headerpad_max_install_names ${ARCH_flag}"
     ;;

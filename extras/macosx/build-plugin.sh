@@ -88,7 +88,7 @@ export CC="xcrun clang -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_V
 export CXX="xcrun clang++ -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
 export OBJC="xcrun clang -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
 export OBJCXX="xcrun clang++ -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
-export LD="xcrun ld -syslibroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+export LD="xcrun ld -syslibroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION} -stdlib=c++11"
 
 export PATH="${npapiroot}/extras/macosx/vlc/extras/tools/build/bin:${npapiroot}/extras/macosx/vlc/contrib/${ARCH}-apple-darwin10/bin:$PATH"
 export PKG_CONFIG_PATH="${npapiroot}/extras/macosx/vlc/${ARCH}-install/lib/pkgconfig"

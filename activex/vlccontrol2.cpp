@@ -59,6 +59,8 @@ BIND_INTERFACE( VLCInput )
 BIND_INTERFACE( VLCMarquee )
 BIND_INTERFACE( VLCLogo )
 BIND_INTERFACE( VLCDeinterlace )
+BIND_INTERFACE( VLCTitle )
+BIND_INTERFACE( VLCChapter )
 BIND_INTERFACE( VLCPlaylistItems )
 BIND_INTERFACE( VLCPlaylist )
 BIND_INTERFACE( VLCVideo )
@@ -915,6 +917,107 @@ STDMETHODIMP VLCSubtitle::description(long nameID, BSTR* name)
 
 /****************************************************************************/
 
+STDMETHODIMP VLCTitle::get_count(long* countTracks)
+{
+    if( NULL == countTracks )
+        return E_POINTER;
+
+    *countTracks = _plug->get_player().get_mp().titleCount();
+    return S_OK;
+}
+
+STDMETHODIMP VLCTitle::get_track(long* track)
+{
+    if( NULL == track )
+        return E_POINTER;
+
+    *track = _plug->get_player().get_mp().title();
+    return S_OK;
+}
+
+STDMETHODIMP VLCTitle::put_track(long track)
+{
+    _plug->get_player().get_mp().setTitle(track);
+    return S_OK;
+}
+
+STDMETHODIMP VLCTitle::description(long track, BSTR* name)
+{
+    if( NULL == name )
+        return E_POINTER;
+
+    auto tracks = _plug->get_player().get_mp().titleDescription();
+    if ( track >= tracks.size() )
+        return E_INVALIDARG;
+    *name = BSTRFromCStr( CP_UTF8, tracks[track].name().c_str() );
+    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+}
+
+/****************************************************************************/
+
+STDMETHODIMP VLCChapter::get_count(long* countTracks)
+{
+    if( NULL == countTracks )
+        return E_POINTER;
+
+    *countTracks = _plug->get_player().get_mp().chapterCount();
+    return S_OK;
+}
+
+STDMETHODIMP VLCChapter::countForTitle(long track, long* countTracks)
+{
+    if( NULL == countTracks )
+        return E_POINTER;
+
+    *countTracks = _plug->get_player().get_mp().chapterCountForTitle(track);
+    return S_OK;
+}
+
+STDMETHODIMP VLCChapter::get_track(long* track)
+{
+    if( NULL == track )
+        return E_POINTER;
+
+    *track = _plug->get_player().get_mp().chapter();
+    return S_OK;
+}
+
+STDMETHODIMP VLCChapter::put_track(long track)
+{
+    _plug->get_player().get_mp().setChapter(track);
+    return S_OK;
+}
+
+STDMETHODIMP VLCChapter::description(long title, long chapter, BSTR* name)
+{
+    if( NULL == name )
+        return E_POINTER;
+
+    auto titleTracks = _plug->get_player().get_mp().titleDescription();
+    if ( title >= titleTracks.size() )
+        return E_INVALIDARG;
+
+    auto tracks = _plug->get_player().get_mp().chapterDescription(title);
+    if ( chapter >= tracks.size() )
+        return E_INVALIDARG;
+    *name = BSTRFromCStr( CP_UTF8, tracks[chapter].name().c_str() );
+    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+}
+
+STDMETHODIMP VLCChapter::next()
+{
+    _plug->get_player().get_mp().nextChapter();
+    return S_OK;
+}
+
+STDMETHODIMP VLCChapter::prev()
+{
+    _plug->get_player().get_mp().previousChapter();
+    return S_OK;
+}
+
+/****************************************************************************/
+
 STDMETHODIMP VLCVideo::get_fullscreen(VARIANT_BOOL* fullscreen)
 {
     if( NULL == fullscreen )
@@ -1156,6 +1259,16 @@ STDMETHODIMP VLCVideo::get_logo(IVLCLogo** obj)
 STDMETHODIMP VLCVideo::get_deinterlace(IVLCDeinterlace** obj)
 {
     return object_get(obj,_p_vlcdeint);
+}
+
+STDMETHODIMP VLCVideo::get_title(IVLCTitle** obj)
+{
+    return object_get(obj,_p_vlctitle);
+}
+
+STDMETHODIMP VLCVideo::get_chapter(IVLCChapter** obj)
+{
+    return object_get(obj,_p_vlcchapter);
 }
 
 /****************************************************************************/

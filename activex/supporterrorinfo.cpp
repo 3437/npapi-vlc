@@ -31,12 +31,14 @@ using namespace std;
 STDMETHODIMP VLCSupportErrorInfo::InterfaceSupportsErrorInfo(REFIID  riid)
 {
     if( (riid == IID_IVLCAudio)
+     || (riid == IID_IVLCChapter)
      || (riid == IID_IVLCInput)
      || (riid == IID_IVLCMarquee)
      || (riid == IID_IVLCLogo)
      || (riid == IID_IVLCPlaylist)
      || (riid == IID_IVLCPlaylistItems)
      || (riid == IID_IVLCSubtitle)
+     || (riid == IID_IVLCTitle)
      || (riid == IID_IVLCVideo)
      || (riid == IID_IVLCControl2) )
     {

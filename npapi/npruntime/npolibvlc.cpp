@@ -1275,6 +1275,8 @@ LibvlcVideoNPObject::~LibvlcVideoNPObject()
         if( marqueeObj ) NPN_ReleaseObject(marqueeObj);
         if( logoObj    ) NPN_ReleaseObject(logoObj);
         if( deintObj   ) NPN_ReleaseObject(deintObj);
+        if( titleObj   ) NPN_ReleaseObject(titleObj);
+        if( chapterObj ) NPN_ReleaseObject(chapterObj);
     }
 }
 
@@ -1290,6 +1292,8 @@ const NPUTF8 * const LibvlcVideoNPObject::propertyNames[] =
     "marquee",
     "logo",
     "deinterlace",
+    "title",
+    "chapter",
 };
 
 enum LibvlcVideoNPObjectPropertyIds
@@ -1304,6 +1308,8 @@ enum LibvlcVideoNPObjectPropertyIds
     ID_video_marquee,
     ID_video_logo,
     ID_video_deinterlace,
+    ID_video_title,
+    ID_video_chapter,
 };
 COUNTNAMES(LibvlcVideoNPObject,propertyCount,propertyNames);
 
@@ -1378,6 +1384,18 @@ LibvlcVideoNPObject::getProperty(int index, npapi::OutVariant& result)
             {
                 InstantObj<LibvlcDeinterlaceNPObject>( deintObj );
                 result = deintObj;
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_video_title:
+            {
+                InstantObj<LibvlcTitleNPObject>( titleObj );
+                result = titleObj;
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_video_chapter:
+            {
+                InstantObj<LibvlcChapterNPObject>( chapterObj );
+                result = chapterObj;
                 return INVOKERESULT_NO_ERROR;
             }
         }
@@ -1900,4 +1918,298 @@ LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
         return INVOKERESULT_NO_SUCH_METHOD;
     }
     return INVOKERESULT_NO_ERROR;
+}
+
+/*
+** implementation of libvlc title object
+*/
+
+const NPUTF8 * const LibvlcTitleNPObject::propertyNames[] =
+{
+    "count",
+    "track",
+};
+COUNTNAMES(LibvlcTitleNPObject,propertyCount,propertyNames);
+
+enum LibvlcTitleNPObjectPropertyIds
+{
+    ID_title_count,
+    ID_title_track,
+};
+
+RuntimeNPObject::InvokeResult
+LibvlcTitleNPObject::getProperty(int index, npapi::OutVariant& result)
+{
+    /* is plugin still running */
+    if( isPluginRunning() )
+    {
+        VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
+        auto& mp = p_plugin->getMD();
+        if( !mp )
+            RETURN_ON_ERROR;
+
+        switch( index )
+        {
+            case ID_title_count:
+            {
+                result = mp.titleCount();
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_title_track:
+            {
+                result = mp.title();
+                return INVOKERESULT_NO_ERROR;
+            }
+            default:
+                ;
+        }
+    }
+    return INVOKERESULT_GENERIC_ERROR;
+}
+
+RuntimeNPObject::InvokeResult
+LibvlcTitleNPObject::setProperty(int index, const NPVariant &value)
+{
+    /* is plugin still running */
+    if( isPluginRunning() )
+    {
+        VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
+        auto& mp = p_plugin->getMD();
+        if( !mp )
+            RETURN_ON_ERROR;
+
+        const npapi::Variant v( value );
+        switch( index )
+        {
+            case ID_title_track:
+            {
+                if( !v.is<int>() )
+                    return INVOKERESULT_INVALID_VALUE;
+
+                mp.setTitle( v );
+                return INVOKERESULT_NO_ERROR;
+            }
+            default:
+                ;
+        }
+    }
+    return INVOKERESULT_GENERIC_ERROR;
+}
+
+const NPUTF8 * const LibvlcTitleNPObject::methodNames[] =
+{
+    "description",
+};
+COUNTNAMES(LibvlcTitleNPObject,methodCount,methodNames);
+
+enum LibvlcTitleNPObjectMethodIds
+{
+    ID_title_description,
+};
+
+RuntimeNPObject::InvokeResult
+LibvlcTitleNPObject::invoke(int index, const NPVariant *args,
+                            uint32_t argCount, npapi::OutVariant& result)
+{
+    /* is plugin still running */
+    if( isPluginRunning() )
+    {
+        VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
+        auto& mp = p_plugin->getMD();
+        if( !mp )
+            RETURN_ON_ERROR;
+
+        switch( index )
+        {
+            case ID_title_description:
+            {
+                if ( argCount < 1 )
+                    return INVOKERESULT_INVALID_ARGS;
+                const npapi::Variant v( args[0] );
+                if( v.is<int>() )
+                {
+                    auto tracks = mp.titleDescription();
+                    if ( v >= tracks.size() )
+                        return INVOKERESULT_INVALID_VALUE;
+                    /* display the name of the track chosen */
+                    result = tracks[v].name();
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_NO_SUCH_METHOD;
+            }
+            default:
+                ;
+        }
+    }
+    return INVOKERESULT_GENERIC_ERROR;
+}
+
+/*
+** implementation of libvlc chapter object
+*/
+
+const NPUTF8 * const LibvlcChapterNPObject::propertyNames[] =
+{
+    "count",
+    "track",
+};
+COUNTNAMES(LibvlcChapterNPObject,propertyCount,propertyNames);
+
+enum LibvlcChapterNPObjectPropertyIds
+{
+    ID_chapter_count,
+    ID_chapter_track,
+};
+
+RuntimeNPObject::InvokeResult
+LibvlcChapterNPObject::getProperty(int index, npapi::OutVariant& result)
+{
+    /* is plugin still running */
+    if( isPluginRunning() )
+    {
+        VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
+        auto& mp = p_plugin->getMD();
+        if( !mp )
+            RETURN_ON_ERROR;
+
+        switch( index )
+        {
+            case ID_chapter_count:
+            {
+                result = mp.chapterCount();
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_chapter_track:
+            {
+                result = mp.chapter();
+                return INVOKERESULT_NO_ERROR;
+            }
+            default:
+                ;
+        }
+    }
+    return INVOKERESULT_GENERIC_ERROR;
+}
+
+RuntimeNPObject::InvokeResult
+LibvlcChapterNPObject::setProperty(int index, const NPVariant &value)
+{
+    /* is plugin still running */
+    if( isPluginRunning() )
+    {
+        VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
+        auto& mp = p_plugin->getMD();
+        if( !mp )
+            RETURN_ON_ERROR;
+
+        const npapi::Variant v( value );
+        switch( index )
+        {
+            case ID_chapter_track:
+            {
+                if( !v.is<int>() )
+                    return INVOKERESULT_INVALID_VALUE;
+
+                mp.setChapter( v );
+                return INVOKERESULT_NO_ERROR;
+            }
+            default:
+                ;
+        }
+    }
+    return INVOKERESULT_GENERIC_ERROR;
+}
+
+const NPUTF8 * const LibvlcChapterNPObject::methodNames[] =
+{
+    "countForTitle",
+    "description",
+    "next",
+    "prev",
+};
+COUNTNAMES(LibvlcChapterNPObject,methodCount,methodNames);
+
+enum LibvlcChapterNPObjectMethodIds
+{
+    ID_chapter_count_for_title,
+    ID_chapter_description,
+    ID_chapter_next,
+    ID_chapter_prev,
+};
+
+RuntimeNPObject::InvokeResult
+LibvlcChapterNPObject::invoke(int index, const NPVariant *args,
+                            uint32_t argCount, npapi::OutVariant& result)
+{
+    /* is plugin still running */
+    if( isPluginRunning() )
+    {
+        VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
+        auto& mp = p_plugin->getMD();
+        if( !mp )
+            RETURN_ON_ERROR;
+
+        switch( index )
+        {
+            case ID_chapter_count_for_title:
+            {
+                if ( argCount < 1 )
+                    return INVOKERESULT_INVALID_ARGS;
+                const npapi::Variant v( args[0] );
+                if( v.is<int>() )
+                {
+                    result = mp.chapterCountForTitle( v );
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_NO_SUCH_METHOD;
+            }
+            case ID_chapter_description:
+            {
+                if ( argCount < 2 )
+                    return INVOKERESULT_INVALID_ARGS;
+
+                const npapi::Variant titleId( args[0] );
+                const npapi::Variant v( args[1] );
+
+                if( !titleId.is<int>() )
+                    return INVOKERESULT_INVALID_VALUE;
+
+                auto titleTracks = mp.titleDescription();
+                if ( titleId >= titleTracks.size() )
+                    return INVOKERESULT_INVALID_VALUE;
+
+                if( v.is<int>() )
+                {
+                    auto tracks = mp.chapterDescription( titleId );
+                    if ( v >= tracks.size() )
+                        return INVOKERESULT_INVALID_VALUE;
+                    /* display the name of the track chosen */
+                    result = tracks[v].name();
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_NO_SUCH_METHOD;
+            }
+            case ID_chapter_next:
+            {
+                if( argCount == 0 )
+                {
+                    mp.nextChapter();
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_NO_SUCH_METHOD;
+            }
+            case ID_chapter_prev:
+            {
+                if( argCount == 0 )
+                {
+                    mp.previousChapter();
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_NO_SUCH_METHOD;
+            }
+            default:
+                ;
+        }
+    }
+    return INVOKERESULT_GENERIC_ERROR;
 }

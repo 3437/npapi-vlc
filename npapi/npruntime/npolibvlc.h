@@ -201,7 +201,7 @@ protected:
 
     LibvlcVideoNPObject(NPP instance, const NPClass *aClass) :
         RuntimeNPObject(instance, aClass),
-        marqueeObj(NULL), logoObj(NULL), deintObj(NULL) { }
+        marqueeObj(NULL), logoObj(NULL), deintObj(NULL), titleObj(NULL), chapterObj(NULL) { }
     virtual ~LibvlcVideoNPObject();
 
     static const int propertyCount;
@@ -219,6 +219,8 @@ private:
     NPObject *marqueeObj;
     NPObject *logoObj;
     NPObject *deintObj;
+    NPObject *titleObj;
+    NPObject *chapterObj;
 };
 
 class LibvlcMarqueeNPObject: public RuntimeNPObject
@@ -284,3 +286,44 @@ protected:
     virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, npapi::OutVariant &result) override;
 };
 
+class LibvlcTitleNPObject: public RuntimeNPObject
+{
+protected:
+    friend class RuntimeNPClass<LibvlcTitleNPObject>;
+
+    LibvlcTitleNPObject(NPP instance, const NPClass *aClass) :
+        RuntimeNPObject(instance, aClass) { }
+    virtual ~LibvlcTitleNPObject() { }
+
+    static const int propertyCount;
+    static const NPUTF8 * const propertyNames[];
+
+    virtual InvokeResult getProperty(int index, npapi::OutVariant& result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
+
+    static const int methodCount;
+    static const NPUTF8 * const methodNames[];
+
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, npapi::OutVariant &result) override;
+};
+
+class LibvlcChapterNPObject: public RuntimeNPObject
+{
+protected:
+    friend class RuntimeNPClass<LibvlcChapterNPObject>;
+
+    LibvlcChapterNPObject(NPP instance, const NPClass *aClass) :
+        RuntimeNPObject(instance, aClass) { }
+    virtual ~LibvlcChapterNPObject() { }
+
+    static const int propertyCount;
+    static const NPUTF8 * const propertyNames[];
+
+    virtual InvokeResult getProperty(int index, npapi::OutVariant& result) override;
+    virtual InvokeResult setProperty(int index, const NPVariant &value) override;
+
+    static const int methodCount;
+    static const NPUTF8 * const methodNames[];
+
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, npapi::OutVariant &result) override;
+};

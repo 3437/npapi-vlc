@@ -201,7 +201,7 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                              ControlWidth, ControlsHeight, hWnd(),
                              (HMENU)ID_FS_SWITCH_FS, 0, 0);
             SendMessage(hFSButton, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP,
-                        (LPARAM)RC().hDeFullscreenBitmap);
+                        (LPARAM)RC().hFullscreenBitmap);
             HorizontalOffset+=ControlWidth+xControlsSpace;
 
             RECT rect;
@@ -398,6 +398,12 @@ void VLCControlsWnd::RegisterToVLCEvents()
 
     VP()->get_mp().eventManager().onStopped([this] {
         PostMessage(hPlayPauseButton, BM_SETIMAGE, (WPARAM) IMAGE_BITMAP, (LPARAM) RC().hPlayBitmap);
+        PostMessage(hVideoPosScroll, (UINT) PBM_SETPOS, (WPARAM)0, 0);
+    });
+
+    VP()->get_mp().eventManager().onEndReached([this] {
+        PostMessage(hPlayPauseButton, BM_SETIMAGE, (WPARAM) IMAGE_BITMAP, (LPARAM) RC().hPlayBitmap);
+        PostMessage(hVideoPosScroll, (UINT) PBM_SETPOS, (WPARAM)0, 0);
     });
 }
 
@@ -912,6 +918,7 @@ void VLCWindowsManager::OnKeyDownEvent(UINT uKeyMsg)
         case VK_ESCAPE:
         case 'F':
             EndFullScreen();
+            _HolderWnd->ControlWindow()->UpdateFullscreenButton( FALSE );
             break;
     }
 }

@@ -181,7 +181,7 @@ RuntimeNPObject::InvokeResult LibvlcRootNPObject::invoke(int index,
 
         if ( !npapi::is_string( args[0] ) ||
             !listener.is<NPObject>() )
-            break;
+            return INVOKERESULT_INVALID_ARGS;
 
         if( !VlcPluginBase::canUseEventListener() )
         {
@@ -1589,16 +1589,12 @@ LibvlcMarqueeNPObject::getProperty(int index, npapi::OutVariant& result)
 
     case ID_marquee_position:
         result = position_bynumber( mp.marqueeInt( libvlc_marquee_Position ) );
-        break;
+        return INVOKERESULT_NO_ERROR;
 
     case ID_marquee_text:
         auto marquee = mp.marqueeString( libvlc_marquee_Text );
-        if( !marquee.empty() )
-        {
-            result = marquee;
-            return INVOKERESULT_NO_ERROR;
-        }
-        break;
+        result = marquee;
+        return INVOKERESULT_NO_ERROR;
     }
     return INVOKERESULT_GENERIC_ERROR;
 }
@@ -1626,12 +1622,11 @@ LibvlcMarqueeNPObject::setProperty(int index, const NPVariant &value)
     case ID_marquee_size:
     case ID_marquee_x:
     case ID_marquee_y:
-        if( v.is<int>() )
-        {
-            mp.setMarqueeInt( marquee_idx[index], v );
-            return INVOKERESULT_NO_ERROR;
-        }
-        break;
+        if( !v.is<int>() )
+            return INVOKERESULT_INVALID_VALUE;
+
+        mp.setMarqueeInt( marquee_idx[index], v );
+        return INVOKERESULT_NO_ERROR;
 
     case ID_marquee_position:
         if( !v.is<const char*>() ||
@@ -1642,12 +1637,11 @@ LibvlcMarqueeNPObject::setProperty(int index, const NPVariant &value)
         return INVOKERESULT_NO_ERROR;
 
     case ID_marquee_text:
-        if( v.is<const char*>() )
-        {
-            mp.setMarqueeString( libvlc_marquee_Text, v );
-            return INVOKERESULT_NO_ERROR;
-        }
-        break;
+        if( !v.is<const char*>() )
+            return INVOKERESULT_INVALID_VALUE;
+
+        mp.setMarqueeString( libvlc_marquee_Text, v );
+        return INVOKERESULT_NO_ERROR;
     }
     return INVOKERESULT_NO_SUCH_METHOD;
 }

@@ -308,8 +308,8 @@ LibvlcAudioNPObject::setProperty(int index, const NPVariant &value)
                     auto tracks = mp.audioTrackDescription();
                     if ( v >= tracks.size() )
                         return INVOKERESULT_INVALID_VALUE;
-                    if ( mp.setAudioTrack( tracks[v].id() ) )
-                        return INVOKERESULT_NO_ERROR;
+                    mp.setAudioTrack( tracks[v].id() );
+                    return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
             case ID_audio_channel:
@@ -1209,8 +1209,8 @@ LibvlcSubtitleNPObject::setProperty(int index, const NPVariant &value)
                     auto tracks = mp.spuDescription();
                     if ( v >= tracks.size() )
                         return INVOKERESULT_INVALID_ARGS;
-                    if ( mp.setSpu( tracks[ v ].id() ) )
-                        return INVOKERESULT_NO_ERROR;
+                    mp.setSpu( tracks[ v ].id() );
+                    return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
             }

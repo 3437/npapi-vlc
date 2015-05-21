@@ -981,13 +981,16 @@ STDMETHODIMP VLCVideo::get_subtitle(long* spu)
     if( NULL == spu )
         return E_POINTER;
 
-    *spu = _plug->get_player().get_mp().spu();
+    *spu = _plug->get_player().currentSubtitleTrack();
     return S_OK;
 }
 
 STDMETHODIMP VLCVideo::put_subtitle(long spu)
 {
-    _plug->get_player().get_mp().setSpu( spu );
+    auto tracks = _plug->get_player().get_mp().spuDescription();
+    if ( spu >= tracks.size() )
+        return E_INVALIDARG;
+    _plug->get_player().get_mp().setSpu( tracks[spu].id() );
     return S_OK;
 }
 

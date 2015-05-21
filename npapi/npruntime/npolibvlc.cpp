@@ -1172,15 +1172,12 @@ LibvlcSubtitleNPObject::getProperty(int index, npapi::OutVariant& result)
         {
             case ID_subtitle_track:
             {
-                /* get the current internal subtitles track ID */
                 result = p_plugin->player().currentSubtitleTrack();
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_subtitle_count:
             {
-                /* get the number of subtitles available */
                 result = mp.spuCount();
-                /* return it */
                 return INVOKERESULT_NO_ERROR;
             }
         }
@@ -1353,7 +1350,7 @@ LibvlcVideoNPObject::getProperty(int index, npapi::OutVariant& result)
             }
             case ID_video_subtitle:
             {
-                result = mp.spu();
+                result = p_plugin->player().currentSubtitleTrack();
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_video_crop:
@@ -1436,7 +1433,10 @@ LibvlcVideoNPObject::setProperty(int index, const NPVariant &value)
             {
                 if( v.is<int>() )
                 {
-                    mp.setSpu( v );
+                    auto tracks = mp.spuDescription();
+                    if ( v >= tracks.size() )
+                        return INVOKERESULT_INVALID_ARGS;
+                    mp.setSpu( tracks[ v ].id() );
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;

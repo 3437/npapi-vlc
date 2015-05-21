@@ -689,6 +689,19 @@ void VLCPlugin::toggleFullscreen()
     _WindowsManager.ToggleFullScreen();
 }
 
+void VLCPlugin::setFullscreen(BOOL yes)
+{
+    if( yes )
+        _WindowsManager.StartFullScreen();
+    else
+        _WindowsManager.EndFullScreen();
+}
+
+BOOL VLCPlugin::getFullscreen()
+{
+    return _WindowsManager.IsFullScreen();
+}
+
 HRESULT VLCPlugin::onInPlaceDeactivate(void)
 {
     if( m_player.mlp().isPlaying() )

@@ -218,6 +218,8 @@ public:
     RECT getPosRect(void) { return _posRect; };
     inline HWND getInPlaceWindow(void) const { return _inplacewnd; };
     void toggleFullscreen();
+    void setFullscreen(BOOL yes);
+    BOOL getFullscreen();
 
     BOOL isInPlaceActive(void);
 

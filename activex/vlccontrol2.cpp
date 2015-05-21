@@ -920,13 +920,13 @@ STDMETHODIMP VLCVideo::get_fullscreen(VARIANT_BOOL* fullscreen)
     if( NULL == fullscreen )
         return E_POINTER;
 
-    *fullscreen = _plug->get_player().get_mp().fullscreen();
+    *fullscreen = _plug->getFullscreen();
     return S_OK;
 }
 
 STDMETHODIMP VLCVideo::put_fullscreen(VARIANT_BOOL fullscreen)
 {
-    _plug->get_player().get_mp().setFullscreen( VARIANT_FALSE != fullscreen );
+    _plug->setFullscreen( VARIANT_FALSE != fullscreen );
     return S_OK;
 }
 
@@ -1133,7 +1133,7 @@ STDMETHODIMP VLCVideo::takeSnapshot(LPPICTUREDISP* picture)
 
 STDMETHODIMP VLCVideo::toggleFullscreen()
 {
-    _plug->get_player().get_mp().toggleFullscreen();
+    _plug->toggleFullscreen();
     return S_OK;
 }
 

@@ -459,7 +459,7 @@ STDMETHODIMP VLCAudio::get_count(long* trackNumber)
     if( NULL == trackNumber )
         return E_POINTER;
 
-    *trackNumber = _plug->get_player().get_mp().audioTrack();
+    *trackNumber = _plug->get_player().get_mp().audioTrackCount();
 
     return S_OK;
 }

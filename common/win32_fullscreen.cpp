@@ -216,6 +216,7 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             CreateToolTip();
             RegisterToVLCEvents();
+            SyncVolumeSliderWithVLCVolume();
             break;
         }
         case WM_LBUTTONUP:{

@@ -109,7 +109,6 @@ private:
 
     void SyncVolumeSliderWithVLCVolume();
     void SetVLCVolumeBySliderPos(int CurScrollPos);
-    void SetVideoPosScrollPosByVideoPos(libvlc_time_t CurScrollPos);
     void RegisterToVLCEvents();
 
     void NeedHideControls();

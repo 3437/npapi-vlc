@@ -422,15 +422,13 @@ void VLCControlsWnd::NeedHideControls()
     KillTimer(hWnd(), 1);
 }
 
-void VLCControlsWnd::SetVideoPosScrollPosByVideoPos(libvlc_time_t CurScrollPos)
-{
-    PostMessage(hVideoPosScroll, (UINT)PBM_SETPOS, (WPARAM) (CurScrollPos >> VideoPosShiftBits), 0);
-}
-
 void VLCControlsWnd::SetVideoPos(float Pos) //0-start, 1-end
 {
     if( VP() ){
         VP()->get_mp().setPosition( Pos );
+
+        if( VP()->get_mp().length() > 0 )
+            PostMessage(hVideoPosScroll, (UINT)PBM_SETPOS, (WPARAM) (Pos * 100), 0);
     }
 }
 

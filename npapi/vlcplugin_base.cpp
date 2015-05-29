@@ -123,6 +123,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     ppsz_argv[ppsz_argc++] = "--no-xlib";
 
     bool b_autoloop = false;
+    bool b_mute = false;
 
     /* parse plugin arguments */
     for( int i = 0; (i < argc) && (ppsz_argc < MAX_PARAMS); i++ )
@@ -143,7 +144,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
         else if( !strcmp( argn[i], "autoplay")
               || !strcmp( argn[i], "autostart") )
         {
-            set_autoplay(boolValue(argv[i]));
+            set_autoplay( boolValue(argv[i]) );
         }
         else if( !strcmp( argn[i], "fullscreen" )
               || !strcmp( argn[i], "allowfullscreen" )
@@ -153,10 +154,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
         }
         else if( !strcmp( argn[i], "mute" ) )
         {
-            if( boolValue(argv[i]) )
-            {
-                ppsz_argv[ppsz_argc++] = "--volume=0";
-            }
+            b_mute = boolValue( argv[i] );
         }
         else if( !strcmp( argn[i], "loop")
               || !strcmp( argn[i], "autoloop") )
@@ -187,7 +185,10 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     }
 
     m_player.mlp().setPlaybackMode( b_autoloop ? libvlc_playback_mode_loop :
-                                      libvlc_playback_mode_default);
+                                      libvlc_playback_mode_default );
+
+    if( b_mute )
+        m_player.get_mp().setMute( true );
 
     /*
     ** fetch plugin base URL, which is the URL of the page containing the plugin

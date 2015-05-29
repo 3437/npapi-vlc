@@ -766,6 +766,15 @@ void VLCPlugin::setTime(int seconds)
     }
 }
 
+void VLCPlugin::setMute(BOOL mute)
+{
+    if( mute != _b_mute )
+    {
+        _b_mute = mute;
+        m_player.get_mp().setMute( _b_mute );
+    }
+}
+
 void VLCPlugin::setFocus(BOOL fFocus)
 {
     if( fFocus )

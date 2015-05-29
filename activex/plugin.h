@@ -175,7 +175,7 @@ public:
     const SIZEL& getExtent(void) { return _extent; };
 
     // transient properties
-    inline void setMute(BOOL mute) { _b_mute = mute; };
+    void setMute(BOOL mute);
 
     inline void setPicture(LPPICTURE pict)
     {

@@ -124,6 +124,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 
     bool b_autoloop = false;
     bool b_mute = false;
+    int i_volume = -1;
 
     /* parse plugin arguments */
     for( int i = 0; (i < argc) && (ppsz_argc < MAX_PARAMS); i++ )
@@ -155,6 +156,10 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
         else if( !strcmp( argn[i], "mute" ) )
         {
             b_mute = boolValue( argv[i] );
+        }
+        else if( !strcmp( argn[i], "volume" ) )
+        {
+            i_volume = atoi( argv[i] );
         }
         else if( !strcmp( argn[i], "loop")
               || !strcmp( argn[i], "autoloop") )
@@ -189,6 +194,9 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 
     if( b_mute )
         m_player.get_mp().setMute( true );
+
+    if( i_volume >= 0 && i_volume <= 200 )
+        m_player.get_mp().setVolume( i_volume );
 
     /*
     ** fetch plugin base URL, which is the URL of the page containing the plugin

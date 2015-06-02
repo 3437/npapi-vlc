@@ -242,10 +242,6 @@ public:
     */
     void freezeEvents(BOOL freeze);
     void firePropChangedEvent(DISPID dispid);
-    //FIXME: I'm fairly convinced this 3 events are useless.
-    void fireOnPlayEvent(void);
-    void fireOnPauseEvent(void);
-    void fireOnStopEvent(void);
 
     // async events;
     void fireOnMediaPlayerNothingSpecialEvent();

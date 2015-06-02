@@ -63,11 +63,6 @@ library AXVLC
 
     const int DISPID_Visible    = 100;
 
-
-    const int DISPID_PlayEvent  = 100;
-    const int DISPID_PauseEvent = 101;
-    const int DISPID_StopEvent  = 102;
-
     /* async events from libvlc */
     const int DISPID_MediaPlayerNothingSpecialEvent = 200;
     const int DISPID_MediaPlayerOpeningEvent = 201;
@@ -96,14 +91,7 @@ library AXVLC
     {
         properties:
         methods:
-            [id(DISPID_PlayEvent), helpstring("Playing")]
-            void play();
-            [id(DISPID_PauseEvent), helpstring("Paused")]
-            void pause();
-            [id(DISPID_StopEvent), helpstring("Stopped")]
-            void stop();
-
-            /* asyn events from libvlc */
+            /* async events from libvlc */
             [id(DISPID_MediaPlayerNothingSpecialEvent), helpstring("Idle state")]
             void MediaPlayerNothingSpecial();
             [id(DISPID_MediaPlayerOpeningEvent), helpstring("Opening media")]

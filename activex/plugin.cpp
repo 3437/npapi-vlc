@@ -705,10 +705,7 @@ BOOL VLCPlugin::getFullscreen()
 HRESULT VLCPlugin::onInPlaceDeactivate(void)
 {
     if( m_player.mlp().isPlaying() )
-    {
         m_player.mlp().stop();
-        fireOnStopEvent();
-    }
 
     _WindowsManager.DestroyWindows();
 
@@ -955,24 +952,6 @@ void VLCPlugin::freezeEvents(BOOL freeze)
 void VLCPlugin::firePropChangedEvent(DISPID dispid)
 {
     vlcConnectionPointContainer->firePropChangedEvent(dispid);
-};
-
-void VLCPlugin::fireOnPlayEvent(void)
-{
-    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
-    vlcConnectionPointContainer->fireEvent(DISPID_PlayEvent, &dispparamsNoArgs);
-};
-
-void VLCPlugin::fireOnPauseEvent(void)
-{
-    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
-    vlcConnectionPointContainer->fireEvent(DISPID_PauseEvent, &dispparamsNoArgs);
-};
-
-void VLCPlugin::fireOnStopEvent(void)
-{
-    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
-    vlcConnectionPointContainer->fireEvent(DISPID_StopEvent, &dispparamsNoArgs);
 };
 
 /*

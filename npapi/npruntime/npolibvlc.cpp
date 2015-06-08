@@ -1341,11 +1341,7 @@ LibvlcVideoNPObject::getProperty(int index, npapi::OutVariant& result)
             }
             case ID_video_aspectratio:
             {
-                auto ar = mp.aspectRatio();
-                if( ar.empty() )
-                    return INVOKERESULT_GENERIC_ERROR;
-
-                result = ar;
+                result = mp.aspectRatio();
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_video_subtitle:
@@ -1355,11 +1351,7 @@ LibvlcVideoNPObject::getProperty(int index, npapi::OutVariant& result)
             }
             case ID_video_crop:
             {
-                auto geo = mp.cropGeometry();
-                if( geo.empty() )
-                    return INVOKERESULT_GENERIC_ERROR;
-
-                result = geo;
+                result = mp.cropGeometry();
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_video_teletext:
@@ -1592,8 +1584,7 @@ LibvlcMarqueeNPObject::getProperty(int index, npapi::OutVariant& result)
         return INVOKERESULT_NO_ERROR;
 
     case ID_marquee_text:
-        auto marquee = mp.marqueeString( libvlc_marquee_Text );
-        result = marquee;
+        result = mp.marqueeString( libvlc_marquee_Text );
         return INVOKERESULT_NO_ERROR;
     }
     return INVOKERESULT_GENERIC_ERROR;

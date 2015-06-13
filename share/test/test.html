@@ -368,6 +368,7 @@ function close()
         </td>
         <td style="text-align:right">
             <input type="button" value="get position" onClick='doGetPosition();'>
+            <input type="button" value="get time" onClick='doGetTime();'>
         </td>
     </tr>
     <tr>
@@ -491,9 +492,16 @@ function doGetPosition()
 {
     var vlc = getVLC("vlc");
 
-    // set slider to new position
     if( vlc )
-        alert( "position is " + vlc.input.time);
+        alert( "position is " + vlc.input.position );
+}
+
+function doGetTime()
+{
+    var vlc = getVLC("vlc");
+
+    if( vlc )
+        alert( "time is " + vlc.input.time );
 }
 
 function doGetRate()

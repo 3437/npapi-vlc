@@ -831,7 +831,9 @@ function onPlay()
 
 function onEnd()
 {
+    document.getElementById("info").innerHTML = "-:--:--/-:--:--";
     document.getElementById("state").innerHTML = "End...";
+    document.getElementById("PlayOrPause").value = "Play";
     setSeekable(false);
 }
 

@@ -107,7 +107,18 @@ function handle_MediaPlayerOpening()
 
 function handle_MediaPlayerBuffering(val)
 {
+    var vlc = getVLC("vlc");
+
     document.getElementById("info").innerHTML = val + "%";
+
+    if( vlc && val == 100 )
+    {
+        // display the current state after buffering
+        if( vlc.playlist.isPlaying )
+            onPlay();
+        else
+            onPause();
+    }
 }
 
 function handle_MediaPlayerPlaying()

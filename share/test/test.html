@@ -331,7 +331,7 @@ function close()
     </tr>
     <tr>
         <td>Audio Channel:
-            <select onClick='doAudioChannel(this.value);'>
+            <select onChange='doAudioChannel(this.value);'>
                 <option value="1">Stereo</option>
                 <option value="2">Reverse Stereo</option>
                 <option value="3">Left</option>
@@ -377,7 +377,7 @@ function close()
             <input type="button" value="Enable" onClick='getVLC("vlc").video.marquee.enable();'>
             <input type="button" value="Disable" onClick='getVLC("vlc").video.marquee.disable();'>
             <input type="text" size="4" value="" id="marqueeIntValue">
-            <select onClick="doMarqueeOption(this.value,document.getElementById('marqueeIntValue').value);">
+            <select id="marqueeSelect">
                 <option value="1">Color</option>
                 <option value="2">Opacity</option>
                 <option value="3">Position</option>
@@ -388,6 +388,7 @@ function close()
                 <option value="8">X</option>
                 <option value="9">Y</option>
             </select>
+            <input type="button" onclick="doMarqueeOption(document.getElementById('marqueeSelect').value,document.getElementById('marqueeIntValue').value);" value="Go">
         </td>
     </tr>
     <tr>
@@ -395,7 +396,7 @@ function close()
             <input type="button" value="Enable" onClick='getVLC("vlc").video.logo.enable();'>
             <input type="button" value="Disable" onClick='getVLC("vlc").video.logo.disable();'>
             <input type="text" size="4" value="" id="logoIntValue">
-            <select onClick="doLogoOption(this.value,document.getElementById('logoIntValue').value);">
+            <select id="logoSelect">
                 <option value="1">File</option>
                 <option value="2">Position</option>
                 <option value="3">Opacity</option>
@@ -404,6 +405,7 @@ function close()
                 <option value="6">X</option>
                 <option value="7">Y</option>
             </select>
+            <input type="button" onclick="doLogoOption(document.getElementById('logoSelect').value,document.getElementById('logoIntValue').value);" value="Go">
         </td>
     </tr>
     <tr>

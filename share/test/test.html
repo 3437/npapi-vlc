@@ -336,6 +336,14 @@ function close()
             <input type="button" value="Prev" onClick='getVLC("vlc").playlist.prev();'>
             <input type="button" value="Next" onClick='getVLC("vlc").playlist.next();'>
             <input type="button" value="Clear All" onClick='doPlaylistClearAll();'>
+            &nbsp;
+            <input type="button" id="itemCount" value="Items: 0" onClick='doItemCount();'>
+            <form action="javascript:doRemoveItem(document.getElementById('removeid').value);">
+                <input type="text" size="4" value="" id="removeid">
+                <input type="submit" value="Delete">
+            </form>
+        </td>
+        <td style="text-align:right">
             Aspect Ratio:
             <select onChange='doAspectRatio(this.value)'>
                 <option value="default">Default</option>
@@ -345,13 +353,6 @@ function close()
                 <option value="221:100">221:100</option>
                 <option value="5:4">5:4</option>
             </select>
-        </td>
-        <td style="text-align:right">
-            <input type="button" id="itemCount" value="Items: 0" onClick='doItemCount();'>
-            <form action="javascript:doRemoveItem(document.getElementById('removeid').value);">
-                <input type="text" size="4" value="" id="removeid">
-                <input type="submit" value="Delete">
-            </form>
         </td>
     </tr>
     <tr>
@@ -363,9 +364,10 @@ function close()
                 <option value="4">Right</option>
                 <option value="5">Dolby</option>
             </select>
-        </td>
-        <td>
             <input type="button" value="current channel" onClick='alert(getVLC("vlc").audio.channel);'>
+        </td>
+        <td style="text-align:right">
+            <input type="button" value="get position" onClick='doGetPosition();'>
         </td>
     </tr>
     <tr>
@@ -376,9 +378,8 @@ function close()
             <input type="button" value="current track" onClick='alert(getVLC("vlc").audio.description(vlc.audio.track));'>
             <input type="button" value="number of track" onClick='alert(getVLC("vlc").audio.count);'>
         </td>
-        <td>
+        <td style="text-align:right">
             <input type="button" value="set slider" onClick='doSetSlider();'>
-            <input type="button" value="get position" onClick='doGetPosition();'>
         </td>
     </tr>
     <tr>

@@ -1,7 +1,8 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>VLC Plugin test page</TITLE>
-<style>
+<style type="text/css">
   .inputTrackerInput {
         height:20;
         width:30;
@@ -10,7 +11,7 @@
   }
 </style>
 
-<script language="JavaScript"><!--
+<script type="text/javascript"><!--
 function init()
 {
     if( navigator.appName.indexOf("Microsoft Internet")==-1 )
@@ -229,7 +230,7 @@ function close()
 
 //--></script>
 
-<body onLoad="init();" onClose="close();">
+<body onLoad="init();" onUnLoad="close();">
 
 <div style="width: 600; height: 200; top:200px; position: absolute; border: 1pt solid black; background: blue; border-radius: 5px; display: none;" id="overlay"></div>
 <table>
@@ -239,7 +240,7 @@ MRL:
 <input type=submit value="Go" onClick="doGo(document.getElementById('targetTextField').value);">
 <input type=submit value="Add" onClick="doAdd(document.getElementById('targetTextField').value);">
 </td></tr>
-<tr><td align="center" colspan="2">
+<tr><td style="text-align:center" colspan="2">
 
 <!--
 Insert VideoLAN.VLCPlugin.2
@@ -247,8 +248,7 @@ Insert VideoLAN.VLCPlugin.2
 <object classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"
         width="640"
         height="480"
-        id="vlc"
-        events="True">
+        id="vlc">
 <param name="MRL" value="" />
 <param name="ShowDisplay" value="True" />
 <param name="AutoLoop" value="False" />
@@ -258,7 +258,6 @@ Insert VideoLAN.VLCPlugin.2
 <param name="StartTime" value="0" />
 <EMBED pluginspage="http://www.videolan.org"
        type="application/x-vlc-plugin"
-       version="VideoLAN.VLCPlugin.2"
        width="640"
        height="480"
        toolbar="true"
@@ -267,18 +266,17 @@ Insert VideoLAN.VLCPlugin.2
        text="Waiting for video"
        bgcolor="#000000"
        allowfullscreen="true"
-       name="vlc">
-</EMBED>
+       name="vlc" />
 </object>
 </td></tr>
 <tr><td colspan="2">
 <table><tr>
-<td valign="top" width="550">
+<td style="vertical-align:top; width:550px;">
 <!--
 Insert Slider widget
 -->
 <div id="inputTrackerDiv"></div>
-</td><td width="15%">
+</td><td style="width:15%">
 <div id="info" style="text-align:center">-:--:--/-:--:--</div>
 <div id="state" style="text-align:center">Stopped...</div>
 </td></tr></table>
@@ -294,7 +292,7 @@ Insert Slider widget
 <input type=button value="Fullscreen" onClick='getVLC("vlc").video.toggleFullscreen();'>
 <input type=button value="Version" onClick='alert("vlc " + getVLC("vlc").VersionInfo);'>
 <input type=button value=" State " onClick='alert("state: " + getVLC("vlc").input.state);'>
-</td><td align="right">
+</td><td style="text-align:right">
 <SPAN style="text-align:center">Volume:</SPAN>
 <input type=button value=" - " onClick='updateVolume(-10)'>
 <SPAN id="volumeTextField" style="text-align:center">--</SPAN>
@@ -307,7 +305,7 @@ Insert Slider widget
 <input type=button value="Next" onClick='getVLC("vlc").playlist.next();'>
 <input type=button value="Clear All" onClick='doPlaylistClearAll();'>
     Aspect Ratio:
-    <select readonly onChange='doAspectRatio(this.value)'>
+    <select onChange='doAspectRatio(this.value)'>
       <option value="default">Default</option>
       <option value="1:1">1:1</option>
       <option value="4:3">4:3</option>
@@ -315,13 +313,13 @@ Insert Slider widget
       <option value="221:100">221:100</option>
       <option value="5:4">5:4</option>
     </select>
-</td><td align="right">
+</td><td style="text-align:right">
 <input type=button id="itemCount" value=" Items 0 " onClick='doItemCount();'>
 <input size=4 value="" id="removeid"><input type=submit value="Delete" onClick="doRemoveItem(document.getElementById('removeid').value);">
 </td>
 </tr>
 <tr><td>Audio Channel:
-  <select readonly onClick='doAudioChannel(this.value);'>
+  <select onClick='doAudioChannel(this.value);'>
     <option value=1>Stereo</option>
     <option value=2>Reverse Stereo</option>
     <option value=3>Left</option>
@@ -366,7 +364,7 @@ Insert Slider widget
     <input type=button value="Enable" onClick='getVLC("vlc").video.marquee.enable();'>
     <input type=button value="Disable" onClick='getVLC("vlc").video.marquee.disable();'>
     <input size=4 value="" id="marqueeIntValue">
-    <select readonly onClick="doMarqueeOption(this.value,document.getElementById('marqueeIntValue').value);">
+    <select onClick="doMarqueeOption(this.value,document.getElementById('marqueeIntValue').value);">
         <option value=1>Color</option>
         <option value=2>Opacity</option>
         <option value=3>Position</option>
@@ -384,7 +382,7 @@ Insert Slider widget
     <input type=button value="Enable" onClick='getVLC("vlc").video.logo.enable();'>
     <input type=button value="Disable" onClick='getVLC("vlc").video.logo.disable();'>
     <input size=4 value="" id="logoIntValue">
-    <select readonly onClick="doLogoOption(this.value,document.getElementById('logoIntValue').value);">
+    <select onClick="doLogoOption(this.value,document.getElementById('logoIntValue').value);">
         <option value=1>File</option>
         <option value=2>Position</option>
         <option value=3>Opacity</option>
@@ -403,7 +401,7 @@ Insert Slider widget
 </td>
 </tr>
 </table>
-<SCRIPT language="javascript">
+<SCRIPT type="text/javascript">
 <!--
 
 var rate = 0;

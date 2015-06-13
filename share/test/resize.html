@@ -1,10 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 		<title>VLC Resizing Test Page</title>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
-		<style>
+		<style type="text/css">
 			#video_window {
 				position: absolute;
 				left: 50px;
@@ -13,7 +13,7 @@
 				height: 300px;
 			}
 		</style>
-		<script language="Javascript">
+		<script type="text/javascript">
 			var isMoving = false;
 			var isResizing = false;
 
@@ -88,13 +88,10 @@
 		<input type="button" onclick="ToggleMoving()" value="Toggle Moving"/>
 		<div id="video_window">
 			<embed	type="application/x-vlc-plugin"
-					version="VideoLAN.VLCPlugin.2"
 					width="100%" height="100%"
 					target="http://streams.videolan.org/streams/mp4/h264-sample-thefluff.mp4"
 					toolbar="false"
-					id="vlc_control"
-					>
-			</embed>
+					id="vlc_control" />
 		</div>
 	</body>
 </html>

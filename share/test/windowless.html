@@ -1,7 +1,8 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <html>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>VLC windowless Plugin test page</TITLE>
-<style>
+<style type="text/css">
   .inputTrackerInput {
         height:20;
         width:30;
@@ -11,7 +12,7 @@
     body {background: grey;}
 </style>
 
-<script language="JavaScript"><!--
+<script type="text/javascript"><!--
 function init()
 {
     if( navigator.appName.indexOf("Microsoft Internet")==-1 )
@@ -230,11 +231,11 @@ function close()
 
 //--></script>
 
-<body onLoad="init();" onClose="close();">
+<body onLoad="init();" onUnLoad="close();">
 
 <div style="width: 800; height: 200; top:200px; position: absolute; border: 1pt solid black; background: blue; border-radius: 5px; display: none;" id="overlay"></div>
 <table>
-<tr><td align="center" colspan="2">
+<tr><td style="text-align:center;" colspan="2">
 
 <div id=player>
 <!--
@@ -243,9 +244,7 @@ Insert VideoLAN.VLCPlugin.2
 <object classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"
         width="640"
         height="480"
-        id="vlc"
-        windowless="True"
-        events="True">
+        id="vlc">
 <param name="MRL" value="" />
 <param name="ShowDisplay" value="True" />
 <param name="AutoLoop" value="False" />
@@ -253,9 +252,9 @@ Insert VideoLAN.VLCPlugin.2
 <param name="Volume" value="50" />
 <param name="toolbar" value="true" />
 <param name="StartTime" value="0" />
+<param name="Windowless" value="True" />
 <EMBED pluginspage="http://www.videolan.org"
        type="application/x-vlc-plugin"
-       version="VideoLAN.VLCPlugin.2"
        width="640"
        height="480"
        toolbar="true"
@@ -264,8 +263,7 @@ Insert VideoLAN.VLCPlugin.2
        windowless="true"
        bgcolor="#000000"
        branding="true"
-       name="vlc">
-</EMBED>
+       name="vlc" />
 </object>
 </div>
 
@@ -280,7 +278,7 @@ MRL:
 <tr><td>
 <input type=button id="PlayOrPause" value=" Play " onClick='doPlayOrPause();'>
 <input type=button value="Stop" onClick='doStop();'>
-</td><td width="15%">
+</td><td style="width:15%">
 <div id="info" style="text-align:center">-:--:--/-:--:--</div>
 <div id="state" style="text-align:center">Stopped...</div>
 </td>
@@ -293,7 +291,7 @@ MRL:
     </td>
 </tr>
 </table>
-<SCRIPT language="javascript">
+<SCRIPT type="text/javascript">
 <!--
 
 var rate = 0;

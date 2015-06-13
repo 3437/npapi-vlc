@@ -1,6 +1,8 @@
+<!DOCTYPE html>
 <html>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>Simplest VLC plugin test</title>
-<script language="javascript">
+<script type="text/javascript">
 
 function play(tgt) {
     var uri = "http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4";
@@ -19,12 +21,11 @@ function reload() {
 <body onload="play('vlc1')">
 <h1>Simplest VLC plugin test</h1>
 
-<OBJECT id='vlc1_IE'  codeBase=http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab height=240 width=320 classid=clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921>
-<embed type="application/x-vlc-plugin" pluginspage="http://www.videolan.org" version="VideoLAN.VLCPlugin.2"
+<OBJECT id='vlc1_IE' height=240 width=320 classid=clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921>
+<embed type="application/x-vlc-plugin" pluginspage="http://www.videolan.org"
     width="320"
     height="240"
-    id="vlc1">
-</embed>
+    id="vlc1" />
 </OBJECT> 
 
 <hr>

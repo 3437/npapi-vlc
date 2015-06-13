@@ -13,7 +13,7 @@ form {
 <!--
 function init()
 {
-    if( navigator.appName.indexOf("Microsoft Internet")==-1 )
+    if( navigator.appName.indexOf("Microsoft Internet") == -1 )
     {
         onVLCPluginReady()
     }
@@ -24,7 +24,7 @@ function init()
     else
     {
         /* Explorer loads plugins asynchronously */
-        document.onreadystatechange=function()
+        document.onreadystatechange = function()
         {
             if( document.readyState == 'complete' )
             {
@@ -36,16 +36,16 @@ function init()
 
 function getVLC(name)
 {
-    if (window.document[name])
+    if( window.document[name] )
     {
         return window.document[name];
     }
-    if (navigator.appName.indexOf("Microsoft Internet")==-1)
+    if( navigator.appName.indexOf("Microsoft Internet") == -1 )
     {
-        if (document.embeds && document.embeds[name])
+        if( document.embeds && document.embeds[name] )
             return document.embeds[name];
     }
-    else // if (navigator.appName.indexOf("Microsoft Internet")!=-1)
+    else
     {
         return document.getElementById(name);
     }
@@ -55,16 +55,17 @@ function registerVLCEvent(event, handler)
 {
     var vlc = getVLC("vlc");
 
-    if (vlc) {
-        if (vlc.attachEvent) {
+    if( vlc )
+    {
+        if( vlc.attachEvent )
+        {
             // Microsoft
-            vlc.attachEvent (event, handler);
-        } else if (vlc.addEventListener) {
+            vlc.attachEvent(event, handler);
+        }
+        else if( vlc.addEventListener )
+        {
             // Mozilla: DOM level 2
-            vlc.addEventListener (event, handler);
-        } else {
-            // DOM level 0
-            eval("vlc.on" + event + " = handler");
+            vlc.addEventListener(event, handler, false);
         }
     }
 }
@@ -73,16 +74,17 @@ function unregisterVLCEvent(event, handler)
 {
     var vlc = getVLC("vlc");
 
-    if (vlc) {
-        if (vlc.detachEvent) {
+    if( vlc )
+    {
+        if( vlc.detachEvent )
+        {
             // Microsoft
-            vlc.detachEvent (event, handler);
-        } else if (vlc.removeEventListener) {
+            vlc.detachEvent(event, handler);
+        }
+        else if( vlc.removeEventListener )
+        {
             // Mozilla: DOM level 2
-            vlc.removeEventListener (event, handler);
-        } else {
-            // DOM level 0
-            eval("vlc.on" + event + " = null");
+            vlc.removeEventListener(event, handler, false);
         }
     }
 }
@@ -283,9 +285,9 @@ function close()
                         -->
                         <div id="inputTrackerDiv"></div>
                     </td>
-                    <td style="width:15%; text-align:center">
+                    <td style="width:100px; text-align:center">
                         <div id="info">-:--:--/-:--:--</div>
-                        <div id="state">Stopped...</div>
+                        <div id="state">Idle...</div>
                     </td>
                 </tr>
             </table>
@@ -293,7 +295,7 @@ function close()
     </tr>
     <tr>
         <td>
-            <input type="button" id="PlayOrPause" value=" Play " onClick='doPlayOrPause();'>
+            <input type="button" id="PlayOrPause" style="width:60px" value="Play" onClick='doPlayOrPause();'>
             <input type="button" value="Stop" onClick='doStop();'>
             &nbsp;
             <input type="button" value=" << " onClick='doPlaySlower();'>
@@ -308,7 +310,7 @@ function close()
             <span style="text-align:center">Volume:</span>
             <input type="button" value=" - " onClick='updateVolume(-10)'>
             <span id="volumeTextField" style="text-align:center">--</span>
-            <input type="button" value=" + " onClick='updateVolume(+10)'>
+            <input type="button" value=" + " onClick='updateVolume(10)'>
             <input type="button" value="Mute" onClick='getVLC("vlc").audio.toggleMute();'>
         </td>
     </tr>
@@ -328,7 +330,7 @@ function close()
             </select>
         </td>
         <td style="text-align:right">
-            <input type="button" id="itemCount" value="Items 0" onClick='doItemCount();'>
+            <input type="button" id="itemCount" value="Items: 0" onClick='doItemCount();'>
             <form action="javascript:doRemoveItem(document.getElementById('removeid').value);">
                 <input type="text" size="4" value="" id="removeid">
                 <input type="submit" value="Delete">
@@ -442,8 +444,6 @@ function close()
 <script type="text/javascript">
 <!--
 
-var rate = 0;
-var prevState = 0;
 var telxState = false;
 var canPause = true;
 var canSeek = true;
@@ -472,7 +472,7 @@ function doGetPosition()
     var vlc = getVLC("vlc");
 
     // set slider to new position
-    if (vlc)
+    if( vlc )
         alert( "position is " + vlc.input.time);
 }
 
@@ -531,7 +531,7 @@ function doToggleTeletext()
     if( vlc )
     {
         vlc.video.toggleTeletext();
-        if (telxState)
+        if( telxState )
         {
             document.getElementById("telx").innerHTML = "Teletext on";
             telxState = true;
@@ -550,7 +550,7 @@ function doItemCount()
     if( vlc )
     {
         var count = vlc.playlist.items.count;
-        document.getElementById("itemCount").value = " Items " + count + " ";
+        document.getElementById("itemCount").value = " Items: " + count + " ";
     }
 }
 
@@ -567,10 +567,6 @@ function doPlaylistClearAll()
     if( vlc )
     {
         vlc.playlist.items.clear();
-        while( vlc.playlist.items.count > 0)
-        {
-            // wait till playlist empties.
-        }
         doItemCount();
     }
 }
@@ -615,45 +611,40 @@ function doState()
     if( vlc )
         newState = vlc.input.state;
 
-    if( newState == 0 )
+    switch( newState )
     {
-        // current media has stopped
-        onEnd();
-    }
-    else if( newState == 1 )
-    {
-        // current media is openning/connecting
-        onOpen();
-    }
-    else if( newState == 2 )
-    {
-        // current media is buffering data
-        onBuffer();
-    }
-    else if( newState == 3 )
-    {
-        // current media is now playing
-        onPlay();
-    }
-    else if( newState == 4 )
-    {
-        // current media is now paused
-        onPause();
-    }
-    else if( newState == 5 )
-    {
-        // current media has stopped
-        onStop();
-    }
-    else if( newState == 6 )
-    {
-        // current media has ended
-        onEnd();
-    }
-    else if( newState == 7 )
-    {
-        // current media encountered error
-        onError();
+        case 0:
+            // player is in idle state
+            onEnd();
+            break;
+        case 1:
+            // current media is openning/connecting
+            onOpen();
+            break;
+        case 2:
+            // current media is buffering data
+            onBuffer();
+            break;
+        case 3:
+            // current media is now playing
+            onPlay();
+            break;
+        case 4:
+            // current media is now paused
+            onPause();
+            break;
+        case 5:
+            // current media has stopped
+            onStop();
+            break;
+        case 6:
+            // current media has ended
+            onEnd();
+            break;
+        case 7:
+            // current media encountered error
+            onError();
+            break;
     }
 }
 
@@ -666,14 +657,8 @@ function doGo(targetURL)
     if( vlc )
     {
         vlc.playlist.items.clear();
-        while( vlc.playlist.items.count > 0 )
-        {
-            // clear() may return before the playlist has actually been cleared
-            // just wait for it to finish its job
-        }
         var options = [":rtsp-tcp"];
         var itemId = vlc.playlist.add(targetURL,"",options);
-        options = [];
         if( itemId != -1 )
         {
             // play MRL
@@ -694,7 +679,6 @@ function doAdd(targetURL)
     if( vlc )
     {
         vlc.playlist.add(targetURL, "", options);
-        options = [];
         doItemCount();
     }
 }
@@ -732,27 +716,39 @@ function doPlayFaster()
 function doMarqueeOption(option, value)
 {
     var vlc = getVLC("vlc");
-    val = parseInt(value);
     if( vlc )
     {
-        if (option == 1)
-            vlc.video.marquee.color = val;
-        if (option == 2)
-            vlc.video.marquee.opacity = val;
-        if (option == 3)
-            vlc.video.marquee.position = value;
-        if (option == 4)
-            vlc.video.marquee.refresh = val;
-        if (option == 5)
-            vlc.video.marquee.size = val;
-        if (option == 6)
-            vlc.video.marquee.text = value;
-        if (option == 7)
-            vlc.video.marquee.timeout = val;
-        if (option == 8)
-            vlc.video.marquee.x = val;
-        if (option == 9)
-            vlc.video.marquee.y = val;
+        val = parseInt(value);
+        switch( option )
+        {
+            case "1":
+                vlc.video.marquee.color = val;
+                break;
+            case "2":
+                vlc.video.marquee.opacity = val;
+                break;
+            case "3":
+                vlc.video.marquee.position = value;
+                break;
+            case "4":
+                vlc.video.marquee.refresh = val;
+                break;
+            case "5":
+                vlc.video.marquee.size = val;
+                break;
+            case "6":
+                vlc.video.marquee.text = value;
+                break;
+            case "7":
+                vlc.video.marquee.timeout = val;
+                break;
+            case "8":
+                vlc.video.marquee.x = val;
+                break;
+            case "9":
+                vlc.video.marquee.y = val;
+                break;
+        }
     }
 }
 
@@ -761,21 +757,31 @@ function doLogoOption(option, value)
     var vlc = getVLC("vlc");
     if( vlc )
     {
-        if (option == 1)
-            vlc.video.logo.file(value);
-        if (option == 2)
-            vlc.video.logo.position = value;
         val = parseInt(value);
-        if (option == 3)
-            vlc.video.logo.opacity = val;
-        if (option == 4)
-            vlc.video.logo.repeat = val;
-        if (option == 5)
-            vlc.video.logo.delay = val;
-        if (option == 6)
-            vlc.video.logo.x = val;
-        if (option == 7)
-            vlc.video.logo.y = val;
+        switch( option )
+        {
+            case "1":
+                vlc.video.logo.file(value);
+                break;
+            case "2":
+                vlc.video.logo.position = value;
+                break;
+            case "3":
+                vlc.video.logo.opacity = val;
+                break;
+            case "4":
+                vlc.video.logo.repeat = val;
+                break;
+            case "5":
+                vlc.video.logo.delay = val;
+                break;
+            case "6":
+                vlc.video.logo.x = val;
+                break;
+            case "7":
+                vlc.video.logo.y = val;
+                break;
+        }
     }
 }
 
@@ -810,44 +816,40 @@ var liveFeedRoll = 0;
 
 function onPlaying()
 {
-        var vlc = getVLC("vlc");
-        var info = document.getElementById("info");
-        if( vlc )
+    var vlc = getVLC("vlc");
+    var info = document.getElementById("info");
+    if( vlc )
+    {
+        var mediaLen = vlc.input.length;
+        if( mediaLen > 0 )
         {
-            var mediaLen = vlc.input.length;
-            if( mediaLen > 0 )
-            {
-                // seekable media
-                info.innerHTML = formatTime(vlc.input.time)+"/"+formatTime(mediaLen);
-            }
-            else
-            {
-                // non-seekable "live" media
-                liveFeedRoll = liveFeedRoll & 3;
-                info.innerHTML = liveFeedText[liveFeedRoll++];
-            }
+            // seekable media
+            info.innerHTML = formatTime(vlc.input.time)+"/"+formatTime(mediaLen);
         }
+        else
+        {
+            // non-seekable "live" media
+            liveFeedRoll = liveFeedRoll & 3;
+            info.innerHTML = liveFeedText[liveFeedRoll++];
+        }
+    }
 }
 
 function onPause()
 {
     document.getElementById("state").innerHTML = "Paused...";
-    document.getElementById("PlayOrPause").value = " Play ";
+    document.getElementById("PlayOrPause").value = "Play";
 }
 
 function onStop()
 {
-    var vlc = getVLC("vlc");
-
     document.getElementById("info").innerHTML = "-:--:--/-:--:--";
     document.getElementById("state").innerHTML = "Stopped...";
-    document.getElementById("PlayOrPause").value = " Play ";
+    document.getElementById("PlayOrPause").value = "Play";
 }
 
 function onError()
 {
-    var vlc = getVLC("vlc");
-
     document.getElementById("state").innerHTML = "Error...";
 }
 

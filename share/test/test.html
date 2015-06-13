@@ -373,8 +373,17 @@ function close()
     </tr>
     <tr>
         <td colspan="2">Deinterlacing:
-            <input type="button" value="BLEND" onClick='getVLC("vlc").video.deinterlace.enable("blend");'>
-            <input type="button" value="  X  " onClick='getVLC("vlc").video.deinterlace.enable("x");'>
+            <select id="deinterlaceSelect">
+                <option value="blend">Blend</option>
+                <option value="bob">Bob</option>
+                <option value="discard">Discard</option>
+                <option value="linear">Linear</option>
+                <option value="mean">Mean</option>
+                <option value="x">X</option>
+                <option value="yadif">Yadif</option>
+                <option value="yadif2x">Yadif2x</option>
+            </select>
+            <input type="button" onClick="getVLC('vlc').video.deinterlace.enable(document.getElementById('deinterlaceSelect').value);" value="Enable">
             <input type="button" value="Disable" onClick='getVLC("vlc").video.deinterlace.disable();'>
         </td>
     </tr>

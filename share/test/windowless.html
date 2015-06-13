@@ -419,7 +419,11 @@ function doPlayOrPause()
     var vlc = getVLC("vlc");
     if( vlc )
     {
+        if( vlc.playlist.isPlaying )
             vlc.playlist.togglePause();
+        else
+            vlc.playlist.play();
+    }
 }
 
 function doStop()

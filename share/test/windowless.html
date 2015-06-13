@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>VLC windowless Plugin test page</TITLE>
+<title>VLC windowless Plugin test page</title>
+
 <style type="text/css">
-  .inputTrackerInput {
-        height:20;
-        width:30;
-        font-family : Arial, Helvetica, sans-serif;
-        font-size : 12px;
-  }
-    body {background: grey;}
+body {
+    background: grey;
+}
 </style>
 
-<script type="text/javascript"><!--
+<script type="text/javascript">
+<!--
 function init()
 {
     if( navigator.appName.indexOf("Microsoft Internet")==-1 )
@@ -229,69 +227,77 @@ function close()
     unregisterVLCEvent("MediaPlayerLengthChanged", handle_MediaPlayerLengthChanged);
 }
 
-//--></script>
+//-->
+</script>
 
 <body onLoad="init();" onUnLoad="close();">
 
-<div style="width: 800; height: 200; top:200px; position: absolute; border: 1pt solid black; background: blue; border-radius: 5px; display: none;" id="overlay"></div>
 <table>
-<tr><td style="text-align:center;" colspan="2">
+    <tr>
+        <td style="text-align:center;" colspan="2">
 
-<div id=player>
-<!--
-Insert VideoLAN.VLCPlugin.2
--->
-<object classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"
-        width="640"
-        height="480"
-        id="vlc">
-<param name="MRL" value="" />
-<param name="ShowDisplay" value="True" />
-<param name="AutoLoop" value="False" />
-<param name="AutoPlay" value="False" />
-<param name="Volume" value="50" />
-<param name="toolbar" value="true" />
-<param name="StartTime" value="0" />
-<param name="Windowless" value="True" />
-<EMBED pluginspage="http://www.videolan.org"
-       type="application/x-vlc-plugin"
-       width="640"
-       height="480"
-       toolbar="true"
-       loop="true"
-       text="Waiting for video"
-       windowless="true"
-       bgcolor="#000000"
-       branding="true"
-       name="vlc" />
-</object>
-</div>
+            <div id="player">
+                <!--
+                Insert VideoLAN.VLCPlugin.2
+                -->
+                <object classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"
+                        width="640"
+                        height="480"
+                        id="vlc">
+                    <param name="MRL" value="" />
+                    <param name="ShowDisplay" value="True" />
+                    <param name="AutoLoop" value="False" />
+                    <param name="AutoPlay" value="False" />
+                    <param name="Volume" value="50" />
+                    <param name="Toolbar" value="True" />
+                    <param name="StartTime" value="0" />
+                    <param name="Windowless" value="True" />
+                    <embed pluginspage="http://www.videolan.org"
+                           type="application/x-vlc-plugin"
+                           width="640"
+                           height="480"
+                           toolbar="true"
+                           loop="false"
+                           text="Waiting for video"
+                           windowless="true"
+                           bgcolor="#000000"
+                           branding="true"
+                           allowfullscreen="true"
+                           name="vlc" />
+                </object>
+            </div>
 
-</td></tr>
-<tr><td colspan="2">
-MRL:
-<input size="90" id="targetTextField" value="">
-<input type=submit value="Go" onClick="doGo(document.getElementById('targetTextField').value);">
-<input type=submit value="Add" onClick="doAdd(document.getElementById('targetTextField').value);">
-</td></tr>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            MRL:
+            <input type="text" size="90" id="targetTextField" value="">
+            <input type="submit" value="Go" onClick="doGo(document.getElementById('targetTextField').value);">
+            <input type="submit" value="Add" onClick="doAdd(document.getElementById('targetTextField').value);">
+        </td>
+    </tr>
 
-<tr><td>
-<input type=button id="PlayOrPause" value=" Play " onClick='doPlayOrPause();'>
-<input type=button value="Stop" onClick='doStop();'>
-</td><td style="width:15%">
-<div id="info" style="text-align:center">-:--:--/-:--:--</div>
-<div id="state" style="text-align:center">Stopped...</div>
-</td>
-</tr>
-<tr>
-    <td>
-        <input type=button value="3D transform" onClick='doToggle3dTransform();'>
-        <input type=button value="Change opacity" onClick='doToggleOpacity();'>
-        <input type=button value="Rounded corners" onClick='doToggleRound();'>
-    </td>
-</tr>
+    <tr>
+        <td>
+            <input type="button" id="PlayOrPause" value=" Play " onClick='doPlayOrPause();'>
+            <input type="button" value="Stop" onClick='doStop();'>
+        </td>
+        <td style="text-align:center; width:15%">
+            <div id="info">-:--:--/-:--:--</div>
+            <div id="state">Stopped...</div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <input type="button" value="3D transform" onClick='doToggle3dTransform();'>
+            <input type="button" value="Change opacity" onClick='doToggleOpacity();'>
+            <input type="button" value="Rounded corners" onClick='doToggleRound();'>
+        </td>
+    </tr>
 </table>
-<SCRIPT type="text/javascript">
+
+<script type="text/javascript">
 <!--
 
 var rate = 0;
@@ -759,6 +765,6 @@ function onError()
 }
 
 //-->
-</SCRIPT>
+</script>
 </body>
-</HTML>
+</html>

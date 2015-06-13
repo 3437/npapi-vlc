@@ -172,6 +172,12 @@ function handle_MediaPlayerTimeChanged(time)
             // seekable media
             info.innerHTML = formatTime(time)+"/"+formatTime(mediaLen);
         }
+        else
+        {
+            // non-seekable "live" media
+            liveFeedRoll = liveFeedRoll & 3;
+            info.innerHTML = liveFeedText[liveFeedRoll++];
+        }
     }
 }
 
@@ -430,6 +436,8 @@ function onOpen()
 {
     document.getElementById("state").innerHTML = "Opening...";
     document.getElementById("PlayOrPause").value = "Pause";
+    if( liveFeedRoll != 0 )
+        liveFeedRoll = 0;
 }
 
 function onBuffer()
@@ -450,7 +458,7 @@ function onEnd()
     document.getElementById("state").innerHTML = "End...";
 }
 
-var liveFeedText = ["Live", "((Live))", "(( Live ))", "((  Live  ))"];
+var liveFeedText = ["Live", "((Live))", "(( Live ))", "((&nbsp; Live &nbsp;))"];
 var liveFeedRoll = 0;
 
 function onPlaying()

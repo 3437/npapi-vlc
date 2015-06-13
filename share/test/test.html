@@ -168,6 +168,12 @@ function handle_MediaPlayerTimeChanged(time)
             // seekable media
             info.innerHTML = formatTime(time)+"/"+formatTime(mediaLen);
         }
+        else
+        {
+            // non-seekable "live" media
+            liveFeedRoll = liveFeedRoll & 3;
+            info.innerHTML = liveFeedText[liveFeedRoll++];
+        }
     }
 }
 
@@ -456,8 +462,8 @@ function close()
 <!--
 
 var telxState = false;
-var canPause = true;
-var canSeek = true;
+var canPause = false;
+var canSeek = false;
 
 function setPauseable(val)
 {
@@ -467,6 +473,8 @@ function setPauseable(val)
 function setSeekable(val)
 {
     canSeek = val;
+    if( liveFeedRoll != 0 )
+        liveFeedRoll = 0;
 }
 
 function doSetSlider()
@@ -802,6 +810,7 @@ function onOpen()
 {
     document.getElementById("state").innerHTML = "Opening...";
     document.getElementById("PlayOrPause").value = "Pause";
+    setSeekable(false);
 }
 
 function onBuffer()
@@ -820,9 +829,10 @@ function onPlay()
 function onEnd()
 {
     document.getElementById("state").innerHTML = "End...";
+    setSeekable(false);
 }
 
-var liveFeedText = ["Live", "((Live))", "(( Live ))", "((  Live  ))"];
+var liveFeedText = ["Live", "((Live))", "(( Live ))", "((&nbsp; Live &nbsp;))"];
 var liveFeedRoll = 0;
 
 function onPlaying()
@@ -857,6 +867,7 @@ function onStop()
     document.getElementById("info").innerHTML = "-:--:--/-:--:--";
     document.getElementById("state").innerHTML = "Stopped...";
     document.getElementById("PlayOrPause").value = "Play";
+    setSeekable(false);
 }
 
 function onError()

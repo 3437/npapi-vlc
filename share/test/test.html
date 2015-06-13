@@ -316,7 +316,7 @@ function close()
             <input type="button" value="Stop" onClick='doStop();'>
             &nbsp;
             <input type="button" value=" << " onClick='doPlaySlower();'>
-            <input type="button" value="Reverse" onClick='doReverse();'>
+            <span id="rateTextField" style="text-align:center">1x</span>
             <input type="button" value=" >> " onClick='doPlayFaster();'>
             &nbsp;
             <input type="button" value="Fullscreen" onClick='getVLC("vlc").video.toggleFullscreen();'>
@@ -495,11 +495,11 @@ function doGetPosition()
         alert( "position is " + vlc.input.time);
 }
 
-function doReverse(rate)
+function doGetRate()
 {
     var vlc = getVLC("vlc");
     if( vlc )
-        vlc.input.rate = -1.0 * vlc.input.rate;
+        document.getElementById("rateTextField").innerHTML = vlc.input.rate + "x";
 }
 
 function doAudioChannel(value)
@@ -740,14 +740,20 @@ function doPlaySlower()
 {
     var vlc = getVLC("vlc");
     if( vlc )
+    {
         vlc.input.rate = vlc.input.rate / 2;
+        doGetRate();
+    }
 }
 
 function doPlayFaster()
 {
     var vlc = getVLC("vlc");
     if( vlc )
+    {
         vlc.input.rate = vlc.input.rate * 2;
+        doGetRate();
+    }
 }
 
 function doMarqueeOption(option, value)

@@ -569,13 +569,13 @@ function doToggleTeletext()
         vlc.video.toggleTeletext();
         if( telxState )
         {
-            document.getElementById("telx").innerHTML = "Teletext on";
-            telxState = true;
+            document.getElementById("telx").value = "Teletext off";
+            telxState = false;
         }
         else
         {
-            document.getElementById("telx").innerHTML = "Teletext off";
-            telxState = false;
+            document.getElementById("telx").value = "Teletext on";
+            telxState = true;
         }
     }
 }

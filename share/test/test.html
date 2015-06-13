@@ -4,6 +4,35 @@
 <title>VLC Plugin test page</title>
 
 <style type="text/css">
+#sliderBox {
+    position:relative;
+    margin:0px 4px;
+    height:10px;
+    border:1px solid #999999;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+#sliderProgress {
+    position:absolute;
+    z-index:-1;
+    top:0px;
+    left:0px;
+    background-color:#3399FF;
+    width:0%;
+    height:100%;
+}
+
+.sliderButton {
+    position:absolute;
+    top:-3px;
+    right:-2px;
+    background-color:#999999;
+    height:16px;
+    width:4px;
+    border-radius:3px;
+}
+
 form {
     display:inline;
 }
@@ -179,7 +208,11 @@ function handle_MediaPlayerTimeChanged(time)
 
 function handle_MediaPlayerPositionChanged(val)
 {
-    // set javascript slider to correct position
+    if( canSeek )
+    {
+        var percent = Math.round(val*10000)/100;
+        document.getElementById("sliderProgress").style.width = percent + "%";
+    }
 }
 
 function handle_MediaPlayerSeekableChanged(val)
@@ -294,13 +327,23 @@ function close()
     </tr>
     <tr>
         <td colspan="2">
-            <table>
+            <table style="width:100%;">
                 <tr>
-                    <td style="vertical-align:top; width:550px;">
+                    <td style="vertical-align:middle; width:550px;">
                         <!--
                         Insert Slider widget
                         -->
-                        <div id="inputTrackerDiv"></div>
+                        <div id="sliderBox" onMouseLeave="if(slideState) slideState = false;" onMouseUp="if(slideState) slideState = false;">
+                            <!-- progress bar -->
+                            <div id="sliderProgress">
+                                <!-- Slider button -->
+                                <div class="sliderButton"></div>
+                            </div>
+                            <!-- Clickable seek bar -->
+                            <div style="height:100%; position:relative;"
+                                 onMouseDown="slideState = true; doSetPosition(event); if(event.preventDefault) event.preventDefault(); else return false;"
+                                 onMouseMove="if(slideState) doSetPosition(event);"></div>
+                        </div>
                     </td>
                     <td style="width:100px; text-align:center">
                         <div id="info">-:--:--/-:--:--</div>
@@ -463,6 +506,7 @@ function close()
 <script type="text/javascript">
 <!--
 
+var slideState = false;
 var telxState = false;
 var canPause = false;
 var canSeek = false;
@@ -483,9 +527,8 @@ function doSetSlider()
 {
     var vlc = getVLC("vlc");
 
-    // set slider to new position
-    if( vlc )
-        vlc.input.time = (vlc.input.length/2);
+    if( vlc && vlc.input.length != 0 )
+        vlc.input.time = vlc.input.length / 2;
 }
 
 function doGetPosition()
@@ -837,12 +880,26 @@ function doLogoOption(option, value)
     }
 }
 
+function doSetPosition(event){
+    if( !canSeek ) return; // non-seekable "live" media
+
+    var vlc = getVLC("vlc");
+    if( vlc )
+    {
+        var sliderBoxWidth = document.getElementById("sliderBox").offsetWidth - 2; // -2 for border
+        var x = event.offsetX || event.layerX || 0;
+        document.getElementById("sliderProgress").style.width = Math.round((x / (sliderBoxWidth-1) )*10000)/100 + "%"; // set slider position
+        vlc.input.position = ((x*100)/sliderBoxWidth)/100; // set media position
+    }
+}
+
 /* events */
 
 function onOpen()
 {
     document.getElementById("state").innerHTML = "Opening...";
     document.getElementById("PlayOrPause").value = "Pause";
+    document.getElementById("sliderProgress").style.width = "0%";
     setSeekable(false);
 }
 
@@ -864,6 +921,7 @@ function onEnd()
     document.getElementById("info").innerHTML = "-:--:--/-:--:--";
     document.getElementById("state").innerHTML = "End...";
     document.getElementById("PlayOrPause").value = "Play";
+    document.getElementById("sliderProgress").style.width = "0%";
     setSeekable(false);
 }
 
@@ -902,6 +960,7 @@ function onStop()
     document.getElementById("info").innerHTML = "-:--:--/-:--:--";
     document.getElementById("state").innerHTML = "Stopped...";
     document.getElementById("PlayOrPause").value = "Play";
+    document.getElementById("sliderProgress").style.width = "0%";
     setSeekable(false);
 }
 

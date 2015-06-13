@@ -514,7 +514,11 @@ function doAudioTrack(value)
     var vlc = getVLC("vlc");
     if( vlc )
     {
-        vlc.audio.track = vlc.audio.track + value;
+        var newValue = vlc.audio.track + value;
+        if( newValue >= 0 && newValue < vlc.audio.count )
+        {
+            vlc.audio.track = newValue;
+        }
         document.getElementById("trackTextField").innerHTML = vlc.audio.track;
     }
 }
@@ -531,7 +535,11 @@ function doSubtitle(value)
     var vlc = getVLC("vlc");
     if( vlc )
     {
-        vlc.subtitle.track = vlc.subtitle.track + value;
+        var newValue = vlc.subtitle.track + value;
+        if( newValue >= 0 && newValue < vlc.subtitle.count )
+        {
+            vlc.subtitle.track = vlc.subtitle.track + value;
+        }
         document.getElementById("spuTextField").innerHTML = vlc.subtitle.track;
     }
 }
@@ -577,7 +585,14 @@ function doRemoveItem(item)
 {
     var vlc = getVLC("vlc");
     if( vlc )
-        vlc.playlist.items.remove(item);
+    {
+        var count = vlc.playlist.items.count;
+        if( !isNaN(item) && item !== "" && item >= 0 && item < count )
+        {
+            vlc.playlist.items.remove(item);
+            doItemCount();
+        }
+    }
 }
 
 function doPlaylistClearAll()

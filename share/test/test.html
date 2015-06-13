@@ -380,6 +380,8 @@ function close()
             <input type="button" value="Next" onClick='getVLC("vlc").playlist.next();'>
             <input type="button" value="Clear All" onClick='doPlaylistClearAll();'>
             &nbsp;
+            <input type="button" value="current item" onClick='alert("current item: " + getVLC("vlc").playlist.currentItem);'>
+            &nbsp;
             <input type="button" id="itemCount" value="Items: 0" onClick='doItemCount();'>
             <form action="javascript:doRemoveItem(document.getElementById('removeid').value);">
                 <input type="text" size="4" value="" id="removeid">

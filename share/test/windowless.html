@@ -7,6 +7,10 @@
 body {
     background: grey;
 }
+
+form {
+    display:inline;
+}
 </style>
 
 <script type="text/javascript">
@@ -272,9 +276,11 @@ function close()
     <tr>
         <td colspan="2">
             MRL:
-            <input type="text" size="90" id="targetTextField" value="">
-            <input type="submit" value="Go" onClick="doGo(document.getElementById('targetTextField').value);">
-            <input type="submit" value="Add" onClick="doAdd(document.getElementById('targetTextField').value);">
+            <form action="javascript:doGo(document.getElementById('targetTextField').value);">
+                <input type="text" size="90" id="targetTextField" value="">
+                <input type="submit" value="Go">
+                <input type="button" value="Add" onClick="doAdd(document.getElementById('targetTextField').value);">
+            </form>
         </td>
     </tr>
 

@@ -4,7 +4,9 @@
 <title>VLC Plugin test page</title>
 
 <style type="text/css">
-
+form {
+    display:inline;
+}
 </style>
 
 <script type="text/javascript">
@@ -234,9 +236,11 @@ function close()
     <tr>
         <td colspan="2">
             MRL:
-            <input type="text" size="90" id="targetTextField" value="">
-            <input type="submit" value="Go" onClick="doGo(document.getElementById('targetTextField').value);">
-            <input type="submit" value="Add" onClick="doAdd(document.getElementById('targetTextField').value);">
+            <form action="javascript:doGo(document.getElementById('targetTextField').value);">
+                <input type="text" size="90" id="targetTextField" value="">
+                <input type="submit" value="Go">
+                <input type="button" value="Add" onClick="doAdd(document.getElementById('targetTextField').value);">
+            </form>
         </td>
     </tr>
     <tr>
@@ -324,9 +328,11 @@ function close()
             </select>
         </td>
         <td style="text-align:right">
-            <input type="button" id="itemCount" value=" Items 0 " onClick='doItemCount();'>
-            <input type="text" size="4" value="" id="removeid">
-            <input type="submit" value="Delete" onClick="doRemoveItem(document.getElementById('removeid').value);">
+            <input type="button" id="itemCount" value="Items 0" onClick='doItemCount();'>
+            <form action="javascript:doRemoveItem(document.getElementById('removeid').value);">
+                <input type="text" size="4" value="" id="removeid">
+                <input type="submit" value="Delete">
+            </form>
         </td>
     </tr>
     <tr>
@@ -376,43 +382,50 @@ function close()
         <td colspan="2">Marquee video filter:
             <input type="button" value="Enable" onClick='getVLC("vlc").video.marquee.enable();'>
             <input type="button" value="Disable" onClick='getVLC("vlc").video.marquee.disable();'>
-            <input type="text" size="4" value="" id="marqueeIntValue">
-            <select id="marqueeSelect">
-                <option value="1">Color</option>
-                <option value="2">Opacity</option>
-                <option value="3">Position</option>
-                <option value="4">Refresh</option>
-                <option value="5">Size</option>
-                <option value="6">Text</option>
-                <option value="7">Timeout</option>
-                <option value="8">X</option>
-                <option value="9">Y</option>
-            </select>
-            <input type="button" onclick="doMarqueeOption(document.getElementById('marqueeSelect').value,document.getElementById('marqueeIntValue').value);" value="Go">
+            <form action="javascript:doMarqueeOption(document.getElementById('marqueeSelect').value,document.getElementById('marqueeIntValue').value);">
+                <select id="marqueeSelect">
+                    <option value="1">Color</option>
+                    <option value="2">Opacity</option>
+                    <option value="3">Position</option>
+                    <option value="4">Refresh</option>
+                    <option value="5">Size</option>
+                    <option value="6">Text</option>
+                    <option value="7">Timeout</option>
+                    <option value="8">X</option>
+                    <option value="9">Y</option>
+                </select>
+                <input type="text" size="8" value="" id="marqueeIntValue">
+                <input type="submit" value="Go">
+            </form>
         </td>
     </tr>
     <tr>
         <td colspan="2">Logo video filter:
             <input type="button" value="Enable" onClick='getVLC("vlc").video.logo.enable();'>
             <input type="button" value="Disable" onClick='getVLC("vlc").video.logo.disable();'>
-            <input type="text" size="4" value="" id="logoIntValue">
-            <select id="logoSelect">
-                <option value="1">File</option>
-                <option value="2">Position</option>
-                <option value="3">Opacity</option>
-                <option value="4">Repeat</option>
-                <option value="5">Delay</option>
-                <option value="6">X</option>
-                <option value="7">Y</option>
-            </select>
-            <input type="button" onclick="doLogoOption(document.getElementById('logoSelect').value,document.getElementById('logoIntValue').value);" value="Go">
+            <form action="javascript:doLogoOption(document.getElementById('logoSelect').value,document.getElementById('logoIntValue').value);">
+                <select id="logoSelect">
+                    <option value="1">File</option>
+                    <option value="2">Position</option>
+                    <option value="3">Opacity</option>
+                    <option value="4">Repeat</option>
+                    <option value="5">Delay</option>
+                    <option value="6">X</option>
+                    <option value="7">Y</option>
+                </select>
+                <input type="text" size="8" value="" id="logoIntValue">
+                <input type="submit" value="Go">
+            </form>
         </td>
     </tr>
     <tr>
         <td colspan="2">
             <input type="button" id="telx" value="Teletext off" onClick='doToggleTeletext();'>
             Teletext page:
-            <input type="text" size="4" value="100" id="telxPage" onClick='doTelxPage(document.getElementById("telxPage").value);'>
+            <form action="javascript:doTelxPage(document.getElementById('telxPage').value);">
+                <input type="text" size="4" value="100" id="telxPage">
+                <input type="submit" value="Set page">
+            </form>
         </td>
     </tr>
 </table>

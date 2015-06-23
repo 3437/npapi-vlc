@@ -171,6 +171,57 @@ library AXVLC
 
     [
       odl,
+      uuid(b5def5a1-ffb6-4e68-b3d8-a12ac60fda54),
+      helpstring("VLC Title APIs"),
+      dual,
+      oleautomation
+    ]
+    interface IVLCTitle : IDispatch
+    {
+        [propget, helpstring("Returns the number of title tracks available.")]
+        HRESULT count([out, retval] long* countTracks);
+
+        [propget, helpstring("Returns/sets title track used/to use.")]
+        HRESULT track([out, retval] long* track);
+        [propput, helpstring("Returns/sets title track used/to use.")]
+        HRESULT track([in] long track);
+
+        [helpstring("Returns the current title track name.")]
+        HRESULT description([in] long track, [out, retval] BSTR* name);
+    };
+
+    [
+      odl,
+      uuid(5af314cf-8849-4a79-a3fc-8de6625d9e72),
+      helpstring("VLC Chapter APIs"),
+      dual,
+      oleautomation
+    ]
+    interface IVLCChapter : IDispatch
+    {
+        [propget, helpstring("Returns the number of chapter tracks available.")]
+        HRESULT count([out, retval] long* countTracks);
+
+        [helpstring("Returns the number of chapter tracks available of a specific title.")]
+        HRESULT countForTitle([in] long title, [out, retval] long* countTracks);
+
+        [propget, helpstring("Returns/sets chapter track used/to use.")]
+        HRESULT track([out, retval] long* track);
+        [propput, helpstring("Returns/sets chapter track used/to use.")]
+        HRESULT track([in] long track);
+
+        [helpstring("Returns the current chapter track name.")]
+        HRESULT description([in] long title, [in] long chapter, [out, retval] BSTR* name);
+
+        [helpstring("Advance to next chapter in current title.")]
+        HRESULT next();
+
+        [helpstring("Advance to previous chapter in current title.")]
+        HRESULT prev();
+    };
+
+    [
+      odl,
       uuid(49E0DBD1-9440-466C-9C97-95C67190C603),
       helpstring("VLC Input APIs"),
       dual,
@@ -204,6 +255,12 @@ library AXVLC
 
         [propget, helpstring("Returns whether current playback displays video.")]
         HRESULT hasVout([out, retval] VARIANT_BOOL* hasVout);
+
+        [propget, helpstring("Returns the title object.")]
+        HRESULT title([out, retval] IVLCTitle** obj);
+
+        [propget, helpstring("Returns the chapter object.")]
+        HRESULT chapter([out, retval] IVLCChapter** obj);
     };
 
     [
@@ -415,57 +472,6 @@ library AXVLC
 
     [
       odl,
-      uuid(b5def5a1-ffb6-4e68-b3d8-a12ac60fda54),
-      helpstring("VLC Title APIs"),
-      dual,
-      oleautomation
-    ]
-    interface IVLCTitle : IDispatch
-    {
-        [propget, helpstring("Returns the number of title tracks available.")]
-        HRESULT count([out, retval] long* countTracks);
-
-        [propget, helpstring("Returns/sets title track used/to use.")]
-        HRESULT track([out, retval] long* track);
-        [propput, helpstring("Returns/sets title track used/to use.")]
-        HRESULT track([in] long track);
-
-        [helpstring("Returns the current title track name.")]
-        HRESULT description([in] long track, [out, retval] BSTR* name);
-    };
-
-    [
-      odl,
-      uuid(5af314cf-8849-4a79-a3fc-8de6625d9e72),
-      helpstring("VLC Chapter APIs"),
-      dual,
-      oleautomation
-    ]
-    interface IVLCChapter : IDispatch
-    {
-        [propget, helpstring("Returns the number of chapter tracks available.")]
-        HRESULT count([out, retval] long* countTracks);
-
-        [helpstring("Returns the number of chapter tracks available of a specific title.")]
-        HRESULT countForTitle([in] long title, [out, retval] long* countTracks);
-
-        [propget, helpstring("Returns/sets chapter track used/to use.")]
-        HRESULT track([out, retval] long* track);
-        [propput, helpstring("Returns/sets chapter track used/to use.")]
-        HRESULT track([in] long track);
-
-        [helpstring("Returns the current chapter track name.")]
-        HRESULT description([in] long title, [in] long chapter, [out, retval] BSTR* name);
-
-        [helpstring("Advance to next chapter in current title.")]
-        HRESULT next();
-
-        [helpstring("Advance to previous chapter in current title.")]
-        HRESULT prev();
-    };
-
-    [
-      odl,
       uuid(0AAEDF0B-D333-4B27-A0C6-BBF31413A42E),
       helpstring("VLC Video APIs"),
       dual,
@@ -522,12 +528,6 @@ library AXVLC
 
         [propget, helpstring("Returns the logo object.")]
         HRESULT deinterlace([out, retval] IVLCDeinterlace** obj);
-
-        [propget, helpstring("Returns the title object.")]
-        HRESULT title([out, retval] IVLCTitle** obj);
-
-        [propget, helpstring("Returns the chapter object.")]
-        HRESULT chapter([out, retval] IVLCChapter** obj);
     };
 
     [

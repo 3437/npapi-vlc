@@ -387,6 +387,15 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
 ** implementation of libvlc input object
 */
 
+LibvlcInputNPObject::~LibvlcInputNPObject()
+{
+    if( isValid() )
+    {
+        if( titleObj   ) NPN_ReleaseObject(titleObj);
+        if( chapterObj ) NPN_ReleaseObject(chapterObj);
+    }
+}
+
 const NPUTF8 * const LibvlcInputNPObject::propertyNames[] =
 {
     "length",
@@ -396,6 +405,8 @@ const NPUTF8 * const LibvlcInputNPObject::propertyNames[] =
     "rate",
     "fps",
     "hasVout",
+    "title",
+    "chapter",
 };
 COUNTNAMES(LibvlcInputNPObject,propertyCount,propertyNames);
 
@@ -408,6 +419,8 @@ enum LibvlcInputNPObjectPropertyIds
     ID_input_rate,
     ID_input_fps,
     ID_input_hasvout,
+    ID_input_title,
+    ID_input_chapter,
 };
 
 RuntimeNPObject::InvokeResult
@@ -465,6 +478,18 @@ LibvlcInputNPObject::getProperty(int index, npapi::OutVariant& result)
             case ID_input_hasvout:
             {
                 result = p_plugin->player().get_mp().hasVout() != 0;
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_input_title:
+            {
+                InstantObj<LibvlcTitleNPObject>( titleObj );
+                result = titleObj;
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_input_chapter:
+            {
+                InstantObj<LibvlcChapterNPObject>( chapterObj );
+                result = chapterObj;
                 return INVOKERESULT_NO_ERROR;
             }
             default:
@@ -1275,8 +1300,6 @@ LibvlcVideoNPObject::~LibvlcVideoNPObject()
         if( marqueeObj ) NPN_ReleaseObject(marqueeObj);
         if( logoObj    ) NPN_ReleaseObject(logoObj);
         if( deintObj   ) NPN_ReleaseObject(deintObj);
-        if( titleObj   ) NPN_ReleaseObject(titleObj);
-        if( chapterObj ) NPN_ReleaseObject(chapterObj);
     }
 }
 
@@ -1292,8 +1315,6 @@ const NPUTF8 * const LibvlcVideoNPObject::propertyNames[] =
     "marquee",
     "logo",
     "deinterlace",
-    "title",
-    "chapter",
 };
 
 enum LibvlcVideoNPObjectPropertyIds
@@ -1308,8 +1329,6 @@ enum LibvlcVideoNPObjectPropertyIds
     ID_video_marquee,
     ID_video_logo,
     ID_video_deinterlace,
-    ID_video_title,
-    ID_video_chapter,
 };
 COUNTNAMES(LibvlcVideoNPObject,propertyCount,propertyNames);
 
@@ -1384,18 +1403,6 @@ LibvlcVideoNPObject::getProperty(int index, npapi::OutVariant& result)
             {
                 InstantObj<LibvlcDeinterlaceNPObject>( deintObj );
                 result = deintObj;
-                return INVOKERESULT_NO_ERROR;
-            }
-            case ID_video_title:
-            {
-                InstantObj<LibvlcTitleNPObject>( titleObj );
-                result = titleObj;
-                return INVOKERESULT_NO_ERROR;
-            }
-            case ID_video_chapter:
-            {
-                InstantObj<LibvlcChapterNPObject>( chapterObj );
-                result = chapterObj;
                 return INVOKERESULT_NO_ERROR;
             }
         }

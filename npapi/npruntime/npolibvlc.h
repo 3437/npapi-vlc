@@ -91,9 +91,10 @@ protected:
     friend class RuntimeNPClass<LibvlcInputNPObject>;
 
     LibvlcInputNPObject(NPP instance, const NPClass *aClass) :
-        RuntimeNPObject(instance, aClass) {};
+        RuntimeNPObject(instance, aClass),
+        titleObj(NULL), chapterObj(NULL) {};
 
-    virtual ~LibvlcInputNPObject() {};
+    virtual ~LibvlcInputNPObject();
 
     static const int propertyCount;
     static const NPUTF8 * const propertyNames[];
@@ -105,6 +106,10 @@ protected:
     static const NPUTF8 * const methodNames[];
 
     InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+
+private:
+    NPObject *titleObj;
+    NPObject *chapterObj;
 };
 
 class LibvlcMediaDescriptionNPObject: public RuntimeNPObject
@@ -201,7 +206,7 @@ protected:
 
     LibvlcVideoNPObject(NPP instance, const NPClass *aClass) :
         RuntimeNPObject(instance, aClass),
-        marqueeObj(NULL), logoObj(NULL), deintObj(NULL), titleObj(NULL), chapterObj(NULL) { }
+        marqueeObj(NULL), logoObj(NULL), deintObj(NULL) { }
     virtual ~LibvlcVideoNPObject();
 
     static const int propertyCount;
@@ -219,8 +224,6 @@ private:
     NPObject *marqueeObj;
     NPObject *logoObj;
     NPObject *deintObj;
-    NPObject *titleObj;
-    NPObject *chapterObj;
 };
 
 class LibvlcMarqueeNPObject: public RuntimeNPObject

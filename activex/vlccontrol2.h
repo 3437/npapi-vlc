@@ -140,10 +140,42 @@ public:
     STDMETHODIMP description(long trackId, BSTR*);
 };
 
+class VLCTitle : public VLCInterface<VLCTitle,IVLCTitle>
+{
+public:
+    VLCTitle(VLCPlugin *p): VLCInterface<VLCTitle,IVLCTitle>(p) { }
+
+    // IVLCTitle methods
+    STDMETHODIMP get_count(long*);
+    STDMETHODIMP get_track(long*);
+    STDMETHODIMP put_track(long);
+    STDMETHODIMP description(long, BSTR*);
+};
+
+class VLCChapter : public VLCInterface<VLCChapter,IVLCChapter>
+{
+public:
+    VLCChapter(VLCPlugin *p): VLCInterface<VLCChapter,IVLCChapter>(p) { }
+
+    // IVLCChapter methods
+    STDMETHODIMP get_count(long*);
+    STDMETHODIMP countForTitle(long, long*);
+    STDMETHODIMP get_track(long*);
+    STDMETHODIMP put_track(long);
+    STDMETHODIMP description(long, long, BSTR*);
+    STDMETHODIMP next();
+    STDMETHODIMP prev();
+};
+
 class VLCInput: public VLCInterface<VLCInput,IVLCInput>
 {
 public:
-    VLCInput(VLCPlugin *p): VLCInterface<VLCInput,IVLCInput>(p) { }
+    VLCInput(VLCPlugin *p): VLCInterface<VLCInput,IVLCInput>(p),
+        _p_vlctitle(new VLCTitle(p)), _p_vlcchapter(new VLCChapter(p)) { }
+    virtual ~VLCInput() {
+        _p_vlctitle->Release();
+        _p_vlcchapter->Release();
+    }
 
     // IVLCInput methods
     STDMETHODIMP get_length(double*);
@@ -156,6 +188,12 @@ public:
     STDMETHODIMP put_rate(double);
     STDMETHODIMP get_fps(double*);
     STDMETHODIMP get_hasVout(VARIANT_BOOL*);
+    STDMETHODIMP get_title(IVLCTitle**);
+    STDMETHODIMP get_chapter(IVLCChapter**);
+
+private:
+    IVLCTitle       *_p_vlctitle;
+    IVLCChapter     *_p_vlcchapter;
 };
 
 class VLCMarquee: public VLCInterface<VLCMarquee,IVLCMarquee>
@@ -236,33 +274,6 @@ public:
     STDMETHODIMP disable();
 };
 
-class VLCTitle : public VLCInterface<VLCTitle,IVLCTitle>
-{
-public:
-    VLCTitle(VLCPlugin *p): VLCInterface<VLCTitle,IVLCTitle>(p) { }
-
-    // IVLCTitle methods
-    STDMETHODIMP get_count(long*);
-    STDMETHODIMP get_track(long*);
-    STDMETHODIMP put_track(long);
-    STDMETHODIMP description(long, BSTR*);
-};
-
-class VLCChapter : public VLCInterface<VLCChapter,IVLCChapter>
-{
-public:
-    VLCChapter(VLCPlugin *p): VLCInterface<VLCChapter,IVLCChapter>(p) { }
-
-    // IVLCChapter methods
-    STDMETHODIMP get_count(long*);
-    STDMETHODIMP countForTitle(long, long*);
-    STDMETHODIMP get_track(long*);
-    STDMETHODIMP put_track(long);
-    STDMETHODIMP description(long, long, BSTR*);
-    STDMETHODIMP next();
-    STDMETHODIMP prev();
-};
-
 class VLCPlaylistItems: public VLCInterface<VLCPlaylistItems,IVLCPlaylistItems>
 {
 public:
@@ -320,14 +331,11 @@ class VLCVideo: public VLCInterface<VLCVideo,IVLCVideo>
 public:
     VLCVideo(VLCPlugin *p): VLCInterface<VLCVideo,IVLCVideo>(p),
         _p_vlcmarquee(new VLCMarquee(p)), _p_vlclogo(new VLCLogo(p)),
-        _p_vlcdeint(new VLCDeinterlace(p)), _p_vlctitle(new VLCTitle(p)),
-        _p_vlcchapter(new VLCChapter(p)) { }
+        _p_vlcdeint(new VLCDeinterlace(p)) { }
     virtual ~VLCVideo() {
         _p_vlcmarquee->Release();
         _p_vlclogo->Release();
         _p_vlcdeint->Release();
-        _p_vlctitle->Release();
-        _p_vlcchapter->Release();
     }
 
     // IVLCVideo methods
@@ -346,8 +354,6 @@ public:
     STDMETHODIMP get_marquee(IVLCMarquee**);
     STDMETHODIMP get_logo(IVLCLogo**);
     STDMETHODIMP get_deinterlace(IVLCDeinterlace**);
-    STDMETHODIMP get_title(IVLCTitle**);
-    STDMETHODIMP get_chapter(IVLCChapter**);
     STDMETHODIMP takeSnapshot(LPPICTUREDISP*);
     STDMETHODIMP toggleFullscreen();
     STDMETHODIMP toggleTeletext();
@@ -356,8 +362,6 @@ private:
     IVLCMarquee     *_p_vlcmarquee;
     IVLCLogo        *_p_vlclogo;
     IVLCDeinterlace *_p_vlcdeint;
-    IVLCTitle       *_p_vlctitle;
-    IVLCChapter     *_p_vlcchapter;
 };
 
 class VLCMediaDescription:

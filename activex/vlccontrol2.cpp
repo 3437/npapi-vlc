@@ -930,7 +930,7 @@ STDMETHODIMP VLCPlaylist::playItem(long item)
 
 STDMETHODIMP VLCPlaylist::pause()
 {
-    _plug->get_player().mlp().pause();
+    _plug->get_player().get_mp().setPause( true );
     return S_OK;
 }
 

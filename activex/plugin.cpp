@@ -455,56 +455,8 @@ void VLCPlugin::initVLC()
         return;
     }
 
-    get_player().mlp().setPlaybackMode( _b_autoloop ? libvlc_playback_mode_loop :
-                                       libvlc_playback_mode_default );
-
     // register player events
     player_register_events();
-
-    // initial playlist item
-    if( SysStringLen(_bstr_mrl) > 0 )
-    {
-        char *psz_mrl = NULL;
-
-        if( SysStringLen(_bstr_baseurl) > 0 )
-        {
-            /*
-            ** if the MRL a relative URL, we should end up with an absolute URL
-            */
-            LPWSTR abs_url = CombineURL(_bstr_baseurl, _bstr_mrl);
-            if( NULL != abs_url )
-            {
-                psz_mrl = CStrFromWSTR(CP_UTF8, abs_url, wcslen(abs_url));
-                CoTaskMemFree(abs_url);
-            }
-            else
-            {
-                psz_mrl = CStrFromBSTR(CP_UTF8, _bstr_mrl);
-            }
-        }
-        else
-        {
-            /*
-            ** baseURL is empty, assume MRL is absolute
-            */
-            psz_mrl = CStrFromBSTR(CP_UTF8, _bstr_mrl);
-        }
-        if( NULL != psz_mrl )
-        {
-            const char *options[1];
-            int i_options = 0;
-
-            char timeBuffer[32];
-            if( _i_time )
-            {
-                snprintf(timeBuffer, sizeof(timeBuffer), ":start-time=%d", _i_time);
-                options[i_options++] = timeBuffer;
-            }
-            // add default target to playlist
-            m_player.add_item( psz_mrl, i_options, options);
-            CoTaskMemFree(psz_mrl);
-        }
-    }
 
     if( !isInPlaceActive()  )
     {
@@ -664,12 +616,55 @@ HRESULT VLCPlugin::onActivateInPlace(LPMSG, HWND hwndParent, LPCRECT lprcPosRect
     HRGN clipRgn = CreateRectRgnIndirect(&clipRect);
     SetWindowRgn(_inplacewnd, clipRgn, TRUE);
 
-    if( isUserMode() ) {
-        _WindowsManager.CreateWindows(this->getInPlaceWindow());
-    }
-
-    if( _b_usermode )
+    if( isUserMode() )
     {
+        _WindowsManager.CreateWindows(this->getInPlaceWindow());
+
+        // initial playlist item
+        if( SysStringLen(_bstr_mrl) > 0 )
+        {
+            char *psz_mrl = NULL;
+
+            if( SysStringLen(_bstr_baseurl) > 0 )
+            {
+                /*
+                ** if the MRL a relative URL, we should end up with an absolute URL
+                */
+                LPWSTR abs_url = CombineURL(_bstr_baseurl, _bstr_mrl);
+                if( NULL != abs_url )
+                {
+                    psz_mrl = CStrFromWSTR(CP_UTF8, abs_url, wcslen(abs_url));
+                    CoTaskMemFree(abs_url);
+                }
+                else
+                {
+                    psz_mrl = CStrFromBSTR(CP_UTF8, _bstr_mrl);
+                }
+            }
+            else
+            {
+                /*
+                ** baseURL is empty, assume MRL is absolute
+                */
+                psz_mrl = CStrFromBSTR(CP_UTF8, _bstr_mrl);
+            }
+            if( NULL != psz_mrl )
+            {
+                const char *options[1];
+                int i_options = 0;
+
+                char timeBuffer[32];
+                if( _i_time )
+                {
+                    snprintf(timeBuffer, sizeof(timeBuffer), ":start-time=%d", _i_time);
+                    options[i_options++] = timeBuffer;
+                }
+                // add default target to playlist
+                m_player.add_item( psz_mrl, i_options, options);
+                CoTaskMemFree(psz_mrl);
+            }
+        }
+
         if( get_autoplay() )
         {
             get_player().play();

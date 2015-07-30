@@ -184,7 +184,7 @@ cd ${ARCH}-build
         --enable-shout \
         --disable-ncurses \
         --disable-twolame \
-        --disable-a52 \
+        --enable-a52 \
         --enable-realrtsp \
         --enable-libass \
         --disable-macosx-avfoundation \

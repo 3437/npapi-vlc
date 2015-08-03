@@ -556,11 +556,14 @@ LRESULT VLCHolderWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_PAINT:{
             PAINTSTRUCT PaintStruct;
             HDC hDC = BeginPaint(hWnd(), &PaintStruct);
-            RECT rect;
-            GetClientRect(hWnd(), &rect);
-            int IconX = ((rect.right - rect.left) - GetSystemMetrics(SM_CXICON))/2;
-            int IconY = ((rect.bottom - rect.top) - GetSystemMetrics(SM_CYICON))/2;
-            DrawIcon(hDC, IconX, IconY, RC().hBackgroundIcon);
+            if( PO() && PO()->get_enable_branding() )
+            {
+                RECT rect;
+                GetClientRect(hWnd(), &rect);
+                int IconX = ((rect.right - rect.left) - GetSystemMetrics(SM_CXICON))/2;
+                int IconY = ((rect.bottom - rect.top) - GetSystemMetrics(SM_CYICON))/2;
+                DrawIcon(hDC, IconX, IconY, RC().hBackgroundIcon);
+            }
             EndPaint(hWnd(), &PaintStruct);
             break;
         }

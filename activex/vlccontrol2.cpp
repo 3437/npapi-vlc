@@ -1690,6 +1690,21 @@ STDMETHODIMP VLCControl2::put_BackColor(OLE_COLOR backcolor)
     return S_OK;
 };
 
+STDMETHODIMP VLCControl2::get_Branding(VARIANT_BOOL *visible)
+{
+    if( NULL == visible )
+        return E_POINTER;
+
+    *visible = varbool( _p_instance->get_options().get_enable_branding() );
+    return S_OK;
+};
+
+STDMETHODIMP VLCControl2::put_Branding(VARIANT_BOOL visible)
+{
+    _p_instance->get_options().set_enable_branding( VARIANT_FALSE != visible );
+    return S_OK;
+};
+
 STDMETHODIMP VLCControl2::get_audio(IVLCAudio** obj)
 {
     return object_get(obj,_p_vlcaudio);

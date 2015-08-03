@@ -449,6 +449,8 @@ public:
     STDMETHODIMP put_BackColor(OLE_COLOR backcolor) override;
     STDMETHODIMP get_FullscreenEnabled(VARIANT_BOOL* enabled) override;
     STDMETHODIMP put_FullscreenEnabled(VARIANT_BOOL enabled) override;
+    STDMETHODIMP get_Branding(VARIANT_BOOL* visible) override;
+    STDMETHODIMP put_Branding(VARIANT_BOOL visible) override;
 
     STDMETHODIMP get_audio(IVLCAudio**) override;
     STDMETHODIMP get_input(IVLCInput**) override;

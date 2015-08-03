@@ -261,6 +261,13 @@ STDMETHODIMP VLCPersistPropertyBag::Load(LPPROPERTYBAG pPropBag, LPERRORLOG pErr
         }
     }
 
+    V_VT(&value) = VT_BOOL;
+    if( S_OK == pPropBag->Read(OLESTR("Branding"), &value, pErrorLog) )
+    {
+        _p_instance->get_options().set_enable_branding(V_BOOL(&value) != VARIANT_FALSE);
+        VariantClear(&value);
+    }
+
     return _p_instance->onLoad();
 };
 
@@ -330,6 +337,11 @@ STDMETHODIMP VLCPersistPropertyBag::Save(LPPROPERTYBAG pPropBag, BOOL fClearDirt
     V_VT(&value) = VT_BOOL;
     V_BOOL(&value) = _p_instance->get_options().get_enable_fs()? VARIANT_TRUE : VARIANT_FALSE;
     pPropBag->Write(OLESTR("FullscreenEnabled"), &value);
+    VariantClear(&value);
+
+    V_VT(&value) = VT_BOOL;
+    V_BOOL(&value) = _p_instance->get_options().get_enable_branding()? VARIANT_TRUE : VARIANT_FALSE;
+    pPropBag->Write(OLESTR("Branding"), &value);
     VariantClear(&value);
 
     if( fClearDirty )

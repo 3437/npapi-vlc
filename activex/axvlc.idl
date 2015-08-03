@@ -662,6 +662,11 @@ library AXVLC
 
         [propget, helpstring("Returns the media description object.")]
         HRESULT mediaDescription([out, retval] IVLCMediaDescription** obj);
+
+        [propget, helpstring("Returns/sets visibility of the VLC branding.")]
+        HRESULT Branding([out, retval] VARIANT_BOOL* visible);
+        [propput, helpstring("Returns/sets visibility of the VLC branding.")]
+        HRESULT Branding([in] VARIANT_BOOL visible);
     };
 
     [

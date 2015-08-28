@@ -170,8 +170,11 @@ fi
 cd ${ARCH}-build
 ../configure \
         --build=${ARCH}-apple-darwin10 \
+        --prefix=${PREFIX} \
+        --with-macosx-version-min=${MINIMAL_OSX_VERSION} \
+        --with-macosx-sdk=$SDKROOT \
         --disable-lua --disable-httpd --disable-vlm --disable-sout \
-        --disable-vcd --enable-dvdnav --enable-dvdread --disable-screen \
+        --disable-vcd --disable-screen \
         --disable-debug \
         --disable-macosx \
         --disable-notify \
@@ -184,7 +187,6 @@ cd ${ARCH}-build
         --enable-shout \
         --disable-ncurses \
         --disable-twolame \
-        --enable-a52 \
         --enable-realrtsp \
         --enable-libass \
         --disable-macosx-avfoundation \
@@ -201,13 +203,10 @@ cd ${ARCH}-build
         --disable-upnp \
         --disable-goom \
         --disable-nls \
-        --disable-mad \
         --disable-sdl \
         --disable-sdl-image \
-        --with-macosx-sdk=$SDKROOT \
-        --with-macosx-version-min=${MINIMAL_OSX_VERSION} \
         ${CONFIG_OPTIONS} \
-        --prefix=${PREFIX} > ${out}
+         > ${out}
 
 info "Compiling VLC"
 

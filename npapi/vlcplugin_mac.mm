@@ -319,6 +319,9 @@ NPError VlcPluginMac::get_root_layer(void *value)
         if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
             NSLog(@"Safari 5 detected, deploying UI update timer");
             [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
+        } else if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/9")) {
+            NSLog(@"Safari 9 detected, deploying UI update timer");
+            [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
         } else if (strstr(userAgent, "Firefox")) {
             NSLog(@"Firefox detected, deploying UI update timer");
             this->runningWithinFirefox = true;

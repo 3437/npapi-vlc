@@ -319,8 +319,11 @@ NPError VlcPluginMac::get_root_layer(void *value)
         if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
             NSLog(@"Safari 5 detected, deploying UI update timer");
             [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
-        } else if (strstr(userAgent, "Firefox"))
+        } else if (strstr(userAgent, "Firefox")) {
+            NSLog(@"Firefox detected, deploying UI update timer");
             this->runningWithinFirefox = true;
+            [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
+        }
 
         [(VLCPerInstanceStorage *)this->_perInstanceStorage setNoMediaLayer:[[VLCNoMediaLayer alloc] init]];
         [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer].opaque = 1.;
@@ -360,8 +363,10 @@ bool VlcPluginMac::handle_event(void *event)
             CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
-            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil)
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil) {
                 [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] handleMouseDown:[[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] convertPoint:point toLayer:[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]]];
+                [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setNeedsDisplay];
+            }
 
             return true;
         }
@@ -375,8 +380,10 @@ bool VlcPluginMac::handle_event(void *event)
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
 
-            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil)
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil) {
                 [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] handleMouseUp:[[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] convertPoint:point toLayer:[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]]];
+                [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setNeedsDisplay];
+            }
 
             return true;
         }

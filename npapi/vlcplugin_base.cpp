@@ -111,7 +111,11 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 #endif
 
     /* common settings */
+#ifndef NDEBUG
     ppsz_argv[ppsz_argc++] = "-vv";
+#else
+    ppsz_argv[ppsz_argc++] = "--quiet";
+#endif
     ppsz_argv[ppsz_argc++] = "--no-stats";
     ppsz_argv[ppsz_argc++] = "--no-media-library";
     ppsz_argv[ppsz_argc++] = "--intf=dummy";

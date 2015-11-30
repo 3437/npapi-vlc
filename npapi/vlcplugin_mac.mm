@@ -183,6 +183,7 @@ VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
 VlcPluginMac::~VlcPluginMac()
 {
     [(VLCPerInstanceStorage *)_perInstanceStorage release];
+    _perInstanceStorage = nil;
 }
 
 void VlcPluginMac::set_player_window()
@@ -550,9 +551,13 @@ bool VlcPluginMac::handle_event(void *event)
     [CATransaction begin];
     [aLayer removeFromSuperlayer];
     [CATransaction commit];
+    VLCPerInstanceStorage *storage = (VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage;
 
-    if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] == aLayer)
-        [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage setPlaybackLayer:nil];
+    if (storage != nil) {
+        if ([storage respondsToSelector:@selector(setPlaybackLayer:)]) {
+            [storage setPlaybackLayer:nil];
+        }
+    }
 }
 
 - (CGSize)currentOutputSize

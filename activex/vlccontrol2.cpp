@@ -699,7 +699,19 @@ STDMETHODIMP VLCInput::get_fps(double* fps)
     if( NULL == fps )
         return E_POINTER;
 
-    *fps = static_cast<double>( _plug->get_player().get_mp().fps() );
+    auto media = _plug->get_player().get_mp().media();
+    if ( media == nullptr )
+        return INVOKERESULT_GENERIC_ERROR;
+    auto tracks = media->tracks();
+    for ( const auto& t : tracks )
+    {
+        if ( t.type() == VLC::MediaTrack::Type::Video )
+        {
+            *fps = (float)( (float)t.fpsNum() / (float)t.fpsDen() );
+            return S_OK;
+        }
+    }
+    *fps = 0.0;
 
     return S_OK;
 }

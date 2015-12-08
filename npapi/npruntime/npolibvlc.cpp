@@ -472,7 +472,19 @@ LibvlcInputNPObject::getProperty(int index, npapi::OutVariant& result)
             }
             case ID_input_fps:
             {
-                result = mp.fps();
+                auto media = mp.media();
+                if ( media == nullptr )
+                    return INVOKERESULT_GENERIC_ERROR;
+                auto tracks = media->tracks();
+                for ( const auto& t : tracks )
+                {
+                    if ( t.type() == VLC::MediaTrack::Type::Video )
+                    {
+                        result = (float)( (float)t.fpsNum() / (float)t.fpsDen() );
+                        return INVOKERESULT_GENERIC_ERROR;
+                    }
+                }
+                result = 0.0f;
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_input_hasvout:

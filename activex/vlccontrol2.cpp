@@ -701,7 +701,7 @@ STDMETHODIMP VLCInput::get_fps(double* fps)
 
     auto media = _plug->get_player().get_mp().media();
     if ( media == nullptr )
-        return INVOKERESULT_GENERIC_ERROR;
+        return E_FAIL;
     auto tracks = media->tracks();
     for ( const auto& t : tracks )
     {

@@ -481,7 +481,7 @@ LibvlcInputNPObject::getProperty(int index, npapi::OutVariant& result)
                     if ( t.type() == VLC::MediaTrack::Type::Video )
                     {
                         result = (float)( (float)t.fpsNum() / (float)t.fpsDen() );
-                        return INVOKERESULT_GENERIC_ERROR;
+                        return INVOKERESULT_NO_ERROR;
                     }
                 }
                 result = 0.0f;

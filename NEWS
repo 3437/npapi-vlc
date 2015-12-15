@@ -1,14 +1,32 @@
 Changes between VLC plugins 2.2.1 and 2.2.2:
 --------------------------------------------
 
-Common:
+NPAPI Core:
  * Rewrite using libvlcpp
  * Fix various memleaks
  * Improve stability
  * Cleanup
+ * Add support for titles and chapters
+ * Fix vlc.video.subtitle index
+ * Fix attribute 'mute'
+
+ActiveX:
+ * Rename 'versionInfo()' method to 'getVersionInfo()'
+ * Remove deprecated VLCControl (v1)
+ * Fix handling of fullscreen mode over JS API
 
 NPAPI:
  * Add missing GTK UI updates
+ * Add method 'getVersionInfo()'
+ * Add attribute 'volume'
+
+Test:
+ * Cleanup and updates for HTML test pages
+ * Add an example VB project
+
+Platforms:
+ * Support for attribute 'branding' under Windows
+
 
 Changes between VLC plugins 2.2.0 and 2.2.1:
 --------------------------------------------

@@ -166,6 +166,7 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 FreeLibrary(hThModule);
             }
             HorizontalOffset+=ControlWidth+xControlsSpace;
+            SendMessage(hVideoPosScroll, (UINT)PBM_SETRANGE, 0, MAKELPARAM(0, 1000));
 
             ControlWidth = ButtonsWidth;
             hMuteButton =
@@ -386,7 +387,7 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
 void VLCControlsWnd::RegisterToVLCEvents()
 {
     VP()->get_mp().eventManager().onPositionChanged([this](float pos) {
-        PostMessage(hVideoPosScroll, (UINT) PBM_SETPOS, (WPARAM)(pos * 100), 0);
+        PostMessage(hVideoPosScroll, (UINT) PBM_SETPOS, (WPARAM)(pos * 1000), 0);
     });
 
     VP()->get_mp().eventManager().onPlaying([this] {
@@ -429,7 +430,7 @@ void VLCControlsWnd::SetVideoPos(float Pos) //0-start, 1-end
         VP()->get_mp().setPosition( Pos );
 
         if( VP()->get_mp().length() > 0 )
-            PostMessage(hVideoPosScroll, (UINT)PBM_SETPOS, (WPARAM) (Pos * 100), 0);
+            PostMessage(hVideoPosScroll, (UINT)PBM_SETPOS, (WPARAM) (Pos * 1000), 0);
     }
 }
 

@@ -231,7 +231,17 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
         }
         case WM_TIMER:{
-            NeedHideControls();
+            POINT MousePoint;
+            GetCursorPos(&MousePoint);
+            RECT ControlWndRect;
+            GetWindowRect(hWnd(), &ControlWndRect);
+            if(PtInRect(&ControlWndRect, MousePoint)||GetCapture()==hVolumeSlider){
+                //do not allow control window to close while mouse is within
+                NeedShowControls();
+            }
+            else{
+                NeedHideControls();
+            }
             break;
         }
         case WM_SETCURSOR:{

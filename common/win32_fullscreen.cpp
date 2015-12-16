@@ -423,6 +423,20 @@ void VLCControlsWnd::RegisterToVLCEvents()
         PostMessage(hPlayPauseButton, BM_SETIMAGE, (WPARAM) IMAGE_BITMAP, (LPARAM) RC().hPlayBitmap);
         PostMessage(hVideoPosScroll, (UINT) PBM_SETPOS, (WPARAM)0, 0);
     });
+
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
+    VP()->get_mp().eventManager().onAudioVolume([this](float vol) {
+        UpdateVolumeSlider( roundf(vol * 100) );
+    });
+
+    VP()->get_mp().eventManager().onMuted([this] {
+        UpdateMuteButton(true);
+    });
+
+    VP()->get_mp().eventManager().onUnmuted([this] {
+        UpdateMuteButton(false);
+    });
+#endif
 }
 
 void VLCControlsWnd::NeedShowControls()

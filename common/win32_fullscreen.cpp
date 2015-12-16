@@ -216,8 +216,13 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                          SWP_NOZORDER|SWP_NOOWNERZORDER|SWP_NOACTIVATE);
 
             CreateToolTip();
-            RegisterToVLCEvents();
-            SyncVolumeSliderWithVLCVolume();
+
+            if( VP() ){
+                RegisterToVLCEvents();
+                UpdateVolumeSlider( VP()->get_mp().volume() );
+                UpdateMuteButton( VP()->get_mp().mute() );
+            }
+
             break;
         }
         case WM_LBUTTONUP:{
@@ -280,8 +285,9 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                         }
                         case ID_FS_MUTE:{
                             if( VP() ){
-                                VP()->get_mp().setMute( IsDlgButtonChecked(hWnd(), ID_FS_MUTE) != FALSE );
-                                SyncVolumeSliderWithVLCVolume();
+                                bool newMutedState = IsDlgButtonChecked(hWnd(), ID_FS_MUTE) != FALSE;
+                                VP()->get_mp().setMute( newMutedState );
+                                UpdateMuteButton( newMutedState );
                             }
                             break;
                         }
@@ -380,10 +386,10 @@ LRESULT VLCControlsWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         case WM_HSCROLL:
         case WM_VSCROLL: {
-            if( VP() ){
-                if(hVolumeSlider==(HWND)lParam){
+            if( hVolumeSlider == (HWND)lParam ){
+                if( VP() ){
                     LRESULT SliderPos = SendMessage(hVolumeSlider, (UINT) TBM_GETPOS, 0, 0);
-                    SetVLCVolumeBySliderPos(SliderPos);
+                    VP()->get_mp().setVolume( SliderPos );
                 }
             }
             break;
@@ -444,43 +450,28 @@ void VLCControlsWnd::SetVideoPos(float Pos) //0-start, 1-end
     }
 }
 
-void VLCControlsWnd::SyncVolumeSliderWithVLCVolume()
+void VLCControlsWnd::UpdateVolumeSlider(unsigned int vol)
 {
-    if( VP() ){
-        vlc_player& vp = *VP();
-        unsigned int vol = vp.get_mp().volume();
-        const LRESULT SliderPos = SendMessage(hVolumeSlider, (UINT) TBM_GETPOS, 0, 0);
-        if((UINT)SliderPos!=vol)
-            PostMessage(hVolumeSlider, (UINT) TBM_SETPOS, (WPARAM) TRUE, (LPARAM) vol);
-
-        bool muted = vp.get_mp().mute();
-        int MuteButtonState = SendMessage(hMuteButton, (UINT) BM_GETCHECK, 0, 0);
-        if((muted&&(BST_UNCHECKED==MuteButtonState))||(!muted&&(BST_CHECKED==MuteButtonState))){
-            PostMessage(hMuteButton, BM_SETCHECK, (WPARAM)(muted?BST_CHECKED:BST_UNCHECKED), 0);
-        }
-        LRESULT lResult = SendMessage(hMuteButton, BM_GETIMAGE, (WPARAM)IMAGE_BITMAP, 0);
-        if( (muted && ((HANDLE)lResult == RC().hVolumeBitmap)) ||
-            (!muted&&((HANDLE)lResult == RC().hVolumeMutedBitmap)) )
-        {
-            HANDLE hBmp = muted ? RC().hVolumeMutedBitmap : RC().hVolumeBitmap ;
-            PostMessage(hMuteButton, BM_SETIMAGE,
-                        (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp);
-        }
-    }
+    const LRESULT SliderPos = SendMessage(hVolumeSlider, (UINT) TBM_GETPOS, 0, 0);
+    if( (UINT)SliderPos != vol )
+        PostMessage(hVolumeSlider, (UINT) TBM_SETPOS, (WPARAM) TRUE, (LPARAM) vol);
 }
 
-void VLCControlsWnd::SetVLCVolumeBySliderPos(int CurPos)
+void VLCControlsWnd::UpdateMuteButton(bool muted)
 {
-    if( VP() ){
-        vlc_player& vp = *VP();
-        vp.get_mp().setVolume( CurPos );
-        if(0==CurPos){
-            vp.get_mp().setMute( IsDlgButtonChecked( hWnd(), ID_FS_MUTE) != FALSE );
-        }
-        SyncVolumeSliderWithVLCVolume();
+    int MuteButtonState = SendMessage(hMuteButton, (UINT) BM_GETCHECK, 0, 0);
+    if((muted&&(BST_UNCHECKED==MuteButtonState))||(!muted&&(BST_CHECKED==MuteButtonState))){
+        PostMessage(hMuteButton, BM_SETCHECK, (WPARAM)(muted?BST_CHECKED:BST_UNCHECKED), 0);
+    }
+    LRESULT lResult = SendMessage(hMuteButton, BM_GETIMAGE, (WPARAM)IMAGE_BITMAP, 0);
+    if( (muted && ((HANDLE)lResult == RC().hVolumeBitmap)) ||
+        (!muted&&((HANDLE)lResult == RC().hVolumeMutedBitmap)) )
+    {
+        HANDLE hBmp = muted ? RC().hVolumeMutedBitmap : RC().hVolumeBitmap ;
+        PostMessage(hMuteButton, BM_SETIMAGE,
+             (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp);
     }
 }
-
 
 void VLCControlsWnd::UpdateFullscreenButton(bool fullscreen)
 {

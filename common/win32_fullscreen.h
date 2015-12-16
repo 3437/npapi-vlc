@@ -107,8 +107,8 @@ protected:
 private:
     void SetVideoPos(float Pos); //0-start, 1-end
 
-    void SyncVolumeSliderWithVLCVolume();
-    void SetVLCVolumeBySliderPos(int CurScrollPos);
+    void UpdateVolumeSlider(unsigned int vol);
+    void UpdateMuteButton(bool muted);
     void RegisterToVLCEvents();
 
     void NeedHideControls();

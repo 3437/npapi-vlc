@@ -28,14 +28,6 @@
 
 #include <atomic>
 
-#ifdef __MINGW32__
-# include <_mingw.h>
-# if defined(__MINGW32_MAJOR_VERSION) && !defined(__MINGW64_VERSION_MAJOR)
-const GUID  IID_IGlobalInterfaceTable = { 0x00000146, 0, 0, {0xc0, 0, 0, 0, 0, 0, 0, 0x46} };
-# endif /* __MINGW32_MAJOR_VERSION && !__MINGW64_VERSION_MAJOR */
-const CLSID CLSID_StdGlobalInterfaceTable = { 0x00000323, 0, 0, {0xc0, 0, 0, 0, 0, 0, 0, 0x46} };
-#endif /* __MINGW32__ */
-
 /* this function object is used to return the value from a map pair */
 struct VLCEnumConnectionsDereference
 {

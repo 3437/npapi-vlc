@@ -357,13 +357,13 @@ struct Embeded
         copyAndRetain( e.v );
     }
 
-    Embeded( Embeded&& e )
+    Embeded( Embeded&& e ) noexcept
     {
         v = e.v;
         memset( &e.v, 0, sizeof( e.v ) );
     }
 
-    Embeded& operator=(Embeded&& e)
+    Embeded& operator=(Embeded&& e) noexcept
     {
         release();
         v = e.v;
@@ -448,12 +448,12 @@ struct Wrapped
     Wrapped( const Wrapped& ) = delete;
     Wrapped& operator=( const Wrapped& ) = delete;
 
-    Wrapped(Wrapped&& w)
+    Wrapped(Wrapped&& w) noexcept
     {
         *this = std::move( w );
     }
 
-    Wrapped& operator=( Wrapped&& w )
+    Wrapped& operator=( Wrapped&& w ) noexcept
     {
         v = w.v;
         w.v = nullptr;

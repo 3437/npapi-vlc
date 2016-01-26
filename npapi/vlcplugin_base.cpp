@@ -310,7 +310,7 @@ static void invokeEvent( NPP browser, NPObject* listener, Args&&... args )
 class CallbackClosure
 {
 public:
-    CallbackClosure(NPP browser, npapi::Variant listener)
+    CallbackClosure(NPP browser, npapi::Variant&& listener)
         : _browser( browser )
         , _listener( std::move( listener ) )
     {

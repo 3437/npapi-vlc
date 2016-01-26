@@ -279,22 +279,22 @@ bool VlcPluginBase::handle_event(void *)
 
 struct AsyncEventWrapper
 {
-    AsyncEventWrapper(NPP b, npapi::Variant&& l, npapi::VariantArray&& a)
+    AsyncEventWrapper(NPP b, NPObject* l, npapi::VariantArray&& a)
         : browser( b )
-        , listener( std::move( l ) )
+        , listener( l )
         , args( std::move( a ) )
     {
     }
 
     NPP browser;
-    npapi::Variant listener;
+    NPObject* listener;
     npapi::VariantArray args;
 };
 
 template <typename... Args>
-static void invokeEvent( NPP browser, npapi::Variant listener, Args&&... args )
+static void invokeEvent( NPP browser, NPObject* listener, Args&&... args )
 {
-    auto wrapper = new AsyncEventWrapper( browser, std::move( listener ), npapi::wrap( std::forward<Args>( args )... ) );
+    auto wrapper = new AsyncEventWrapper( browser, listener, npapi::wrap( std::forward<Args>( args )... ) );
     NPN_PluginThreadAsyncCall( browser, [](void* data) {
         auto w = reinterpret_cast<AsyncEventWrapper*>( data );
         NPVariant result;

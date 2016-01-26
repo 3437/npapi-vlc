@@ -273,7 +273,7 @@ struct traits<NPString>
         return NPVARIANT_TO_STRING( v );
     }
 
-    static void from( NPString s, NPVariant& v )
+    static void from( const NPString s, NPVariant& v )
     {
         if ( s.UTF8Characters == nullptr )
         {

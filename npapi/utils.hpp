@@ -348,7 +348,7 @@ struct Embeded
 
     Embeded( const Embeded& ) = default;
 
-    // Allow btiwise copy, assuming that the called has handled releasing
+    // Allow bitwise copy, assuming that the caller has handled releasing
     // previously held resources
     Embeded& operator=( const Embeded& ) = default;
 

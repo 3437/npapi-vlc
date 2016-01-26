@@ -346,19 +346,26 @@ struct Embeded
         memset( &v, 0, sizeof( v ) );
     }
 
-    Embeded( const Embeded& ) = default;
+    Embeded( const Embeded& e )
+    {
+        copyAndRetain( e.v );
+    }
 
-    // Allow bitwise copy, assuming that the caller has handled releasing
-    // previously held resources
-    Embeded& operator=( const Embeded& ) = default;
+    Embeded& operator=( const Embeded& e )
+    {
+        release();
+        copyAndRetain( e.v );
+    }
 
     Embeded( Embeded&& e )
     {
-        *this = std::move(e);
+        v = e.v;
+        memset( &e.v, 0, sizeof( e.v ) );
     }
 
     Embeded& operator=(Embeded&& e)
     {
+        release();
         v = e.v;
         memset( &e.v, 0, sizeof( e.v ) );
         return *this;
@@ -366,18 +373,12 @@ struct Embeded
 
     Embeded( const NPVariant& npv )
     {
-        memcpy( &v, &npv, sizeof( npv ) );
-    }
-
-    Embeded& operator=( const NPVariant& npv )
-    {
-        memcpy( &v, &npv, sizeof( npv ) );
-        return *this;
+        copyAndRetain( npv );
     }
 
     ~Embeded()
     {
-        NPN_ReleaseVariantValue( &v );
+        release();
     }
 
     NPVariant* ptr()
@@ -401,6 +402,26 @@ struct Embeded
     }
 
     NPVariant v;
+
+private:
+    void release()
+    {
+        NPN_ReleaseVariantValue( &v );
+    }
+
+    void copyAndRetain( const NPVariant& npv )
+    {
+        if ( traits<NPString>::is( npv ) == true )
+        {
+            traits<NPString>::from( traits<NPString>::to( npv ), v );
+        }
+        else
+        {
+            memcpy( &v, &npv, sizeof( v ) );
+            if ( traits<NPObject>::is( npv ) == true )
+                NPN_RetainObject( traits<NPObject>::to( v ) );
+        }
+    }
 };
 
 ///
@@ -477,14 +498,10 @@ public:
     Variant( const typename StoragePolicy::VariantType& v )
         : m_variant( v )
     {
-        retainOrCopy();
     }
 
-    Variant(const Variant& v)
-        : m_variant( v.m_variant )
-    {
-        retainOrCopy();
-    }
+    Variant( const Variant& v ) = default;
+    Variant& operator=( const Variant& v ) = default;
 
     template <typename T>
     explicit Variant(const T& t)
@@ -492,34 +509,22 @@ public:
         traits<TraitsType<T>>::from( t, m_variant.ref() );
     }
 
-    Variant& operator=(const Variant& v)
-    {
-        if ( &v == this )
-            return *this;
-        release();
-
-        m_variant = v.m_variant;
-        retainOrCopy();
-
-        return *this;
-    }
 
 #ifndef _MSC_VER
     Variant(Variant&& v) = default;
+    Variant& operator=(Variant&& v) = default;
 #else
     Variant(Variant&& v)
         : m_variant( std::move( v.m_variant ) )
     {
     }
-#endif
 
     Variant& operator=(Variant&& v)
     {
-        release();
         m_variant = std::move( v.m_variant );
         return *this;
     }
-
+#endif
 
     template <typename T>
     bool is() const
@@ -598,20 +603,6 @@ public:
     bool operator>=(const T& rhs) const
     {
         return (const T)*this >= rhs;
-    }
-
-    void release()
-    {
-        NPN_ReleaseVariantValue( m_variant.ptr() );
-    }
-
-private:
-    void retainOrCopy()
-    {
-        if (is<NPObject>())
-            NPN_RetainObject( *this );
-        else if (is<NPString>())
-            traits<NPString>::from( (NPString)*this, m_variant.ref() );
     }
 
 private:

@@ -277,28 +277,34 @@ bool VlcPluginBase::handle_event(void *)
     return false;
 }
 
+template <typename... Args>
 struct AsyncEventWrapper
 {
-    AsyncEventWrapper(NPP b, NPObject* l, npapi::VariantArray&& a)
+    template <typename... PFArgs>
+    AsyncEventWrapper(NPP b, NPObject* l, PFArgs&&... args)
         : browser( b )
         , listener( l )
-        , args( std::move( a ) )
+        , args( std::make_tuple( std::forward<Args>( args )... ) )
     {
     }
 
     NPP browser;
     NPObject* listener;
-    npapi::VariantArray args;
+    // If we do not decay Args here, we will end up declaring a tuple holding references
+    // The tuple returned by make_tuple does that, but we end up converting from the correct tuple
+    // type to an invalid tuple type, since we would end up using dangling references.
+    std::tuple<typename std::decay<Args>::type...> args;
 };
 
 template <typename... Args>
 static void invokeEvent( NPP browser, NPObject* listener, Args&&... args )
 {
-    auto wrapper = new AsyncEventWrapper( browser, listener, npapi::wrap( std::forward<Args>( args )... ) );
+    auto wrapper = new AsyncEventWrapper<Args...>( browser, listener, std::forward<Args>( args )... );
     NPN_PluginThreadAsyncCall( browser, [](void* data) {
-        auto w = reinterpret_cast<AsyncEventWrapper*>( data );
+        auto w = reinterpret_cast<AsyncEventWrapper<Args...>*>( data );
+        auto args = npapi::wrap( w->args );
         NPVariant result;
-        if (NPN_InvokeDefault( w->browser, w->listener, w->args, w->args.size(), &result ))
+        if (NPN_InvokeDefault( w->browser, w->listener, reinterpret_cast<NPVariant*>( args.data() ), args.size(), &result ))
         {
             // "result" content is unspecified when invoke fails. Don't clean potential garbage
             NPN_ReleaseVariantValue( &result );

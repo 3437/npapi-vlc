@@ -24,13 +24,14 @@
 #ifndef UTILS_NPP
 #define UTILS_NPP
 
-#include <npruntime.h>
-#include <memory>
-#include <type_traits>
-#include <string>
-
-#include <cstring>
+#include <array>
 #include <cassert>
+#include <cstring>
+#include <memory>
+#include <npruntime.h>
+#include <string>
+#include <tuple>
+#include <type_traits>
 
 using CStr = std::unique_ptr<char, void(*)(void*)>;
 
@@ -614,107 +615,40 @@ private:
 using Variant = details::Variant<details::policy::Embeded>;
 using OutVariant = details::Variant<details::policy::Wrapped>;
 
-class VariantArray
-{
-    using VPtr = std::unique_ptr<Variant[]>;
-public:
-    VariantArray()
-        : m_variants( nullptr )
-        , m_size( 0 )
-    {
-    }
-    VariantArray(unsigned int nbValue)
-        : m_variants( VPtr( new Variant[nbValue] ) )
-        , m_size( nbValue )
-    {
-    }
-
-    Variant& operator[](size_t idx)
-    {
-        return m_variants[idx];
-    }
-
-    const Variant& operator[](size_t idx) const
-    {
-        return m_variants[idx];
-    }
-
-    // Warning: this assumes the same binary layout between Variant & NPVariant
-    operator NPVariant*()
-    {
-        return (NPVariant*)m_variants.get();
-    }
-
-    operator const NPVariant*() const
-    {
-        return (const NPVariant*)m_variants.get();
-    }
-
-    size_t size() const
-    {
-        return m_size;
-    }
-
-    VariantArray(const VariantArray&) = delete;
-    VariantArray& operator=(const VariantArray&) = delete;
-#ifndef _MSC_VER
-    VariantArray(VariantArray&&) = default;
-    VariantArray& operator=(VariantArray&&) = default;
-#else
-    VariantArray(VariantArray&& v)
-        : m_variants(std::move( v.m_variants ) )
-        , m_size( v.m_size )
-    {
-    }
-
-    VariantArray& operator=(VariantArray&& v)
-    {
-        if (&v == this)
-            return *this;
-        m_variants = std::move(v.m_variants);
-        m_size = v.m_size;
-        return *this;
-    }
-
-#endif
-private:
-    VPtr m_variants;
-    size_t m_size;
-};
-
-// Private implementation namespace
 namespace details
 {
-    template <size_t Idx, typename T>
-    void wrap( VariantArray& array, T arg )
+    template <size_t... Ns>
+    struct Seq
     {
-        array[Idx] = Variant<details::policy::Embeded>(arg);
-    }
+        using type = Seq<Ns..., sizeof...(Ns)>;
+    };
 
-    template <size_t Idx, typename T, typename... Args>
-    void wrap( VariantArray& array, T arg, Args&&... args )
+    template <size_t N>
+    struct GenSeq
     {
-        wrap<Idx + 1>( array, std::forward<Args>( args )... );
-        // This needs the Variant wrapper to be the exact size of a NPVariant
-        // For future proofness, we make this explicit:
-        array[Idx] = Variant<details::policy::Embeded>(arg);
+        // This will recurse down to Seq<> which yields type = Seq<0>
+        // Then, from Seq<0>::type, up to Seq<N-1>::type, which ends
+        // up generating Seq<0, 1, ... N>
+        using type = typename GenSeq<N - 1>::type::type;
+    };
+
+    template <>
+    struct GenSeq<0>
+    {
+        using type = Seq<>;
+    };
+
+    template <typename Tuple, size_t... Indices>
+    std::array<npapi::Variant, sizeof...(Indices)> wrap( const Tuple& t, Seq<Indices...> )
+    {
+        return { npapi::Variant( std::get<Indices>( t ) )... };
     }
 }
 
-// public entry point. Responsible for allocating the array and initializing
-// the template index parameter (to avoid filling to array in reverse order with
-// sizeof...()
 template <typename... Args>
-VariantArray wrap(Args&&... args)
+std::array<Variant, sizeof...(Args)> wrap( const std::tuple<Args...>& args )
 {
-    auto array = VariantArray{sizeof...(args)};
-    details::wrap<0>( array, std::forward<Args>( args )... );
-    return array;
-}
-
-inline VariantArray wrap()
-{
-    return VariantArray{};
+    return details::wrap( args, typename details::GenSeq<sizeof...(Args)>::type{} );
 }
 
 }

@@ -356,6 +356,7 @@ struct Embeded
     {
         release();
         copyAndRetain( e.v );
+        return *this;
     }
 
     Embeded( Embeded&& e ) noexcept

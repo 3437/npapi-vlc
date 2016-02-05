@@ -156,7 +156,11 @@ static void UnregisterProgID(REFCLSID rclsid, unsigned int version)
 STDAPI DllUnregisterServer(VOID)
 {
     // unregister type lib from the registry
+#if !defined(_WIN64)
     UnRegisterTypeLib(LIBID_AXVLC, 1, 0, LOCALE_NEUTRAL, SYS_WIN32);
+#else
+    UnRegisterTypeLib(LIBID_AXVLC, 1, 0, LOCALE_NEUTRAL, SYS_WIN64);
+#endif
 
     // remove component categories we supports
     ICatRegister *pcr;

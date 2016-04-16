@@ -25,6 +25,7 @@
 #include "vlcwindowless_mac.h"
 
 #define SHOW_BRANDING 1
+#define OSX_EL_CAPITAN (NSAppKitVersionNumber >= 1404)
 
 CGImageRef createImageNamed(CFStringRef);
 
@@ -51,8 +52,6 @@ CGImageRef createImageNamed(CFStringRef name)
 VlcWindowlessMac::VlcWindowlessMac(NPP instance, NPuint16_t mode) :
     VlcWindowlessBase(instance, mode)
 {
-    colorspace = CGColorSpaceCreateDeviceRGB();
-
     const char *userAgent = NPN_UserAgent(this->getBrowser());
     if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
         legacy_drawing_mode = true;
@@ -64,7 +63,8 @@ VlcWindowlessMac::~VlcWindowlessMac()
 {
     if (lastFrame)
         CGImageRelease(lastFrame);
-    CGColorSpaceRelease(colorspace);
+    if (colorspace != nil)
+        CGColorSpaceRelease(colorspace);
 }
 
 void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
@@ -273,6 +273,28 @@ bool VlcWindowlessMac::handle_event(void *event)
             cached_height = m_media_height;
             left = (npwindow.width  - m_media_width) / 2.;
             top = (npwindow.height - m_media_height) / 2.;
+
+            if (colorspace == nil) {
+               /* support for BT.709 and BT.2020 color spaces was introduced with OS X 10.11
+                * on older OS versions, we can't show correct colors, so we fallback on linear RGB */
+               if (OSX_EL_CAPITAN) {
+                   fprintf(stderr, "Guessing color space based on video dimensions (height: %i)", cached_height);
+
+                   if (cached_height >= 2000 || cached_width >= 3800) {
+                       fprintf(stderr, "Should use BT.2020 color space, but in reality it's BT.709");
+                       colorspace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
+                   } else if (cached_height > 576) {
+                       fprintf(stderr, "Using BT.709 color space");
+                       colorspace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
+                   } else {
+                       fprintf(stderr, "SD content, using linear RGB color space");
+                       colorspace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+                   }
+               } else {
+                   fprintf(stderr, "OS does not support BT.709 or BT.2020 color spaces, output may vary");
+                   colorspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+               }
+            }
 
             /* fetch frame */
             CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,

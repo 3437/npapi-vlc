@@ -25,7 +25,6 @@
 #include "vlcwindowless_mac.h"
 
 #define SHOW_BRANDING 1
-#define OSX_EL_CAPITAN (NSAppKitVersionNumber >= 1404)
 
 CGImageRef createImageNamed(CFStringRef);
 
@@ -277,7 +276,9 @@ bool VlcWindowlessMac::handle_event(void *event)
             if (colorspace == nil) {
                /* support for BT.709 and BT.2020 color spaces was introduced with OS X 10.11
                 * on older OS versions, we can't show correct colors, so we fallback on linear RGB */
-               if (OSX_EL_CAPITAN) {
+               SInt32 minorVersion;
+               Gestalt(gestaltSystemVersionMinor, &minorVersion);
+               if (minorVersion >= 11) {
                    fprintf(stderr, "Guessing color space based on video dimensions (height: %i)", cached_height);
 
                    if (cached_height >= 2000 || cached_width >= 3800) {

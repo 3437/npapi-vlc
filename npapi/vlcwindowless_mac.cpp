@@ -279,20 +279,20 @@ bool VlcWindowlessMac::handle_event(void *event)
                SInt32 minorVersion;
                Gestalt(gestaltSystemVersionMinor, &minorVersion);
                if (minorVersion >= 11) {
-                   fprintf(stderr, "Guessing color space based on video dimensions (height: %i)", cached_height);
+                   fprintf(stderr, "Guessing color space based on video dimensions (%ix%i)\n", m_media_source_width, m_media_source_height);
 
-                   if (cached_height >= 2000 || cached_width >= 3800) {
-                       fprintf(stderr, "Should use BT.2020 color space, but in reality it's BT.709");
-                       colorspace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
-                   } else if (cached_height > 576) {
-                       fprintf(stderr, "Using BT.709 color space");
+                   if (m_media_source_height >= 2000 || m_media_source_width >= 3800) {
+                       fprintf(stderr, "Using BT.2020 color space\n");
+                       colorspace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_2020);
+                   } else if (m_media_source_height > 576) {
+                       fprintf(stderr, "Using BT.709 color space\n");
                        colorspace = CGColorSpaceCreateWithName(kCGColorSpaceITUR_709);
                    } else {
-                       fprintf(stderr, "SD content, using linear RGB color space");
+                       fprintf(stderr, "SD content, using linear RGB color space\n");
                        colorspace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
                    }
                } else {
-                   fprintf(stderr, "OS does not support BT.709 or BT.2020 color spaces, output may vary");
+                   fprintf(stderr, "WARNING: OS does not support BT.709 or BT.2020 color spaces, output may vary\n");
                    colorspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
                }
             }

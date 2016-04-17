@@ -80,6 +80,8 @@ public:
 protected:
     std::vector<char> m_frame_buf;
     unsigned int m_media_width;
+    unsigned int m_media_source_width;
     unsigned int m_media_height;
+    unsigned int m_media_source_height;
 };
 #endif

@@ -35,6 +35,8 @@ unsigned VlcWindowlessBase::video_format_cb(char *chroma,
                                 unsigned *pitches, unsigned *lines)
 {
     if ( p_browser ) {
+        m_media_source_width = *width;
+        m_media_source_height = *height;
         float src_aspect = (float)(*width) / (*height);
         float dst_aspect = (float)npwindow.width/npwindow.height;
         if ( src_aspect > dst_aspect ) {

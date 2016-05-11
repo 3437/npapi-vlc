@@ -161,3 +161,6 @@ VLC-Plugin.plugin: $(lib_LTLIBRARIES)
 	find "$(top_builddir)/VLC-Plugin.plugin" -type f -exec chmod ugo+r '{}' \;
 
 endif # Mac
+
+package/vlc.r.in: vlcshell.cpp
+	./gen-vlc-r-in > package/vlc.r.in

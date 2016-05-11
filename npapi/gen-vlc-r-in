@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+# Generate package/vlc.r.in from the mime types listed in vlcshell.cpp
+
+set -e
+
+# Extract all mime type lines, minus the quicktime ones, which are
+# unwanted on MacOS X.
+lines() {
+    awk '/static char mimetype/,/   ;/ {print}' vlcshell.cpp | \
+	grep -v static | \
+	grep -v '^    ;' | \
+	grep -vi "quicktime"
+}
+
+
+cat <<EOF
+/*****************************************************************************
+ * VLC Plugin description for OS X
+ *****************************************************************************/
+
+/* Definitions of system resource types */
+
+data 'carb' (0)
+{
+};
+
+/* The first string in the array is a plugin description,
+ * the second is the plugin name */
+resource 'STR#' (126)
+{
+    {
+        "VLC media player Web Plugin @VERSION@"
+        "<BR>@COPYRIGHT_MESSAGE@"
+        "<BR><A HREF='http://www.videolan.org'>http://www.videolan.org</A>",
+        "VLC Web Plugin"
+    };
+};
+
+/* A description for each MIME type in resource 128 */
+resource 'STR#' (127)
+{
+    {
+EOF
+
+lines | sed 's/ *".*:.*:\(.*\);"/        "\1",/' |
+  sed 's%^ */%        /%'
+
+cat <<EOF
+    };
+};
+
+/* A series of pairs of strings... first MIME type, then file extension(s) */
+resource 'STR#' (128,"MIME Type")
+{
+    {
+EOF
+lines | sed 's/ *"\(.*\):\(.*\):.*;"/        "\1", "\2",/' |
+  sed 's%^ */%        /%'
+cat <<EOF
+    };
+};
+
+EOF

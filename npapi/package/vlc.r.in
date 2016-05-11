@@ -26,70 +26,168 @@ resource 'STR#' (127)
     {
         /* MPEG-1 and MPEG-2 */
         "MPEG audio",
+        "MP2 audio",
+        "MPEG audio",
+        "MPEG audio",
+        "MPEG audio",
+        "MPEG audio",
+        "MPEG audio",
+        "MPEG audio",
+        "MPEG audio",
         "MPEG audio",
         "MPEG video",
+        "MPEG video",
+        "MPEG-2 transport stream",
         "MPEG video",
         "MPEG video",
         "MPEG video",
         /* MPEG-4 */
+        "AAC sound",
+        "AAC sound",
         "MPEG-4 audio",
         "MPEG-4 audio",
-        /* */
+        "MPEG-4 audio",
+        /* MPEG-4 ASP */
         "MPEG-4 video",
         "MPEG-4 video",
+        "MPEG-4 video",
+        "MPEG-4 audio",
+        "MPEG-4 audio",
         "MPEG-4 video",
         "MPEG-4 video",
         /* AVI */
         "AVI video",
-        /* Quicktime */
-        /* "QuickTime video", */
+        "DivX video",
+        "AVI video",
+        "DivX video",
+        "AVI video",
+        "AVI video",
         /* OGG */
         "Ogg stream",
         "Ogg video",
+        "Ogg audio",
         "Ogg stream",
+        "OGM video",
+        "Ogg Theora video",
+        "Ogg Theora video",
+        "Ogg Vorbis audio",
+        "Ogg Vorbis audio",
+        "Speex audio",
+        /* Opus */
+        "Opus audio",
+        "Opus audio",
         /* VLC */
         "VLC plug-in",
         /* Windows Media */
-        "Windows Media video",
-        "Windows Media video",
-        "Windows Media plug-in",
-        "Windows Media video",
-        "Windows Media video",
-        "Windows Media audio",
+        "ASF video",
+        "Microsoft ASX playlist",
+        "Microsoft Media",
+        "ASF video",
+        "ASF video",
+        "ASF video",
+        "Windows Media Video",
+        "Windows Media Video",
+        "Windows Media",
+        "Windows Media",
+        "Windows Media",
+        "Windows Media",
+        "Windows Media Video",
+        "Windows Media Audio",
         /* Google VLC */
         "Google VLC plug-in",
-        /* WAV audio */
+        /* Audio sample format */
         "WAV audio",
         "WAV audio",
+        "WAV audio",
+        "Audio samples",
         /* 3GPP */
+        "3GPP video",
         "3GPP audio",
         "3GPP video",
         /* 3GPP2 */
         "3GPP2 audio",
         "3GPP2 video",
-        /* DIVX */
-        "DivX video",
-        /* FLV */
+        /* Autodesk animation format */
+        "FLI video",
         "FLV video",
         "FLV video",
-        /* MkV */
+        "FLI video",
+        "FLV video",
+        /* Matroska */
         "Matroska video",
         "Matroska video",
         "Matroska audio",
-        /* XSPF */
-        "XSPF playlist",
-        /* M3U */
-        "M3U playlist",
+        /* Playlists / text/xml list with URLs */
+        "Playlist xspf",
+        "MPEG audio playlist",
+        "MPEG audio",
+        "MP3 ShoutCast playlist",
+        "MP3 ShoutCast playlist",
+        "Google Video Pointer playlist",
+        "Google Video Pointer playlist",
+        "MPEG video (streamed)",
+        "HTTP Live Streaming playlist",
+        "ASF video",
+        "WPL playlist",
+        "SDP multicast stream file",
+        /* Digital Video */
+        "DV audio",
+        "DV video",
+        /* IFF related formats */
+        "AIFF/Amiga/Mac audio",
+        "AIFF audio",
+        "ANIM animation",
         /* Webm */
-        "Webm video",
-        "Webm audio",
+        "WebM video",
+        "WebM audio",
         /* Real Media */
-        "Real Media",
-        "Readl Audio",
+        "RealMedia Metafile",
+        "Real Media File",
+        "Real Media File",
+        "RealAudio document",
+        "RealAudio plugin file",
+        "Real Media Audio",
+        "Real Media Audio",
+        "Real Media Audio",
+        "Real Media Video",
         /* AMR */
+        "AMR-WB audio",
+        "AMR audio",
+        "AMR-WB audio",
         "AMR audio",
         /* FLAC */
         "FLAC audio",
+        "FLAC audio",
+        "FLAC audio",
+        /* Adobe Flash video */
+        "Flash video",
+        "Shockwave Flash file",
+        /* Raw audio */
+        "Dolby Digital audio",
+        "E-AC3",
+        "ULAW (Sun) audio",
+        "MIDI audio",
+        "DTSHD audio",
+        "Dolby HeAAC",
+        "Dolby HeAAC",
+        "MLP/TrueHD",
+        "DTS audio",
+        "Monkey's audio",
+        "GSM 06.10 audio",
+        "Musepack audio",
+        "Shorten audio",
+        "TrueAudio audio",
+        "WavPack audio",
+        /* Modplug / GME */
+        "Impulse Tracker audio",
+        "Amiga SoundTracker audio",
+        "Scream Tracker 3 audio",
+        "FastTracker II audio",
+        /* misc */
+        "MXF video",
+        "RealPix document",
+        "SHOUTcast 2",
+        "NullSoft video",
     };
 };
 
@@ -98,71 +196,169 @@ resource 'STR#' (128,"MIME Type")
 {
     {
         /* MPEG-1 and MPEG-2 */
+        "audio/mp1", "",
+        "audio/mp2", "",
+        "audio/mp3", "",
         "audio/mpeg", "mp2,mp3,mpga,mpega",
+        "audio/mpg", "",
+        "audio/x-mp1", "",
+        "audio/x-mp2", "",
+        "audio/x-mp3", "",
         "audio/x-mpeg", "mp2,mp3,mpga,mpega",
+        "audio/x-mpg", "",
         "video/mpeg", "mpg,mpeg,mpe",
         "video/x-mpeg", "mpg,mpeg,mpe",
-        "video/mpeg-system", "mpg,mpeg,vob",
-        "video/x-mpeg-system", "mpg,mpeg,vob",
+        "video/mp2t", "",
+        "video/mpeg-system", "mpg,mpeg,mpe,vob",
+        "video/x-mpeg-system", "mpg,mpeg,mpe,vob",
+        "video/x-mpeg2", "",
         /* MPEG-4 */
-        "audio/mp4", "mp4,mpg4",
-        "audio/x-m4a", "m4a"
-        /* MPEG-4 */
+        "audio/aac", "",
+        "audio/x-aac", "",
+        "audio/mp4", "aac,mp4,mpg4",
+        "audio/x-m4a", "m4a",
+        "audio/m4a", "m4a",
+        /* MPEG-4 ASP */
         "video/mp4", "mp4,mpg4",
         "application/mpeg4-iod", "mp4,mpg4",
         "application/mpeg4-muxcodetable", "mp4,mpg4",
+        "application/x-extension-m4a", "",
+        "application/x-extension-mp4", "",
         "video/x-m4v", "m4v",
+        "video/mp4v-es", "",
         /* AVI */
+        "audio/x-pn-windows-acm", "",
+        "video/divx", "divx",
+        "video/msvideo", "avi",
+        "video/vnd.divx", "",
+        "video/x-avi", "",
         "video/x-msvideo", "avi",
-        /* Quicktime */
-        /* "video/quicktime", "mov,qt", */
         /* OGG */
         "application/ogg", "ogg",
         "video/ogg", "ogv",
+        "audio/ogg", "oga,ogg",
         "application/x-ogg", "ogg",
+        "video/x-ogm+ogg", "",
+        "video/x-theora+ogg", "",
+        "video/x-theora", "",
+        "audio/x-vorbis+ogg", "",
+        "audio/x-vorbis", "",
+        "audio/x-speex", "",
+        /* Opus */
+        "audio/ogg;codecs=opus", "opus",
+        "audio/opus", "",
         /* VLC */
         "application/x-vlc-plugin", "",
         /* Windows Media */
+        "audio/x-ms-asf", "",
+        "audio/x-ms-asx", "",
+        "audio/x-ms-wax", "wax",
+        "video/x-ms-asf", "asf,asx",
+        "video/x-ms-asf-plugin", "",
+        "video/x-ms-asx", "",
         "video/x-ms-asf-plugin", "asf,asx",
         "video/x-ms-asf", "asf,asx",
         "application/x-mplayer2", "",
+        "video/x-ms-wm", "wm",
         "video/x-ms-wmv", "wmv",
+        "video/x-ms-wmx", "wmx",
         "video/x-ms-wvx", "wvx",
-        "video/x-ms-wma", "wma",
+        "audio/x-ms-wma", "wma",
         /* Google VLC */
         "application/x-google-vlc-plugin", "",
-        /* WAV audio */
+        /* Audio sample format */
         "audio/wav", "wav",
         "audio/x-wav", "wav",
+        "audio/x-pn-wav", "",
+        "audio/x-pn-au", "",
         /* 3GPP */
+        "video/3gp", "",
         "audio/3gpp", "3gp,3gpp",
         "video/3gpp", "3gp,3gpp",
         /* 3GPP2 */
         "audio/3gpp2", "3g2,3gpp2",
         "video/3gpp2", "3g2,3gpp2",
-        /* DIVX */
-        "video/divx", "divx",
-        /* FLV */
+        /* Autodesk animation format */
+        "video/fli", "fli",
         "video/flv", "flv",
+        "video/x-flc", "",
+        "video/x-fli", "",
         "video/x-flv", "flv",
-        /* MKV */
+        /* Matroska */
         "application/x-matroska", "mkv",
-        "video/x-matroska", "mkv",
+        "video/x-matroska", "mpv,mkv",
         "audio/x-matroska", "mka",
-        /* XSPF */
+        /* Playlists / text/xml list with URLs */
         "application/xspf+xml", "xspf",
-        /* M3U */
+        "audio/mpegurl", "m3u",
         "audio/x-mpegurl", "m3u",
+        "audio/scpls", "pls",
+        "audio/x-scpls", "pls",
+        "text/google-video-pointer", "",
+        "text/x-google-video-pointer", "",
+        "video/vnd.mpegurl", "mxu",
+        "application/vnd.apple.mpegurl", "",
+        "application/vnd.ms-asf", "",
+        "application/vnd.ms-wpl", "",
+        "application/sdp", "",
+        /* Digital Video */
+        "audio/dv", "dif,dv",
+        "video/dv", "dif,dv",
+        /* IFF related formats */
+        "audio/x-aiff", "aif,aiff,aifc",
+        "audio/x-pn-aiff", "",
+        "video/x-anim", "",
         /* Webm */
         "video/webm", "webm",
         "audio/webm", "webm",
         /* Real Media */
+        "application/ram", "ram",
+        "application/vnd.rn-realmedia-vbr", "",
         "application/vnd.rn-realmedia", "rm",
+        "audio/vnd.rn-realaudio", "",
+        "audio/x-pn-realaudio-plugin", "",
+        "audio/x-pn-realaudio", "ra,rm,ram",
+        "audio/x-real-audio", "",
         "audio/x-realaudio", "ra",
+        "video/vnd.rn-realvideo", "",
         /* AMR */
+        "audio/AMR-WB", "",
+        "audio/AMR", "",
+        "audio/amr-wb", "awb",
         "audio/amr", "amr",
         /* FLAC */
+        "application/x-flac", "flac",
         "audio/x-flac", "flac",
+        "audio/flac", "flac",
+        /* Adobe Flash video */
+        "application/x-flash-video", "",
+        "application/x-shockwave-flash", "swf,swfl",
+        /* Raw audio */
+        "audio/ac3", "",
+        "audio/eac3", "",
+        "audio/basic", "au,snd",
+        "audio/midi", "mid,midi,kar",
+        "audio/vnd.dts.hd", "",
+        "audio/vnd.dolby.heaac.1", "",
+        "audio/vnd.dolby.heaac.2", "",
+        "audio/vnd.dolby.mlp", "",
+        "audio/vnd.dts", "",
+        "audio/x-ape", "",
+        "audio/x-gsm", "gsm",
+        "audio/x-musepack", "",
+        "audio/x-shorten", "",
+        "audio/x-tta", "",
+        "audio/x-wavpack", "",
+        /* Modplug / GME */
+        "audio/x-it", "",
+        "audio/x-mod", "",
+        "audio/x-s3m", "",
+        "audio/x-xm", "",
+        /* misc */
+        "application/mxf", "mxf",
+        "image/vnd.rn-realpix", "",
+        "misc/ultravox", "",
+        "video/x-nsv", "",
     };
 };
 

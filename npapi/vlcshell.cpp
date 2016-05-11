@@ -44,13 +44,25 @@
 
 static char mimetype[] =
     /* MPEG-1 and MPEG-2 */
+    "audio/mp1::MPEG audio;"
+    "audio/mp2::MP2 audio;"
+    "audio/mp3::MPEG audio;"
     "audio/mpeg:mp2,mp3,mpga,mpega:MPEG audio;"
+    "audio/mpg::MPEG audio;"
+    "audio/x-mp1::MPEG audio;"
+    "audio/x-mp2::MPEG audio;"
+    "audio/x-mp3::MPEG audio;"
     "audio/x-mpeg:mp2,mp3,mpga,mpega:MPEG audio;"
+    "audio/x-mpg::MPEG audio;"
     "video/mpeg:mpg,mpeg,mpe:MPEG video;"
     "video/x-mpeg:mpg,mpeg,mpe:MPEG video;"
+    "video/mp2t::MPEG-2 transport stream;"
     "video/mpeg-system:mpg,mpeg,mpe,vob:MPEG video;"
     "video/x-mpeg-system:mpg,mpeg,mpe,vob:MPEG video;"
+    "video/x-mpeg2::MPEG video;"
     /* MPEG-4 */
+    "audio/aac::AAC sound;"
+    "audio/x-aac::AAC sound;"
     "audio/mp4:aac,mp4,mpg4:MPEG-4 audio;"
     "audio/x-m4a:m4a:MPEG-4 audio;"
     "audio/m4a:m4a:MPEG-4 audio;"
@@ -58,62 +70,147 @@ static char mimetype[] =
     "video/mp4:mp4,mpg4:MPEG-4 video;"
     "application/mpeg4-iod:mp4,mpg4:MPEG-4 video;"
     "application/mpeg4-muxcodetable:mp4,mpg4:MPEG-4 video;"
+    "application/x-extension-m4a::MPEG-4 audio;"
+    "application/x-extension-mp4::MPEG-4 audio;"
     "video/x-m4v:m4v:MPEG-4 video;"
+    "video/mp4v-es::MPEG-4 video;"
     /* AVI */
+    "audio/x-pn-windows-acm::AVI video;"
+    "video/divx:divx:DivX video;"
+    "video/msvideo:avi:AVI video;"
+    "video/vnd.divx::DivX video;"
+    "video/x-avi::AVI video;"
     "video/x-msvideo:avi:AVI video;"
     /* QuickTime */
+    "application/x-quicktime-media-link::QuickTime metalink playlist;"
+    "application/x-quicktimeplayer:qtl:QuickTime video;"
     "video/quicktime:mov,qt:QuickTime video;"
     /* OGG */
     "application/ogg:ogg:Ogg stream;"
     "video/ogg:ogv:Ogg video;"
-    "audio/ogg:oga:Ogg audio;"
+    "audio/ogg:oga,ogg:Ogg audio;"
     "application/x-ogg:ogg:Ogg stream;"
+    "video/x-ogm+ogg::OGM video;"
+    "video/x-theora+ogg::Ogg Theora video;"
+    "video/x-theora::Ogg Theora video;"
+    "audio/x-vorbis+ogg::Ogg Vorbis audio;"
+    "audio/x-vorbis::Ogg Vorbis audio;"
+    "audio/x-speex::Speex audio;"
     /* Opus */
     "audio/ogg;codecs=opus:opus:Opus audio;"
+    "audio/opus::Opus audio;"
     /* VLC */
     "application/x-vlc-plugin::VLC plug-in;"
     /* Windows Media */
+    "audio/x-ms-asf::ASF video;"
+    "audio/x-ms-asx::Microsoft ASX playlist;"
+    "audio/x-ms-wax:wax:Microsoft Media;"
+    "video/x-ms-asf:asf,asx:ASF video;"
+    "video/x-ms-asf-plugin::ASF video;"
+    "video/x-ms-asx::ASF video;"
     "video/x-ms-asf-plugin:asf,asx:Windows Media Video;"
     "video/x-ms-asf:asf,asx:Windows Media Video;"
     "application/x-mplayer2::Windows Media;"
+    "video/x-ms-wm:wm:Windows Media;"
     "video/x-ms-wmv:wmv:Windows Media;"
+    "video/x-ms-wmx:wmx:Windows Media;"
     "video/x-ms-wvx:wvx:Windows Media Video;"
     "audio/x-ms-wma:wma:Windows Media Audio;"
     /* Google VLC */
     "application/x-google-vlc-plugin::Google VLC plug-in;"
-    /* WAV audio */
+    /* Audio sample format */
     "audio/wav:wav:WAV audio;"
     "audio/x-wav:wav:WAV audio;"
+    "audio/x-pn-wav::WAV audio;"
+    "audio/x-pn-au::Audio samples;"
     /* 3GPP */
+    "video/3gp::3GPP video;"
     "audio/3gpp:3gp,3gpp:3GPP audio;"
     "video/3gpp:3gp,3gpp:3GPP video;"
     /* 3GPP2 */
     "audio/3gpp2:3g2,3gpp2:3GPP2 audio;"
     "video/3gpp2:3g2,3gpp2:3GPP2 video;"
-    /* DIVX */
-    "video/divx:divx:DivX video;"
-    /* FLV */
+    /* Autodesk animation format */
+    "video/fli:fli:FLI video;"
     "video/flv:flv:FLV video;"
+    "video/x-flc::FLV video;"
+    "video/x-fli::FLI video;"
     "video/x-flv:flv:FLV video;"
     /* Matroska */
     "application/x-matroska:mkv:Matroska video;"
-    "video/x-matroska:mkv:Matroska video;"
+    "video/x-matroska:mpv,mkv:Matroska video;"
     "audio/x-matroska:mka:Matroska audio;"
-    /* XSPF */
+    /* Playlists / text/xml list with URLs */
     "application/xspf+xml:xspf:Playlist xspf;"
-    /* M3U */
+    "audio/mpegurl:m3u:MPEG audio playlist;"
     "audio/x-mpegurl:m3u:MPEG audio;"
+    "audio/scpls:pls:MP3 ShoutCast playlist;"
+    "audio/x-scpls:pls:MP3 ShoutCast playlist;"
+    "text/google-video-pointer::Google Video Pointer playlist;"
+    "text/x-google-video-pointer::Google Video Pointer playlist;"
+    "video/vnd.mpegurl:mxu:MPEG video (streamed);"
+    "application/vnd.apple.mpegurl::HTTP Live Streaming playlist;"
+    "application/vnd.ms-asf::ASF video;"
+    "application/vnd.ms-wpl::WPL playlist;"
+    "application/sdp::SDP multicast stream file;"
+    /* Digital Video */
+    "audio/dv:dif,dv:DV audio;"
+    "video/dv:dif,dv:DV video;"
+    /* IFF related formats */
+    "audio/x-aiff:aif,aiff,aifc:AIFF/Amiga/Mac audio;"
+    "audio/x-pn-aiff::AIFF audio;"
+    "video/x-anim::ANIM animation;"
     /* Webm */
     "video/webm:webm:WebM video;"
     "audio/webm:webm:WebM audio;"
     /* Real Media */
+    "application/ram:ram:RealMedia Metafile;"
+    "application/vnd.rn-realmedia-vbr::Real Media File;"
     "application/vnd.rn-realmedia:rm:Real Media File;"
+    "audio/vnd.rn-realaudio::RealAudio document;"
+    "audio/x-pn-realaudio-plugin::RealAudio plugin file;"
+    "audio/x-pn-realaudio:ra,rm,ram:Real Media Audio;"
+    "audio/x-real-audio::Real Media Audio;"
     "audio/x-realaudio:ra:Real Media Audio;"
+    "video/vnd.rn-realvideo::Real Media Video;"
     /* AMR */
+    "audio/AMR-WB::AMR-WB audio;"
+    "audio/AMR::AMR audio;"
+    "audio/amr-wb:awb:AMR-WB audio;"
     "audio/amr:amr:AMR audio;"
     /* FLAC */
+    "application/x-flac:flac:FLAC audio;"
     "audio/x-flac:flac:FLAC audio;"
     "audio/flac:flac:FLAC audio;"
+    /* Adobe Flash video */
+    "application/x-flash-video::Flash video;"
+    "application/x-shockwave-flash:swf,swfl:Shockwave Flash file;"
+    /* Raw audio */
+    "audio/ac3::Dolby Digital audio;"
+    "audio/eac3::E-AC3;"
+    "audio/basic:au,snd:ULAW (Sun) audio;"
+    "audio/midi:mid,midi,kar:MIDI audio;"
+    "audio/vnd.dts.hd::DTSHD audio;"
+    "audio/vnd.dolby.heaac.1::Dolby HeAAC;"
+    "audio/vnd.dolby.heaac.2::Dolby HeAAC;"
+    "audio/vnd.dolby.mlp::MLP/TrueHD;"
+    "audio/vnd.dts::DTS audio;"
+    "audio/x-ape::Monkey's audio;"
+    "audio/x-gsm:gsm:GSM 06.10 audio;"
+    "audio/x-musepack::Musepack audio;"
+    "audio/x-shorten::Shorten audio;"
+    "audio/x-tta::TrueAudio audio;"
+    "audio/x-wavpack::WavPack audio;"
+    /* Modplug / GME */
+    "audio/x-it::Impulse Tracker audio;"
+    "audio/x-mod::Amiga SoundTracker audio;"
+    "audio/x-s3m::Scream Tracker 3 audio;"
+    "audio/x-xm::FastTracker II audio;"
+    /* misc */
+    "application/mxf:mxf:MXF video;"
+    "image/vnd.rn-realpix::RealPix document;"
+    "misc/ultravox::SHOUTcast 2;"
+    "video/x-nsv::NullSoft video;"
     ;
 
 /******************************************************************************

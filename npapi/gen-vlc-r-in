@@ -13,8 +13,8 @@ lines() {
 	grep -vi "quicktime"
 }
 
-
-cat <<EOF
+macfile() {
+    cat <<EOF
 /*****************************************************************************
  * VLC Plugin description for OS X
  *****************************************************************************/
@@ -43,10 +43,10 @@ resource 'STR#' (127)
     {
 EOF
 
-lines | sed 's/ *".*:.*:\(.*\);"/        "\1",/' |
-  sed 's%^ */%        /%'
+    lines | sed 's/ *".*:.*:\(.*\);"/        "\1",/' | \
+	sed 's%^ */%        /%'
 
-cat <<EOF
+    cat <<EOF
     };
 };
 
@@ -55,10 +55,84 @@ resource 'STR#' (128,"MIME Type")
 {
     {
 EOF
-lines | sed 's/ *"\(.*\):\(.*\):.*;"/        "\1", "\2",/' |
-  sed 's%^ */%        /%'
-cat <<EOF
+    lines | sed 's/ *"\(.*\):\(.*\):.*;"/        "\1", "\2",/' | \
+	sed 's%^ */%        /%'
+    cat <<EOF
     };
 };
 
 EOF
+}
+
+winfile() {
+    mimetype="$(lines | awk '/ *".*:.*:.*;"/ {print}' | sed 's/ *"\(.*\):.*:.*;"/\1|/' | tr -d "\n" | sed 's/|$//')"
+    fileextents="$(lines | awk '/ *".*:.*:.*;"/ {print}' | sed 's/ *".*:\(.*\):.*;"/\1|/' | tr -d "\n" | sed 's/|$//')"
+    fileopenname="$(lines | awk '/ *".*:.*:.*;"/ {print}' | sed 's/ *".*:.*:\(.*\);"/\1|/' | tr -d "\n" | sed 's/|$//')"
+    cat <<EOF
+/////////////////////////////////////////////////////////////////////////////
+//
+//  VLC Plugin description.
+//
+#define VERSION_NUMBER @VERSION_MAJOR@,@VERSION_MINOR@,@VERSION_REVISION@,@VERSION_EXTRA_RC@
+
+//VS_VERSION_INFO VERSIONINFO
+1 VERSIONINFO
+ FILEVERSION VERSION_NUMBER
+ PRODUCTVERSION VERSION_NUMBER
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "VideoLAN\0"
+            VALUE "ProductName", "VLC Web Plugin\0"
+            VALUE "ProductVersion", "@VERSION@"
+            VALUE "InternalName", "npvlc\0"
+            VALUE "OriginalFilename", "npvlc.dll\0"
+            VALUE "FileVersion", "@VERSION@"
+            VALUE "FileDescription", "VLC media player Web Plugin\0"
+            VALUE "LegalCopyright", "Copyright \251 @COPYRIGHT_YEARS@ VideoLAN and VLC Authors\0"
+            VALUE "LegalTrademarks", "VLC media player, VideoLAN and x264 are registered trademarks from VideoLAN\0"
+            VALUE "MIMEType", "$mimetype"
+            VALUE "FileExtents", "$fileextents"
+            VALUE "FileOpenName", "$fileopenname"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+3 BITMAP DISCARDABLE "../share/pixmaps/win32/defullscreen.bmp"
+4 BITMAP DISCARDABLE "../share/pixmaps/win32/play.bmp"
+5 BITMAP DISCARDABLE "../share/pixmaps/win32/pause.bmp"
+6 BITMAP DISCARDABLE "../share/pixmaps/win32/volume.bmp"
+7 BITMAP DISCARDABLE "../share/pixmaps/win32/volume-muted.bmp"
+8 ICON   DISCARDABLE "../share/pixmaps/win32/vlc.ico"
+9 BITMAP DISCARDABLE "../share/pixmaps/win32/fullscreen.bmp"
+EOF
+}
+
+case "$1" in
+    win)
+	winfile
+	;;
+    macosx)
+	macfile
+	;;
+    *)
+	echo "Incorrect usage." 1>&2
+	exit 1
+	;;
+esac

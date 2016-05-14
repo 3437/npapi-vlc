@@ -163,4 +163,6 @@ VLC-Plugin.plugin: $(lib_LTLIBRARIES)
 endif # Mac
 
 package/vlc.r.in: vlcshell.cpp
-	./gen-vlc-r-in > package/vlc.r.in
+	./gen-vlc-r-in macosx > package/vlc.r.in
+package/npvlc_rc.rc.in: vlcshell.cpp
+	./gen-vlc-r-in win > package/npvlc_rc.rc.in

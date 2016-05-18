@@ -43,8 +43,9 @@ npvlc_la_LIBADD = $(libvlcplugin_la_LIBADD)
 npvlc_la_LDFLAGS = $(libvlcplugin_la_LDFLAGS)
 
 npapi-sdk:
-	svn export http://npapi-sdk.googlecode.com/svn/trunk/headers npapi-sdk-svn -r HEAD
-	mv npapi-sdk-svn npapi-sdk
+	wget https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/npapi-sdk/source-archive.zip
+	unzip -j source-archive.zip "npapi-sdk/trunk/headers/*" -x "npapi-sdk/trunk/headers/.svn/*" -d npapi-sdk
+	rm -rf source-archive.zip
 
 if HAVE_XCB
 

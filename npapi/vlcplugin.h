@@ -29,10 +29,6 @@
 #ifndef __VLCPLUGIN_H__
 #define __VLCPLUGIN_H__
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
-
 #include "common.h"
 
 #if defined(XP_UNIX) && !defined(XP_MACOSX)

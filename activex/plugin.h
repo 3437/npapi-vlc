@@ -24,10 +24,6 @@
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
 
-#ifdef HAVE_CONFIG
-# include "config.h"
-#endif
-
 #include <olectl.h>
 
 #include "../common/win32_fullscreen.h"

@@ -29,6 +29,7 @@
 #include <windowsx.h>
 #include <commctrl.h>
 #include <uxtheme.h>
+#include <math.h>
 
 #include "win32_fullscreen.h"
 

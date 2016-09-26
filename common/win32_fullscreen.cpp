@@ -566,9 +566,15 @@ LRESULT VLCHolderWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 DWORD s = GetWindowLong(hwnd, GWL_STYLE);
                 s |= WS_CLIPSIBLINGS;
                 SetWindowLong(hwnd, GWL_STYLE, s);
-                // Now we can hook onto the media player's HWND:
-                MouseHook(true);
+
+                //libvlc events arrives from separate thread,
+                //so we need post message to main thread, to notify it.
+                PostMessage(hWnd(), WM_SET_MOUSE_HOOK, 0, 0);
             });
+            break;
+        }
+        case WM_SET_MOUSE_HOOK:{
+            MouseHook(true);
             break;
         }
         case WM_PAINT:{

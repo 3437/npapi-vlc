@@ -262,7 +262,7 @@ LibvlcAudioNPObject::getProperty(int index, npapi::OutVariant& result)
             }
             case ID_audio_count:
             {
-                result = mp.audioTrackCount();
+                result = negativeToZero( mp.audioTrackCount() );
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_audio_channel:
@@ -1975,7 +1975,7 @@ LibvlcTitleNPObject::getProperty(int index, npapi::OutVariant& result)
         {
             case ID_title_count:
             {
-                result = mp.titleCount();
+                result = negativeToZero( mp.titleCount() );
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_title_track:
@@ -2099,7 +2099,7 @@ LibvlcChapterNPObject::getProperty(int index, npapi::OutVariant& result)
         {
             case ID_chapter_count:
             {
-                result = mp.chapterCount();
+                result = negativeToZero( mp.chapterCount() );
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_chapter_track:
@@ -2181,7 +2181,7 @@ LibvlcChapterNPObject::invoke(int index, const NPVariant *args,
                 const npapi::Variant v( args[0] );
                 if( v.is<int>() )
                 {
-                    result = mp.chapterCountForTitle( v );
+                    result = negativeToZero( mp.chapterCountForTitle( v ) );
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;

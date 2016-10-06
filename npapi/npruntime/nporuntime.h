@@ -49,6 +49,11 @@ public:
     // ownership problems with firefox.
     template<class T> void InstantObj( NPObject *&obj );
 
+    inline int negativeToZero( int i )
+    {
+        return i < 0 ? 0 : i;
+    }
+
     bool isValid()
     {
         return _instance != NULL;

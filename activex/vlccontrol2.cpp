@@ -90,6 +90,8 @@ HRESULT object_get(I **dst, I *src)
 static inline
 VARIANT_BOOL varbool(bool b) { return b ? VARIANT_TRUE : VARIANT_FALSE; }
 
+static inline INT negativeToZero(int i) { return i < 0 ? 0 : i; }
+
 static HRESULT parseStringOptions(int codePage, BSTR bstr, char*** cOptions, int *cOptionCount)
 {
     HRESULT hr = E_INVALIDARG;
@@ -464,7 +466,7 @@ STDMETHODIMP VLCAudio::get_count(long* trackNumber)
     if( NULL == trackNumber )
         return E_POINTER;
 
-    *trackNumber = _plug->get_player().get_mp().audioTrackCount();
+    *trackNumber = negativeToZero( _plug->get_player().get_mp().audioTrackCount() );
 
     return S_OK;
 }
@@ -530,7 +532,7 @@ STDMETHODIMP VLCTitle::get_count(long* countTracks)
     if( NULL == countTracks )
         return E_POINTER;
 
-    *countTracks = _plug->get_player().get_mp().titleCount();
+    *countTracks = negativeToZero( _plug->get_player().get_mp().titleCount() );
     return S_OK;
 }
 
@@ -568,7 +570,7 @@ STDMETHODIMP VLCChapter::get_count(long* countTracks)
     if( NULL == countTracks )
         return E_POINTER;
 
-    *countTracks = _plug->get_player().get_mp().chapterCount();
+    *countTracks = negativeToZero( _plug->get_player().get_mp().chapterCount() );
     return S_OK;
 }
 
@@ -577,7 +579,7 @@ STDMETHODIMP VLCChapter::countForTitle(long track, long* countTracks)
     if( NULL == countTracks )
         return E_POINTER;
 
-    *countTracks = _plug->get_player().get_mp().chapterCountForTitle(track);
+    *countTracks = negativeToZero( _plug->get_player().get_mp().chapterCountForTitle(track) );
     return S_OK;
 }
 

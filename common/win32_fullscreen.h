@@ -138,8 +138,6 @@ private:
     HWND hVideoPosScroll;
     HWND hMuteButton;
     HWND hVolumeSlider;
-
-    int VideoPosShiftBits;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -179,17 +177,12 @@ private:
     HHOOK _hMouseHook;
     DWORD _MouseHookThreadId;
     void MouseHook(bool SetHook);
-    void TrackMouse();
 
     VLCWindowsManager& WM()
         {return *_wm;}
     inline vlc_player* VP() const;
     inline const VLCViewResources& RC() const;
     inline const vlc_player_options* PO() const;
-
-private:
-    static HINSTANCE _hinstance;
-    static ATOM _holder_wndclass_atom;
 
 private:
     VLCWindowsManager* _wm;
@@ -231,12 +224,6 @@ private:
     inline const VLCViewResources& RC() const;
 
 private:
-    void NeedHideControls();
-
-private:
-    void CreateToolTip();
-
-private:
     VLCWindowsManager* _WindowsManager;
 
 public:
@@ -244,8 +231,6 @@ public:
 
 private:
     HWND _hWnd;
-
-    int VideoPosShiftBits;
 };
 
 ///////////////////////
@@ -283,10 +268,6 @@ public:
 public:
     void OnKeyDownEvent(UINT uKeyMsg);
     void OnMouseEvent(UINT uMouseMsg);
-
-private:
-    //libvlc events arrives from separate thread
-    void OnLibVlcEvent(const libvlc_event_t* event);
 
 private:
     const VLCViewResources& _rc;

@@ -1093,8 +1093,11 @@ STDMETHODIMP VLCVideo::get_aspectRatio(BSTR* aspect)
 
 STDMETHODIMP VLCVideo::put_aspectRatio(BSTR aspect)
 {
-    if( NULL == aspect )
-        return E_POINTER;
+    if( 0 == SysStringLen(aspect) )
+    {
+        _plug->get_player().get_mp().setAspectRatio( "" );
+        return S_OK;
+    }
 
     char *psz_aspect = CStrFromBSTR(CP_UTF8, aspect);
     if( !psz_aspect )
@@ -1136,11 +1139,11 @@ STDMETHODIMP VLCVideo::get_crop(BSTR* geometry)
 
 STDMETHODIMP VLCVideo::put_crop(BSTR geometry)
 {
-    if( NULL == geometry )
-        return E_POINTER;
-
     if( 0 == SysStringLen(geometry) )
-        return E_INVALIDARG;
+    {
+        _plug->get_player().get_mp().setCropGeometry( "" );
+        return S_OK;
+    }
 
     char *psz_geometry = CStrFromBSTR(CP_UTF8, geometry);
     if( !psz_geometry )

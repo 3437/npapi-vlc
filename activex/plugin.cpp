@@ -386,7 +386,7 @@ HRESULT VLCPlugin::onInit(void)
     _bstr_mrl     = NULL;
     _b_visible    = TRUE;
     _b_mute       = FALSE;
-    _i_volume     = 50;
+    _i_volume     = 100;
     _i_time       = 0;
     _i_backcolor  = 0;
     // set default/preferred size (320x240) pixels in HIMETRIC

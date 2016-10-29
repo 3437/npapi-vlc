@@ -81,6 +81,7 @@ public:
         V_BSTR(&arg) = bstr;
         VariantInit(&_v);
         VariantCopy(&_v, &arg);
+        VariantClear(&arg);
     };
 
     inline const VARIANTARG *variantArg(void) const {

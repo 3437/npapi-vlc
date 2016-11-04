@@ -1,3 +1,18 @@
+Changes between VLC plugins 2.2.4 and 2.2.5:
+--------------------------------------------
+
+NPAPI Core:
+ * Don't return negative values for count properties
+
+Common:
+ * Correctly update UI after media change (Windows)
+
+ActiveX:
+ * Fix malformed VERSIONINFO structure
+ * Allow empty strings for aspectRatio and crop
+ * Fix initial volume value for volume attribute
+
+
 Changes between VLC plugins 2.2.2 and 2.2.4:
 --------------------------------------------
 

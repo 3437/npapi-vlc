@@ -1133,6 +1133,10 @@ void LibvlcPlaylistNPObject::parseOptions(NPObject *obj, int *i_options,
     NPIdentifier propId = NPN_GetStringIdentifier("length");
     if( NPN_GetProperty(_instance, obj, propId, value) )
     {
+        /* Check if result is valid (because we don't use NPN_HasProperty, the result can be void) */
+        if( !value.is<int>() )
+            return;
+
         int count = value;
 
         if( count )

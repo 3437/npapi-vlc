@@ -12,6 +12,9 @@ ActiveX:
  * Allow empty strings for aspectRatio and crop
  * Fix initial volume value for volume attribute
 
+NPAPI:
+ * Fix possible crash in vlc.playlist.add()
+
 
 Changes between VLC plugins 2.2.2 and 2.2.4:
 --------------------------------------------

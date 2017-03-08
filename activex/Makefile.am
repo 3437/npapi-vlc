@@ -79,7 +79,7 @@ axvlc_la_LIBADD = ../common/libvlcplugin_common.la \
 DATA_axvlc_rc = $(noinst_axvlc_rc_DATA)
 noinst_axvlc_rc_DATA = axvlc_rc.$(OBJEXT)
 noinst_axvlc_rcdir = 
-axvlc_rc.$(OBJEXT): axvlc_rc.rc inplace.bmp axvlc.tlb
+axvlc_rc.$(OBJEXT): axvlc_rc.rc inplace.bmp axvlc.tlb axvlc.dll.manifest
 	$(WINDRES) --include-dir $(srcdir) -i $< -o $@
 
 

@@ -75,6 +75,8 @@ winfile() {
 //
 #define VERSION_NUMBER @VERSION_MAJOR@,@VERSION_MINOR@,@VERSION_REVISION@,@VERSION_EXTRA_RC@
 
+#include <winuser.h>
+
 //VS_VERSION_INFO VERSIONINFO
 1 VERSIONINFO
  FILEVERSION VERSION_NUMBER
@@ -121,6 +123,8 @@ END
 7 BITMAP DISCARDABLE "../share/pixmaps/win32/volume-muted.bmp"
 8 ICON   DISCARDABLE "../share/pixmaps/win32/vlc.ico"
 9 BITMAP DISCARDABLE "../share/pixmaps/win32/fullscreen.bmp"
+
+ISOLATIONAWARE_MANIFEST_RESOURCE_ID RT_MANIFEST "npvlc.dll.manifest"
 EOF
 }
 

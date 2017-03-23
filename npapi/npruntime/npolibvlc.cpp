@@ -1545,7 +1545,10 @@ LibvlcVideoNPObject::invoke(int index, const NPVariant *,
             {
                 if( argCount == 0 )
                 {
-                    p_plugin->getMD().toggleTeletext();
+                    if ( p_plugin->getMD().teletext() == -1 )
+                        p_plugin->getMD().setTeletext( 100 );
+                    else
+                        p_plugin->getMD().setTeletext( -1 );
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;

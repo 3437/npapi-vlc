@@ -1273,10 +1273,10 @@ STDMETHODIMP VLCVideo::toggleFullscreen()
 STDMETHODIMP VLCVideo::toggleTeletext()
 {
 #if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
-    if( _plug->get_player().get_mp().teletext() == -1 )
+    if( _plug->get_player().get_mp().teletext() == 0 )
         _plug->get_player().get_mp().setTeletext( 100 );
     else
-        _plug->get_player().get_mp().setTeletext( -1 );
+        _plug->get_player().get_mp().setTeletext( 0 );
     return S_OK;
 #else
     _plug->get_player().get_mp().toggleTeletext();

@@ -373,7 +373,16 @@ static struct vlcevents_t {
     { "MediaPlayerSeekableChanged", libvlc_MediaPlayerSeekableChanged },
     { "MediaPlayerPausableChanged", libvlc_MediaPlayerPausableChanged },
     { "MediaPlayerTitleChanged", libvlc_MediaPlayerTitleChanged },
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
+    { "MediaPlayerChapterChanged", libvlc_MediaPlayerChapterChanged },
+#endif
     { "MediaPlayerLengthChanged", libvlc_MediaPlayerLengthChanged },
+    { "MediaPlayerVout", libvlc_MediaPlayerVout },
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
+    { "MediaPlayerMuted", libvlc_MediaPlayerMuted },
+    { "MediaPlayerUnmuted", libvlc_MediaPlayerUnmuted },
+    { "MediaPlayerAudioVolume", libvlc_MediaPlayerAudioVolume },
+#endif
 };
 
 void VlcPluginBase::subscribe(const char* eventName, npapi::Variant listener)
@@ -438,9 +447,28 @@ void VlcPluginBase::subscribe(const char* eventName, npapi::Variant listener)
         case libvlc_MediaPlayerTitleChanged:
             e = player().get_mp().eventManager().onTitleChanged( std::move( closure ) );
             break;
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
+        case libvlc_MediaPlayerChapterChanged:
+            e = player().get_mp().eventManager().onChapterChanged( std::move( closure ) );
+            break;
+#endif
         case libvlc_MediaPlayerLengthChanged:
             e = player().get_mp().eventManager().onLengthChanged( std::move( closure ) );
             break;
+        case libvlc_MediaPlayerVout:
+            e = player().get_mp().eventManager().onVout( std::move( closure ) );
+            break;
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
+        case libvlc_MediaPlayerMuted:
+            e = player().get_mp().eventManager().onMuted( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerUnmuted:
+            e = player().get_mp().eventManager().onUnmuted( std::move( closure ) );
+            break;
+        case libvlc_MediaPlayerAudioVolume:
+            e = player().get_mp().eventManager().onAudioVolume( std::move( closure ) );
+            break;
+#endif
         default:
             break;
     }

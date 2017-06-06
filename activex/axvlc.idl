@@ -84,6 +84,12 @@ library AXVLC
     const int DISPID_MediaPlayerMediaChangedEvent = 214;
     const int DISPID_MediaPlayerTitleChangedEvent = 215;
     const int DISPID_MediaPlayerLengthChangedEvent = 216;
+    const int DISPID_MediaPlayerChapterChangedEvent = 217;
+
+    const int DISPID_MediaPlayerVoutEvent = 218;
+    const int DISPID_MediaPlayerMutedEvent = 219;
+    const int DISPID_MediaPlayerUnmutedEvent = 220;
+    const int DISPID_MediaPlayerAudioVolumeEvent = 221;
 
     [
       uuid(DF48072F-5EF8-434e-9B40-E2F3AE759B5F),
@@ -129,6 +135,17 @@ library AXVLC
             void MediaPlayerTitleChanged([in] int title);
             [id(DISPID_MediaPlayerLengthChangedEvent), helpstring("Length changed")]
             void MediaPlayerLengthChanged([in] long length);
+            [id(DISPID_MediaPlayerChapterChangedEvent), helpstring("Chapter changed")]
+            void MediaPlayerChapterChanged([in] int chapter);
+
+            [id(DISPID_MediaPlayerVoutEvent), helpstring("Number of vout changed")]
+            void MediaPlayerVout([in] int count);
+            [id(DISPID_MediaPlayerMutedEvent), helpstring("Audio muted")]
+            void MediaPlayerMuted();
+            [id(DISPID_MediaPlayerUnmutedEvent), helpstring("Audio unmuted")]
+            void MediaPlayerUnmuted();
+            [id(DISPID_MediaPlayerAudioVolumeEvent), helpstring("Audio volume changed")]
+            void MediaPlayerAudioVolume([in] float volume);
     };
 
     [

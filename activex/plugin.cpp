@@ -1114,6 +1114,61 @@ void VLCPlugin::fireOnMediaPlayerLengthChangedEvent(long length)
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerLengthChangedEvent, &params);
 }
 
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
+void VLCPlugin::fireOnMediaPlayerChapterChangedEvent(int chapter)
+{
+    DISPPARAMS params;
+    params.cArgs = 1;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[0].vt = VT_I2;
+    params.rgvarg[0].iVal = chapter;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerChapterChangedEvent, &params);
+}
+#endif
+
+void VLCPlugin::fireOnMediaPlayerVoutEvent(int count)
+{
+    DISPPARAMS params;
+    params.cArgs = 1;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[0].vt = VT_I2;
+    params.rgvarg[0].iVal = count;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerVoutEvent, &params);
+}
+
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
+void VLCPlugin::fireOnMediaPlayerMutedEvent()
+{
+    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerMutedEvent, &dispparamsNoArgs);
+}
+
+void VLCPlugin::fireOnMediaPlayerUnmutedEvent()
+{
+    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerUnmutedEvent, &dispparamsNoArgs);
+}
+
+void VLCPlugin::fireOnMediaPlayerAudioVolumeEvent(float volume)
+{
+    DISPPARAMS params;
+    params.cArgs = 1;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[0].vt = VT_R4;
+    params.rgvarg[0].fltVal = volume;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerAudioVolumeEvent, &params);
+}
+#endif
+
 /* */
 
 void VLCPlugin::set_player_window()
@@ -1178,6 +1233,25 @@ void VLCPlugin::player_register_events()
     em.onLengthChanged( [this]( int64_t length ) {
         fireOnMediaPlayerLengthChangedEvent( length );
     });
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
+    em.onChapterChanged( [this]( int chapter ) {
+        fireOnMediaPlayerChapterChangedEvent( chapter );
+    });
+#endif
+    em.onVout( [this]( int count ) {
+        fireOnMediaPlayerVoutEvent( count );
+    });
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
+    em.onMuted( [this] {
+        fireOnMediaPlayerMutedEvent();
+    });
+    em.onUnmuted( [this] {
+        fireOnMediaPlayerUnmutedEvent();
+    });
+    em.onAudioVolume( [this]( float volume ) {
+        fireOnMediaPlayerAudioVolumeEvent( volume );
+    });
+#endif
 }
 
 #undef B

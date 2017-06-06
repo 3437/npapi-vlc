@@ -537,6 +537,16 @@ library AXVLC
         [helpstring("toggle teletext transparent state.")]
         HRESULT toggleTeletext();
 
+        [propget, helpstring("Returns/sets video track used/to use.")]
+        HRESULT track([out, retval] long* track);
+        [propput, helpstring("Returns/sets video track used/to use.")]
+        HRESULT track([in] long track);
+
+        [propget, helpstring("Returns the number of video tracks available.")]
+        HRESULT count([out, retval] long* trackNumber);
+        [helpstring("Returns video track name.")]
+        HRESULT description([in] long trackID, [out, retval] BSTR* name);
+
         [propget, helpstring("Returns the marquee object.")]
         HRESULT marquee([out, retval] IVLCMarquee** obj);
 

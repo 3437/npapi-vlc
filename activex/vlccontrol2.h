@@ -357,6 +357,10 @@ public:
     STDMETHODIMP takeSnapshot(LPPICTUREDISP*);
     STDMETHODIMP toggleFullscreen();
     STDMETHODIMP toggleTeletext();
+    STDMETHODIMP get_track(long*);
+    STDMETHODIMP put_track(long);
+    STDMETHODIMP get_count(long*);
+    STDMETHODIMP description(long, BSTR*);
 
 private:
     IVLCMarquee     *_p_vlcmarquee;

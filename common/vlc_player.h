@@ -60,6 +60,7 @@ public:
 
     int currentAudioTrack();
     int currentSubtitleTrack();
+    int currentVideoTrack();
 
 private:
     // Returns a 0-based track index, instead of the internal libvlc one

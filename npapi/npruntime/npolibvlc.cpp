@@ -1332,6 +1332,8 @@ const NPUTF8 * const LibvlcVideoNPObject::propertyNames[] =
     "subtitle",
     "crop",
     "teletext",
+    "track",
+    "count",
     "marquee",
     "logo",
     "deinterlace",
@@ -1346,6 +1348,8 @@ enum LibvlcVideoNPObjectPropertyIds
     ID_video_subtitle,
     ID_video_crop,
     ID_video_teletext,
+    ID_video_track,
+    ID_video_count,
     ID_video_marquee,
     ID_video_logo,
     ID_video_deinterlace,
@@ -1405,6 +1409,16 @@ LibvlcVideoNPObject::getProperty(int index, npapi::OutVariant& result)
                 if( i_page < 0 )
                     return INVOKERESULT_GENERIC_ERROR;
                 result = i_page;
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_video_track:
+            {
+                result = p_plugin->player().currentVideoTrack();
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_video_count:
+            {
+                result = negativeToZero( mp.videoTrackCount() );
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_video_marquee:
@@ -1503,6 +1517,18 @@ LibvlcVideoNPObject::setProperty(int index, const NPVariant &value)
                 }
                 return INVOKERESULT_INVALID_VALUE;
             }
+            case ID_video_track:
+            {
+                if( v.is<int>() )
+                {
+                    auto tracks = mp.videoTrackDescription();
+                    if ( v >= tracks.size() )
+                        return INVOKERESULT_INVALID_VALUE;
+                    mp.setVideoTrack( tracks[v].id() );
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_INVALID_VALUE;
+            }
         }
     }
     return INVOKERESULT_GENERIC_ERROR;
@@ -1512,6 +1538,7 @@ const NPUTF8 * const LibvlcVideoNPObject::methodNames[] =
 {
     "toggleFullscreen",
     "toggleTeletext",
+    "description",
 };
 COUNTNAMES(LibvlcVideoNPObject,methodCount,methodNames);
 
@@ -1519,16 +1546,20 @@ enum LibvlcVideoNPObjectMethodIds
 {
     ID_video_togglefullscreen,
     ID_video_toggleteletext,
+    ID_video_description,
 };
 
 RuntimeNPObject::InvokeResult
-LibvlcVideoNPObject::invoke(int index, const NPVariant *,
-                            uint32_t argCount, npapi::OutVariant&)
+LibvlcVideoNPObject::invoke(int index, const NPVariant *args,
+                            uint32_t argCount, npapi::OutVariant& result)
 {
     /* is plugin still running */
     if( isPluginRunning() )
     {
         VlcPluginBase* p_plugin = getPrivate<VlcPluginBase>();
+        auto& mp = p_plugin->getMD();
+        if( !mp )
+            RETURN_ON_ERROR;
 
         switch( index )
         {
@@ -1553,6 +1584,22 @@ LibvlcVideoNPObject::invoke(int index, const NPVariant *,
 #else
                     p_plugin->getMD().toggleTeletext();
 #endif
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_NO_SUCH_METHOD;
+            }
+            case ID_video_description:
+            {
+                if ( argCount < 1 )
+                    return INVOKERESULT_INVALID_ARGS;
+                const npapi::Variant v( args[0] );
+                if( v.is<int>() )
+                {
+                    auto tracks = mp.videoTrackDescription();
+                    if ( v >= tracks.size() )
+                        return INVOKERESULT_INVALID_VALUE;
+                    /* display the name of the track chosen */
+                    result = tracks[v].name();
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;

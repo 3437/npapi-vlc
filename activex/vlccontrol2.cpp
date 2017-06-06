@@ -1283,6 +1283,46 @@ STDMETHODIMP VLCVideo::toggleTeletext()
 #endif
 }
 
+STDMETHODIMP VLCVideo::get_track(long* track)
+{
+    if( NULL == track )
+        return E_POINTER;
+
+    *track = _plug->get_player().currentVideoTrack();
+    return S_OK;
+}
+
+STDMETHODIMP VLCVideo::put_track(long track)
+{
+    auto tracks = _plug->get_player().get_mp().videoTrackDescription();
+    if ( track >= tracks.size() )
+        return E_INVALIDARG;
+    _plug->get_player().get_mp().setVideoTrack( tracks[track].id() );
+    return S_OK;
+}
+
+STDMETHODIMP VLCVideo::get_count(long* trackNumber)
+{
+    if( NULL == trackNumber )
+        return E_POINTER;
+
+    *trackNumber = negativeToZero( _plug->get_player().get_mp().videoTrackCount() );
+
+    return S_OK;
+}
+
+STDMETHODIMP VLCVideo::description(long trackId, BSTR* name)
+{
+    if( NULL == name )
+        return E_POINTER;
+
+    auto tracks = _plug->get_player().get_mp().videoTrackDescription();
+    if ( trackId >= tracks.size() )
+        return E_INVALIDARG;
+    *name = BSTRFromCStr( CP_UTF8, tracks[trackId].name().c_str() );
+    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+}
+
 STDMETHODIMP VLCVideo::get_marquee(IVLCMarquee** obj)
 {
     return object_get(obj,_p_vlcmarquee);

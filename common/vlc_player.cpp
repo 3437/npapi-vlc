@@ -120,6 +120,13 @@ int vlc_player::currentSubtitleTrack()
     return getTrack( current, tracks );
 }
 
+int vlc_player::currentVideoTrack()
+{
+    auto current = _mp.videoTrack();
+    auto tracks = _mp.videoTrackDescription();
+    return getTrack( current, tracks );
+}
+
 int vlc_player::getTrack( int currentId, const std::vector<VLC::TrackDescription>& tracks )
 {
     if ( tracks.empty() )

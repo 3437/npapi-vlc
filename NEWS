@@ -1,3 +1,13 @@
+Changes between VLC plugins 2.2.5 and 2.2.6:
+--------------------------------------------
+
+NPAPI Core:
+ * Fix usage of toggleTeletext() for 3.0 builds
+
+Platforms:
+ * Bundle manifest with DLLs
+
+
 Changes between VLC plugins 2.2.4 and 2.2.5:
 --------------------------------------------
 

@@ -48,6 +48,8 @@ public:
 
     void play();
 
+    int preparse_item_sync(unsigned int idx, int options, unsigned int timeout);
+
     VLC::MediaPlayer& get_mp()
     {
         return _mp;
@@ -57,6 +59,8 @@ public:
     {
         return _ml_p;
     }
+
+    std::shared_ptr<VLC::Media> get_media( unsigned int idx );
 
     int currentAudioTrack();
     int currentSubtitleTrack();

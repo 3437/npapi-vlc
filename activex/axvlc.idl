@@ -349,6 +349,9 @@ library AXVLC
 
         [propget, helpstring("Returns the playlist items collection object.")]
         HRESULT items([out, retval] IVLCPlaylistItems** obj);
+
+        [helpstring("Parse the head media from playlist")]
+        HRESULT parse([in] long options, [in] long timeout_ms, [out, retval] long* status);
     };
 
     [

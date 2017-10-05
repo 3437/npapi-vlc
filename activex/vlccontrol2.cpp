@@ -466,7 +466,32 @@ STDMETHODIMP VLCAudio::get_count(long* trackNumber)
     if( NULL == trackNumber )
         return E_POINTER;
 
-    *trackNumber = negativeToZero( _plug->get_player().get_mp().audioTrackCount() );
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        *trackNumber = negativeToZero( _plug->get_player().get_mp().audioTrackCount() );
+        break;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+        {
+            *trackNumber = 0;
+            return S_OK;
+        }
+        int count = 0;
+        for (auto track:  media->tracks())
+            if (track.type() == VLC::MediaTrack::Type::Audio)
+                count++;
+        *trackNumber = count;
+        break;
+    }
+    }
 
     return S_OK;
 }
@@ -476,11 +501,37 @@ STDMETHODIMP VLCAudio::description(long trackId, BSTR* name)
     if( NULL == name )
         return E_POINTER;
 
-    auto tracks = _plug->get_player().get_mp().audioTrackDescription();
-    if ( trackId >= tracks.size() )
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        auto tracks = _plug->get_player().get_mp().audioTrackDescription();
+        if ( trackId >= tracks.size() )
+            return E_INVALIDARG;
+        *name = BSTRFromCStr( CP_UTF8, tracks[trackId].name().c_str() );
+        return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+            return E_INVALIDARG;
+        for (auto track:  media->tracks())
+            if (track.type() == VLC::MediaTrack::Type::Audio)
+            {
+                if (trackId == 0)
+                {
+                    *name = BSTRFromCStr( CP_UTF8, track.description().c_str() );
+                    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+                }
+                trackId--;
+            }
         return E_INVALIDARG;
-    *name = BSTRFromCStr( CP_UTF8, tracks[trackId].name().c_str() );
-    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+    }
+    }
 }
 
 STDMETHODIMP VLCAudio::get_channel(long *channel)
@@ -633,7 +684,30 @@ STDMETHODIMP VLCInput::get_length(double* length)
     if( NULL == length )
         return E_POINTER;
 
-    *length = static_cast<double>(_plug->get_player().get_mp().length() );
+
+
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        *length = static_cast<double>(_plug->get_player().get_mp().length() );
+        break;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+        {
+            *length = 0.0;
+            return S_OK;
+        }
+        *length = static_cast<double>(media->duration());
+        break;
+    }
+    }
 
     return S_OK;
 }
@@ -706,7 +780,11 @@ STDMETHODIMP VLCInput::get_fps(double* fps)
 
     auto media = _plug->get_player().get_mp().media();
     if ( media == nullptr )
-        return E_FAIL;
+    {
+        media = _plug->get_player().get_media(0);
+        if ( media == nullptr )
+            return E_FAIL;
+    }
     auto tracks = media->tracks();
     for ( const auto& t : tracks )
     {
@@ -1001,6 +1079,16 @@ STDMETHODIMP VLCPlaylist::get_items(IVLCPlaylistItems** obj)
     return E_OUTOFMEMORY;
 }
 
+STDMETHODIMP VLCPlaylist::parse(long options, long timeout, long *status)
+{
+    if ( timeout < 0 )
+        return E_INVALIDARG;
+    if ( status == nullptr )
+        return E_POINTER;
+    *status = _plug->get_player().preparse_item_sync( 0, options, timeout );
+    return S_OK;
+}
+
 /****************************************************************************/
 
 STDMETHODIMP VLCSubtitle::get_track(long* spu)
@@ -1027,20 +1115,72 @@ STDMETHODIMP VLCSubtitle::get_count(long* spuNumber)
     if( NULL == spuNumber )
         return E_POINTER;
 
-    *spuNumber = _plug->get_player().get_mp().spuCount();
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        *spuNumber = _plug->get_player().get_mp().spuCount();
+        break;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+        {
+            *spuNumber = 0;
+            return S_OK;
+        }
+        int count = 0;
+        for (auto track:  media->tracks())
+            if (track.type() == VLC::MediaTrack::Type::Subtitle)
+                count++;
+        *spuNumber = count;
+        break;
+    }
+    }
+
     return S_OK;
 }
 
 STDMETHODIMP VLCSubtitle::description(long nameID, BSTR* name)
 {
     if( NULL == name )
-       return E_POINTER;
+        return E_POINTER;
 
-    auto tracks = _plug->get_player().get_mp().spuDescription();
-    if ( nameID >= tracks.size() )
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        auto tracks = _plug->get_player().get_mp().spuDescription();
+        if ( nameID >= tracks.size() )
+            return E_INVALIDARG;
+        *name = BSTRFromCStr( CP_UTF8, tracks[nameID].name().c_str() );
+        return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+            return E_INVALIDARG;
+        for (auto track:  media->tracks())
+            if (track.type() == VLC::MediaTrack::Type::Subtitle)
+            {
+                if (nameID == 0)
+                {
+                    *name = BSTRFromCStr( CP_UTF8, track.description().c_str() );
+                    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+                }
+                nameID--;
+            }
         return E_INVALIDARG;
-    *name = BSTRFromCStr( CP_UTF8, tracks[nameID].name().c_str() );
-    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+    }
+    }
 }
 
 /****************************************************************************/
@@ -1066,8 +1206,36 @@ STDMETHODIMP VLCVideo::get_width(long* width)
     if( NULL == width )
         return E_POINTER;
 
-    unsigned int height;
-    _plug->get_player().get_mp().size( 0, (unsigned int*)width, &height );
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        unsigned int height;
+        _plug->get_player().get_mp().size( 0, (unsigned int*)width, &height );
+        break;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+        {
+            *width = 0;
+            return S_OK;
+        }
+        for ( auto track : media->tracks() )
+        {
+            if (track.type() == VLC::MediaTrack::Type::Video)
+            {
+                *width = track.width();
+                break;
+            }
+        }
+        break;
+    }
+    }
     return S_OK;
 }
 
@@ -1076,8 +1244,37 @@ STDMETHODIMP VLCVideo::get_height(long* height)
     if( NULL == height )
         return E_POINTER;
 
-    unsigned int width;
-    _plug->get_player().get_mp().size( 0, &width, (unsigned int*)height );
+
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        unsigned int width;
+        _plug->get_player().get_mp().size( 0, &width, (unsigned int*)height );
+        break;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+        {
+            *height = 0;
+            return S_OK;
+        }
+        for ( auto track : media->tracks() )
+        {
+            if (track.type() == VLC::MediaTrack::Type::Video)
+            {
+                *height = track.height();
+                break;
+            }
+        }
+        break;
+    }
+    }
     return S_OK;
 }
 
@@ -1321,7 +1518,32 @@ STDMETHODIMP VLCVideo::get_count(long* trackNumber)
     if( NULL == trackNumber )
         return E_POINTER;
 
-    *trackNumber = negativeToZero( _plug->get_player().get_mp().videoTrackCount() );
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        *trackNumber = negativeToZero( _plug->get_player().get_mp().videoTrackCount() );
+        break;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+        {
+            *trackNumber = 0;
+            return S_OK;
+        }
+        int count = 0;
+        for (auto track:  media->tracks())
+            if (track.type() == VLC::MediaTrack::Type::Video)
+                count++;
+        *trackNumber = count;
+        break;
+    }
+    }
 
     return S_OK;
 }
@@ -1331,11 +1553,37 @@ STDMETHODIMP VLCVideo::description(long trackId, BSTR* name)
     if( NULL == name )
         return E_POINTER;
 
-    auto tracks = _plug->get_player().get_mp().videoTrackDescription();
-    if ( trackId >= tracks.size() )
+    libvlc_state_t state = _plug->get_player().get_mp().state();
+    switch (state)
+    {
+    case libvlc_Buffering:
+    case libvlc_Playing:
+    case libvlc_Paused:
+    {
+        auto tracks = _plug->get_player().get_mp().videoTrackDescription();
+        if ( trackId >= tracks.size() )
+            return E_INVALIDARG;
+        *name = BSTRFromCStr( CP_UTF8, tracks[trackId].name().c_str() );
+        return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+    }
+    default:
+    {
+        auto media = _plug->get_player().get_media(0);
+        if ( !media )
+            return E_INVALIDARG;
+        for (auto track:  media->tracks())
+            if (track.type() == VLC::MediaTrack::Type::Video)
+            {
+                if (trackId == 0)
+                {
+                    *name = BSTRFromCStr( CP_UTF8, track.description().c_str() );
+                    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+                }
+                trackId--;
+            }
         return E_INVALIDARG;
-    *name = BSTRFromCStr( CP_UTF8, tracks[trackId].name().c_str() );
-    return (NULL == *name) ? E_OUTOFMEMORY : S_OK;
+    }
+    }
 }
 
 STDMETHODIMP VLCVideo::get_marquee(IVLCMarquee** obj)
@@ -1421,7 +1669,11 @@ STDMETHODIMP VLCMediaDescription::get_meta(BSTR* val, libvlc_meta_t e_meta)
 
     auto media = _plug->get_player().get_mp().media();
     if ( media == nullptr )
-        return E_FAIL;
+    {
+        media = _plug->get_player().get_media(0);
+        if ( media == nullptr )
+            return E_FAIL;
+    }
     auto info = media->meta( e_meta );
     *val = BSTRFromCStr( CP_UTF8, info.c_str() );
     return *val ? S_OK : E_FAIL;

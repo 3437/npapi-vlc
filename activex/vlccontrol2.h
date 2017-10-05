@@ -309,6 +309,7 @@ public:
     STDMETHODIMP clear();
     STDMETHODIMP removeItem(long);
     STDMETHODIMP get_items(IVLCPlaylistItems**);
+    STDMETHODIMP parse(long options, long timeout, long* status);
 
 private:
     VLCPlaylistItems*    _p_vlcplaylistitems;

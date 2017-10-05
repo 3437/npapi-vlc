@@ -23,6 +23,12 @@
 #include "config.h"
 #endif
 
+#if defined(_WIN32)
+#  include <windows.h>
+#else
+#  include <future>
+#endif
+
 #include "vlc_player.h"
 
 bool vlc_player::open(VLC::Instance& inst)
@@ -93,6 +99,73 @@ void vlc_player::clear_items()
     for( int i = _ml.count(); i > 0; --i) {
         _ml.removeIndex( i - 1 );
     }
+}
+
+int vlc_player::preparse_item_sync(unsigned int idx, int options, unsigned int timeout)
+{
+    int retval = -1;
+
+    VLC::MediaList::Lock lock( _ml );
+    auto media = _ml.itemAtIndex( idx );
+    if ( !media )
+        return -1;
+    auto em = media->eventManager();
+
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
+#  if defined(_WIN32)
+    HANDLE barrier = CreateEvent(nullptr, true,  false, nullptr);
+    if ( barrier == nullptr )
+        return -1;
+
+    auto event = em.onParsedChanged(
+        [&barrier, &retval](VLC::Media::ParsedStatus status )
+    {
+        retval = int( status );
+        SetEvent( barrier );
+    });
+
+    media->parseWithOptions( VLC::Media::ParseFlags( options ), timeout );
+
+    DWORD waitResult = WaitForSingleObject( barrier, INFINITE );
+    switch ( waitResult ) {
+    case WAIT_OBJECT_0:
+        break;
+    default:
+        retval = -1;
+        break;
+    }
+    CloseHandle( barrier );
+    event->unregister();
+#  else
+    std::promise<int> promise;
+    std::future<int> future = promise.get_future();
+
+    auto event = em.onParsedChanged(
+        [&promise]( VLC::Media::ParsedStatus status )
+    {
+        promise.set_value( int( status ) );
+    });
+
+    media->parseWithOptions( VLC::Media::ParseFlags( options ), timeout );
+
+    future.wait();
+    retval = future.get();
+    event->unregister();
+#  endif
+#else
+    media->parse();
+    if ( media->isParsed() )
+        retval = int( VLC::Media::ParsedStatus::Done );
+    else
+        retval = int( VLC::Media::ParsedStatus::Failed );
+#endif
+
+    return retval;
+}
+
+std::shared_ptr<VLC::Media> vlc_player::get_media(unsigned int idx)
+{
+    return _ml.itemAtIndex(idx);
 }
 
 void vlc_player::play()

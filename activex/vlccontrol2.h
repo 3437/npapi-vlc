@@ -345,6 +345,8 @@ public:
     STDMETHODIMP get_height(long*);
     STDMETHODIMP get_aspectRatio(BSTR*);
     STDMETHODIMP put_aspectRatio(BSTR);
+    STDMETHODIMP get_scale(float*);
+    STDMETHODIMP put_scale(float);
     STDMETHODIMP get_subtitle(long*);
     STDMETHODIMP put_subtitle(long);
     STDMETHODIMP get_crop(BSTR*);

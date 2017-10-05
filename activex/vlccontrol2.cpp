@@ -1109,6 +1109,21 @@ STDMETHODIMP VLCVideo::put_aspectRatio(BSTR aspect)
     return S_OK;
 }
 
+STDMETHODIMP VLCVideo::get_scale(float* scale)
+{
+    if( NULL == scale )
+        return E_POINTER;
+
+    *scale = _plug->get_player().get_mp().scale();
+    return S_OK;
+}
+
+STDMETHODIMP VLCVideo::put_scale(float scale)
+{
+    _plug->get_player().get_mp().setScale( scale );
+    return S_OK;
+}
+
 STDMETHODIMP VLCVideo::get_subtitle(long* spu)
 {
     if( NULL == spu )

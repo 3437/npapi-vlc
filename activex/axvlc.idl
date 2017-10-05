@@ -513,6 +513,11 @@ library AXVLC
         [propput, helpstring("Sets video aspect ratio.")]
         HRESULT aspectRatio([in] BSTR aspect);
 
+        [propget, helpstring("Returns video scale.")]
+        HRESULT scale([out, retval] float* aspect);
+        [propput, helpstring("Sets video scale.")]
+        HRESULT scale([in] float aspect);
+
         [propget, helpstring("Returns video subtitle used.")]
         HRESULT subtitle([out, retval] long* spu);
         [propput, helpstring("Sets video subtitle to use.")]

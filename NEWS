@@ -1,8 +1,20 @@
+Changes between VLC plugins 2.2.6 and 3.0.0:
+--------------------------------------------
+
+Core:
+ * Add ChapterChanged, Vout, (Un)Muted, AudioVolume events
+ * Fix usage of toggleTeletext() for 3.0 builds
+ * Support for multiple video tracks selection
+
+ActiveX:
+ * Support video scaling set|get
+
+
 Changes between VLC plugins 2.2.5 and 2.2.6:
 --------------------------------------------
 
 NPAPI Core:
- * Fix usage of toggleTeletext() for 3.0 builds
+ * Fix usage of toggleTeletext() for 2.2 builds
 
 Platforms:
  * Bundle manifest with DLLs

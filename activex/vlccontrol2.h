@@ -289,10 +289,8 @@ public:
 class VLCPlaylist: public VLCInterface<VLCPlaylist,IVLCPlaylist>
 {
 public:
-    VLCPlaylist(VLCPlugin *p):
-        VLCInterface<VLCPlaylist,IVLCPlaylist>(p),
-        _p_vlcplaylistitems(new VLCPlaylistItems(p)) { }
-    virtual ~VLCPlaylist() { delete _p_vlcplaylistitems; }
+    VLCPlaylist(VLCPlugin *p);
+    virtual ~VLCPlaylist();
 
     // IVLCPlaylist methods
     STDMETHODIMP get_itemCount(long*);
@@ -304,6 +302,7 @@ public:
     STDMETHODIMP pause();
     STDMETHODIMP togglePause();
     STDMETHODIMP stop();
+    STDMETHODIMP stop_async();
     STDMETHODIMP next();
     STDMETHODIMP prev();
     STDMETHODIMP clear();
@@ -312,7 +311,13 @@ public:
     STDMETHODIMP parse(long options, long timeout, long* status);
 
 private:
+    static void async_handler_cb(LPVOID obj);
+    void async_handler();
+
+private:
     VLCPlaylistItems*    _p_vlcplaylistitems;
+    HANDLE               _async_thread;
+    DWORD                _async_thread_id;
 };
 
 class VLCSubtitle: public VLCInterface<VLCSubtitle,IVLCSubtitle>

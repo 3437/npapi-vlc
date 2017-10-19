@@ -90,6 +90,7 @@ library AXVLC
     const int DISPID_MediaPlayerMutedEvent = 219;
     const int DISPID_MediaPlayerUnmutedEvent = 220;
     const int DISPID_MediaPlayerAudioVolumeEvent = 221;
+    const int DISPID_MediaPlayerStopAsyncDoneEvent = 222;
 
     [
       uuid(DF48072F-5EF8-434e-9B40-E2F3AE759B5F),
@@ -120,6 +121,8 @@ library AXVLC
             void MediaPlayerEndReached();
             [id(DISPID_MediaPlayerStoppedEvent), helpstring("Playback stopped")]
             void MediaPlayerStopped();
+            [id(DISPID_MediaPlayerStopAsyncDoneEvent), helpstring("Playback stop async done")]
+            void MediaPlayerStopAsyncDone();
 
             [id(DISPID_MediaPlayerTimeChangedEvent), helpstring("Time changed")]
             void MediaPlayerTimeChanged([in] long time);
@@ -334,6 +337,9 @@ library AXVLC
 
         [helpstring("Stop current clip.")]
         HRESULT stop();
+
+        [helpstring("Stop current clip asynchronously.")]
+        HRESULT stop_async();
 
         [helpstring("Advance to next item in playlist.")]
         HRESULT next();

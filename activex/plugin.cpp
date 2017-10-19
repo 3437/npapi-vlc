@@ -1024,6 +1024,13 @@ void VLCPlugin::fireOnMediaPlayerStoppedEvent()
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerStoppedEvent, &dispparamsNoArgs);
 };
 
+void VLCPlugin::fireOnMediaPlayerStopAsyncDoneEvent()
+{
+    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerStopAsyncDoneEvent, &dispparamsNoArgs);
+};
+
+
 void VLCPlugin::fireOnMediaPlayerForwardEvent()
 {
     DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};

@@ -910,6 +910,30 @@ STDMETHODIMP VLCPlaylistItems::remove(long item)
 }
 
 /****************************************************************************/
+enum PlaylistAsyncMessages
+{
+    PM_INPUT_STOP = WM_USER +1,
+    PM_DESTROY
+};
+
+VLCPlaylist::VLCPlaylist(VLCPlugin *p):
+    VLCInterface<VLCPlaylist,IVLCPlaylist>(p),
+    _p_vlcplaylistitems(new VLCPlaylistItems(p))
+{
+    _async_thread = CreateThread ( NULL , 0 ,
+        (LPTHREAD_START_ROUTINE)VLCPlaylist::async_handler_cb,
+        (LPVOID)this , 0, &_async_thread_id );
+}
+
+VLCPlaylist::~VLCPlaylist()
+{
+    PostThreadMessage(_async_thread_id, PM_DESTROY, 0, 0);
+    WaitForSingleObject(_async_thread, INFINITE);
+    CloseHandle (_async_thread);
+
+    delete _p_vlcplaylistitems;
+}
+
 
 STDMETHODIMP VLCPlaylist::get_itemCount(long* count)
 {
@@ -1041,6 +1065,12 @@ STDMETHODIMP VLCPlaylist::stop()
     return S_OK;
 }
 
+STDMETHODIMP VLCPlaylist::stop_async()
+{
+    PostThreadMessage(_async_thread_id, PM_INPUT_STOP, 0, 0);
+    return S_OK;
+}
+
 STDMETHODIMP VLCPlaylist::next()
 {
     _plug->get_player().mlp().next();
@@ -1087,6 +1117,36 @@ STDMETHODIMP VLCPlaylist::parse(long options, long timeout, long *status)
         return E_POINTER;
     *status = _plug->get_player().preparse_item_sync( 0, options, timeout );
     return S_OK;
+}
+
+void VLCPlaylist::async_handler_cb(LPVOID obj)
+{
+    VLCPlaylist* that = (VLCPlaylist*) obj;
+    that->async_handler();
+}
+
+
+void VLCPlaylist::async_handler()
+{
+    MSG msg;
+    bool b_quit = false;
+    while (!b_quit && GetMessage(&msg, 0, 0, 0))
+    {
+        switch(msg.message)
+        {
+        case PM_INPUT_STOP:
+            this->stop();
+            _plug->fireOnMediaPlayerStopAsyncDoneEvent();
+            break;
+        case PM_DESTROY:
+            b_quit = true;
+            break;
+        default:
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+            break;
+        }
+    }
 }
 
 /****************************************************************************/

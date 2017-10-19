@@ -250,6 +250,7 @@ public:
     void fireOnMediaPlayerEncounteredErrorEvent();
     void fireOnMediaPlayerEndReachedEvent();
     void fireOnMediaPlayerStoppedEvent();
+    void fireOnMediaPlayerStopAsyncDoneEvent();
 
     void fireOnMediaPlayerTimeChangedEvent(libvlc_time_t time);
     void fireOnMediaPlayerPositionChangedEvent(float position);

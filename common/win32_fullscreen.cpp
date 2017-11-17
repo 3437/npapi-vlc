@@ -443,9 +443,10 @@ void VLCControlsWnd::RegisterToVLCEvents()
 
 void VLCControlsWnd::NeedShowControls()
 {
-    if( !(GetWindowLong(hWnd(), GWL_STYLE) & WS_VISIBLE) ) {
-        if(WM().IsFullScreen() || (PO() && PO()->get_show_toolbar() ) )
-            ShowWindow( hWnd(), SW_SHOW );
+    if ( WM().IsFullScreen() || (PO() && PO()->get_show_toolbar()) )
+    {
+        SetWindowPos( hWnd(),  HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE );
+        ShowWindow( hWnd(), SW_SHOW );
     }
     SetTimer(hWnd(), 1, 2 * 1000, nullptr);
 }
@@ -898,6 +899,19 @@ void VLCWindowsManager::StartFullScreen()
                      FSFlags);
 
         ShowWindow(_FSWnd->getHWND(), SW_SHOW);
+
+        HWND controlWindow = _HolderWnd->ControlWindow()->hWnd();
+        //parenting to NULL promotes window to WS_POPUP
+        SetParent(controlWindow, NULL);
+        //Ensure control window is on the right screen
+        RECT controlRect;
+        GetWindowRect(controlWindow, &controlRect);
+        OffsetRect(&controlRect, FSRect.left - controlRect.left, FSRect.bottom - controlRect.bottom);
+        SetWindowPos(controlWindow,  HWND_TOPMOST,
+                     controlRect.left, controlRect.top,
+                     controlRect.right - controlRect.left, controlRect.bottom - controlRect.top,
+                     SWP_FRAMECHANGED);
+
     }
 }
 
@@ -918,6 +932,10 @@ void VLCWindowsManager::EndFullScreen()
 
         _FSWnd->DestroyWindow();
         _FSWnd = nullptr;
+
+        HWND controlWindow = _HolderWnd->ControlWindow()->hWnd();
+        SetParent(controlWindow, _HolderWnd->hWnd());
+        SetWindowPos(controlWindow,  HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
    }
 }
 

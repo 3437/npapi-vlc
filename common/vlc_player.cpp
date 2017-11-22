@@ -155,9 +155,9 @@ int vlc_player::preparse_item_sync(unsigned int idx, int options, unsigned int t
 #else
     media->parse();
     if ( media->isParsed() )
-        retval = int( VLC::Media::ParsedStatus::Done );
+        retval = 4; /* int( VLC::Media::ParsedStatus::Done ); */
     else
-        retval = int( VLC::Media::ParsedStatus::Failed );
+        retval = 2; /* int( VLC::Media::ParsedStatus::Failed ); */
 #endif
 
     return retval;

@@ -98,7 +98,13 @@ case "${host_os}" in
   *mingw32*)
     SYS=mingw32
     AC_CHECK_TOOL(WINDRES, windres, :)
-    AC_DEFINE([_WIN32_WINNT], 0x0501, [Define to '0x0501' for Windows XP APIs.])
+    AC_TRY_COMPILE([#include <windows.h>], [
+      #if _WIN32_WINNT >= 0x0501
+      #error new enough by default
+      #endif
+    ], [
+      AC_DEFINE([_WIN32_WINNT], 0x0501, [Define to '0x0501' for Windows XP APIs.])
+    ])
     AC_DEFINE([_WIN32_IE], 0x0600, [Define to '0x0600' for IE6.0 APIs.])
     AC_DEFINE([_WIN32], 1, [Define to 1 if targetting Windows.])
     CC="$CC -static-libgcc"

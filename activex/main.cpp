@@ -49,6 +49,9 @@ DEFINE_GUID(CATID_SafeForInitializing, \
 DEFINE_GUID(CATID_SafeForScripting, \
     0x7DD95801, 0x9882, 0x11CF, 0x9F, 0xA9, 0x00,0xAA,0x00,0x6C,0x42,0xC4);
 #  endif /* __MINGW32_MAJOR_VERSION && !__MINGW64_VERSION_MAJOR */
+#  define EXPORT __declspec(dllexport)
+#else
+#  define EXPORT
 #endif /* __MINGW32__ */
 
 using namespace std;
@@ -70,7 +73,7 @@ HMODULE DllGetModule()
     return h_instance;
 };
 
-STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
+STDAPI EXPORT DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
 {
     HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 
@@ -86,7 +89,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppv)
     return hr;
 };
 
-STDAPI DllCanUnloadNow(VOID)
+STDAPI EXPORT DllCanUnloadNow(VOID)
 {
     return (0 == i_class_ref) ? S_OK: S_FALSE;
 };
@@ -157,7 +160,7 @@ static void UnregisterProgID(REFCLSID rclsid, unsigned int version)
     }
 };
 
-STDAPI DllUnregisterServer(VOID)
+STDAPI EXPORT DllUnregisterServer(VOID)
 {
     // unregister type lib from the registry
 #if !defined(_WIN64)
@@ -336,7 +339,7 @@ static HRESULT RegisterClassID(HKEY hParent, REFCLSID rclsid, unsigned int versi
     return S_OK;
 }
 
-STDAPI DllRegisterServer(VOID)
+STDAPI EXPORT DllRegisterServer(VOID)
 {
     DllUnregisterServer();
 
@@ -474,7 +477,7 @@ STDAPI_(int) WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 
 #else
 
-STDAPI_(BOOL) DllMain(HANDLE hModule, DWORD fdwReason, LPVOID lpReserved )
+STDAPI_(BOOL) EXPORT DllMain(HANDLE hModule, DWORD fdwReason, LPVOID lpReserved )
 {
     (void)lpReserved;
     switch( fdwReason )

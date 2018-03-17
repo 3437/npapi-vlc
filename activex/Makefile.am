@@ -14,7 +14,6 @@ DIST_rsrc = \
 
 DIST_misc = \
     axvlc.inf.in \
-    axvlc.def \
     axvlc.dll.manifest \
     axvlc.idl \
     axvlc.tlb \
@@ -68,8 +67,8 @@ axvlc_la_SOURCES = \
     axvlc_idl.c \
     axvlc_idl.h
 
-axvlc_la_DEPENDENCIES = $(srcdir)/axvlc.def $(DATA_axvlc_rc)
-axvlc_la_LDFLAGS = -Wl,$(srcdir)/axvlc.def -Wl,$(DATA_axvlc_rc) \
+axvlc_la_DEPENDENCIES = $(DATA_axvlc_rc)
+axvlc_la_LDFLAGS = -Wl,--kill-at -Wl,$(DATA_axvlc_rc) \
     -no-undefined -avoid-version -module \
     -Wc,--static -Wc,-static-libgcc
 axvlc_la_LIBADD = ../common/libvlcplugin_common.la \

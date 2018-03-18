@@ -8,6 +8,8 @@ Core:
 
 ActiveX:
  * Support video scaling set|get
+ * Add method to parse items
+ * Add method to stop asynchronously
 
 
 Changes between VLC plugins 2.2.5 and 2.2.6:

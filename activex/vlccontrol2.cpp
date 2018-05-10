@@ -562,7 +562,12 @@ STDMETHODIMP VLCAudio::toggleMute()
 
 STDMETHODIMP VLCDeinterlace::disable()
 {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    _plug->get_player().get_mp().setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Disabled,
+                                                 std::string() );
+#else
     _plug->get_player().get_mp().setDeinterlace( "" );
+#endif
     return S_OK;
 }
 
@@ -571,7 +576,12 @@ STDMETHODIMP VLCDeinterlace::enable(BSTR mode)
     char *psz_mode = CStrFromBSTR(CP_UTF8, mode);
     if ( psz_mode == nullptr )
         return E_OUTOFMEMORY;
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    _plug->get_player().get_mp().setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Enabled,
+                                                 psz_mode );
+#else
     _plug->get_player().get_mp().setDeinterlace( psz_mode );
+#endif
     CoTaskMemFree(psz_mode);
     return S_OK;
 }

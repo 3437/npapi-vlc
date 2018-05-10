@@ -1981,7 +1981,12 @@ LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
     switch( index )
     {
     case ID_deint_disable:
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        mp.setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Disabled,
+                           std::string() );
+#else
         mp.setDeinterlace( std::string() );
+#endif
         break;
 
     case ID_deint_enable:
@@ -1992,7 +1997,11 @@ LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
         if ( !v.is<const char*>() )
             return INVOKERESULT_INVALID_VALUE;
 
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        mp.setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Enabled, v );
+#else
         mp.setDeinterlace( v );
+#endif
         break;
     }
     default:

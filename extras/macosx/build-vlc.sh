@@ -1,4 +1,7 @@
 #!/bin/sh
+# Copyright (C) Pierre d'Herbemont, 2010
+# Copyright (C) Felix Paul Kühne, 2012-2018
+
 set -e
 
 info()
@@ -8,11 +11,16 @@ info()
     echo "[${green}build${normal}] $1"
 }
 
-OSX_VERSION="10.11"
+OSX_VERSION=`xcrun --sdk macosx --show-sdk-version`
 ARCH="x86_64"
-MINIMAL_OSX_VERSION="10.6"
+MINIMAL_OSX_VERSION="10.7"
 SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_VERSION.sdk
 UNSTABLE=no
+
+if [ -z "$MAKE_JOBS" ]; then
+    CORE_COUNT=`sysctl -n machdep.cpu.core_count`
+    let MAKE_JOBS=$CORE_COUNT+1
+fi
 
 usage()
 {
@@ -81,12 +89,7 @@ if [ "x$1" != "x" ]; then
     exit 1
 fi
 
-if [ "$ARCH" = "i686" ]; then
-    MINIMAL_OSX_VERSION="10.5"
-fi
-
 export OSX_VERSION
-export SDKROOT
 
 # Get root dir
 spushd .
@@ -103,7 +106,7 @@ if ! [ -e vlc ]; then
 if [ "$UNSTABLE" = "yes" ]; then
 git clone git://git.videolan.org/vlc.git vlc
 else
-git clone git://git.videolan.org/vlc/vlc-2.2.git vlc
+git clone git://git.videolan.org/vlc/vlc-3.0.git vlc
 fi
 fi
 
@@ -113,7 +116,7 @@ spopd #extras/macosx
 # Build time
 #
 
-export PATH="${npapi_root_dir}/extras/macosx/vlc/extras/tools/build/bin:${npapi_root_dir}/extras/macosx/contrib/${ARCH}-apple-darwin10/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin"
+export PATH="${npapi_root_dir}/extras/macosx/vlc/extras/tools/build/bin:${npapi_root_dir}/extras/macosx/contrib/${ARCH}-apple-darwin14/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin"
 
 info "Building tools"
 spushd extras/macosx/vlc/extras/tools
@@ -121,6 +124,73 @@ if ! [ -e build ]; then
 ./bootstrap && make
 fi
 spopd
+
+info "Exporting environment"
+
+if [ ! -d "${SDKROOT}" ]
+then
+    echo "*** ${SDKROOT} does not exist, please install required SDK, or set SDKROOT manually. ***"
+    exit 1
+fi
+
+# partially clean the environment
+export CFLAGS=""
+export CPPFLAGS=""
+export CXXFLAGS=""
+export OBJCFLAGS=""
+export LDFLAGS=""
+
+export PLATFORM=$PLATFORM
+export SDK_VERSION=$SDK_VERSION
+export VLCSDKROOT=$SDKROOT
+
+CFLAGS="-isysroot ${SDKROOT} -arch ${ARCH} ${OPTIM}"
+OBJCFLAGS="${OPTIM}"
+
+CFLAGS+=" -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+
+export CFLAGS="${CFLAGS}"
+export CXXFLAGS="${CFLAGS}"
+export CPPFLAGS="${CFLAGS}"
+export OBJCFLAGS="${OBJCFLAGS}"
+
+export LDFLAGS="-arch ${ARCH}"
+
+EXTRA_CFLAGS="-arch ${ARCH}"
+EXTRA_CFLAGS+=" -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+EXTRA_LDFLAGS=" -Wl,-macosx_version_min,${MINIMAL_OSX_VERSION}"
+export LDFLAGS="${LDFLAGS} -v -Wl,-macosx_version_min,${MINIMAL_OSX_VERSION}"
+
+# The following symbols do not exist on the minimal macOS version (10.7), so they are disabled
+# here. This allows compilation also with newer macOS SDKs.
+# Added symbols in 10.13
+export ac_cv_func_open_wmemstream=no
+export ac_cv_func_fmemopen=no
+export ac_cv_func_open_memstream=no
+export ac_cv_func_futimens=no
+export ac_cv_func_utimensat=no
+
+# Added symbols between 10.11 and 10.12
+export ac_cv_func_basename_r=no
+export ac_cv_func_clock_getres=no
+export ac_cv_func_clock_gettime=no
+export ac_cv_func_clock_settime=no
+export ac_cv_func_dirname_r=no
+export ac_cv_func_getentropy=no
+export ac_cv_func_mkostemp=no
+export ac_cv_func_mkostemps=no
+
+# Added symbols between 10.7 and 10.11
+export ac_cv_func_ffsll=no
+export ac_cv_func_flsll=no
+export ac_cv_func_fdopendir=no
+export ac_cv_func_openat=no
+export ac_cv_func_fstatat=no
+export ac_cv_func_readlinkat=no
+
+export CC="xcrun clang"
+export CXX="xcrun clang++"
+export OBJC="xcrun clang"
 
 info "Fetching contrib"
 
@@ -130,21 +200,74 @@ if ! [ -e ${ARCH}-npapi ]; then
 mkdir ${ARCH}-npapi
 fi
 cd ${ARCH}-npapi
-../bootstrap --build=${ARCH}-apple-darwin10 \
- --disable-sout --disable-cddb --disable-bluray --disable-sdl \
- --disable-sparkle --disable-bghudappkit --disable-growl --disable-goom \
- --disable-SDL_image --disable-lua --disable-chromaprint \
- --disable-caca --disable-upnp --disable-vncserver \
- --disable-ncurses --disable-protobuf
-make fetch
-core_count=`sysctl -n machdep.cpu.core_count`
-make .gettext && AUTOPOINT=true make -j $core_count
+
+export USE_FFMPEG=1
+../bootstrap --build=${ARCH}-apple-darwin14 \
+    --enable-ad-clauses \
+    --disable-disc \
+    --disable-sdl \
+    --disable-SDL_image \
+    --disable-iconv \
+    --enable-zvbi \
+    --disable-kate \
+    --disable-caca \
+    --disable-gettext \
+    --disable-mpcdec \
+    --disable-upnp \
+    --disable-gme \
+    --disable-srt \
+    --disable-tremor \
+    --enable-vorbis \
+    --disable-sidplay2 \
+    --disable-samplerate \
+    --disable-goom \
+    --disable-vncserver \
+    --disable-orc \
+    --disable-schroedinger \
+    --disable-libmpeg2 \
+    --disable-chromaprint \
+    --disable-mad \
+    --enable-fribidi \
+    --enable-libxml2 \
+    --enable-freetype2 \
+    --enable-ass \
+    --disable-fontconfig \
+    --disable-gpg-error \
+    --disable-vncclient \
+    --disable-gnutls \
+    --disable-lua \
+    --disable-luac \
+    --disable-aribb24 \
+    --disable-aribb25 \
+    --enable-libdsm \
+    --enable-libplacebo \
+    --disable-sparkle \
+    --disable-growl \
+    --disable-breakpad \
+    --disable-ncurses \
+    --disable-asdcplib \
+    --enable-soxr \
+    --disable-protobuf \
+    --disable-sout \
+    --disable-fontconfig \
+    --disable-bghudappkit \
+    --disable-twolame \
+    --disable-microdns \
+    --disable-SDL \
+    --disable-SDL_image \
+    --disable-cddb \
+    --disable-bluray \
+    --disable-vncserver \
+    --disable-vpx
+
+echo "EXTRA_CFLAGS += ${EXTRA_CFLAGS}" >> config.mak
+echo "EXTRA_LDFLAGS += ${EXTRA_LDFLAGS}" >> config.mak
+
+make fetch -j$MAKE_JOBS
+make -j$MAKE_JOBS > ${out}
 
 spopd
 
-export CC="xcrun clang"
-export CXX="xcrun clang++"
-export OBJC="xcrun clang"
 PREFIX="${npapi_root_dir}/extras/macosx/vlc/${ARCH}-install"
 
 info "Configuring VLC"
@@ -161,25 +284,25 @@ if ! [ -e ${ARCH}-build ]; then
     mkdir ${ARCH}-build
 fi
 
-CONFIG_OPTIONS=""
-if [ "$ARCH" = "i686" ]; then
-    CONFIG_OPTIONS="--disable-vda"
-    export LDFLAGS="-Wl,-read_only_relocs,suppress"
-fi
+# Available but not authorized
+export ac_cv_func_daemon=no
+export ac_cv_func_fork=no
+
+export CXXFLAGS="${CXXFLAGS} -stdlib=libc++"
+export LDFLAGS="${LDFLAGS} -read_only_relocs suppress"
 
 cd ${ARCH}-build
 ../configure \
-        --build=${ARCH}-apple-darwin10 \
+        --build=${ARCH}-apple-darwin14 \
         --prefix=${PREFIX} \
         --with-macosx-version-min=${MINIMAL_OSX_VERSION} \
         --with-macosx-sdk=$SDKROOT \
-        --disable-lua --disable-httpd --disable-vlm --disable-sout \
+        --disable-lua --disable-vlm --disable-sout \
         --disable-vcd --disable-screen \
         --disable-debug \
         --disable-macosx \
         --disable-notify \
         --disable-projectm \
-        --disable-growl \
         --disable-faad \
         --disable-bluray \
         --enable-flac \
@@ -190,28 +313,22 @@ cd ${ARCH}-build
         --enable-realrtsp \
         --enable-libass \
         --disable-macosx-avfoundation \
-        --disable-macosx-dialog-provider \
-        --disable-macosx-eyetv \
         --disable-macosx-qtkit \
-        --disable-macosx-quartztext \
-        --disable-macosx-vlc-app \
         --disable-skins2 \
         --disable-xcb \
         --disable-caca \
-        --disable-sdl \
         --disable-samplerate \
         --disable-upnp \
         --disable-goom \
         --disable-nls \
-        --disable-sdl \
         --disable-sdl-image \
-        ${CONFIG_OPTIONS} \
-         > ${out}
+        --disable-sparkle \
+        --disable-addonmanagermodules \
+        --disable-mad \
+        --enable-merge-ffmpeg \
+        > ${out}
 
 info "Compiling VLC"
-
-CORE_COUNT=`sysctl -n machdep.cpu.core_count`
-let MAKE_JOBS=$CORE_COUNT+1
 
 if [ "$VERBOSE" = "yes" ]; then
     make V=1 -j$MAKE_JOBS > ${out}

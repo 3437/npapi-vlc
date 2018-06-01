@@ -21,7 +21,7 @@ spopd()
 out="/dev/null"
 
 npapiroot=`pwd`
-INTEL32ROOT="${npapiroot}/i686-build/VLC-Plugin.plugin"
+INTEL32ROOT="${npapiroot}/i386-build/VLC-Plugin.plugin"
 INTEL64ROOT="${npapiroot}/x86_64-build/VLC-Plugin.plugin"
 UBROOT="${npapiroot}/VLC-Plugin.plugin"
 
@@ -32,9 +32,9 @@ if [ ! -e "${npapiroot}/extras/macosx/vlc/x86_64-install" ]; then
     ./extras/macosx/build-vlc.sh -a x86_64
 fi
 
-if [ ! -e "${npapiroot}/extras/macosx/vlc/i686-install" ]; then
+if [ ! -e "${npapiroot}/extras/macosx/vlc/i386-install" ]; then
     info "libvlc wasn't compiled for 32bit, compiling"
-    ./extras/macosx/build-vlc.sh -a i686
+    ./extras/macosx/build-vlc.sh -a i386
 fi
 
 spushd ${npapiroot}
@@ -45,8 +45,8 @@ info "compiling x86_64 binary"
 fi
 
 if [ ! -e "${INTEL32ROOT}" ]; then
-info "compiling i686 binary"
-./extras/macosx/build-plugin.sh -a i686
+info "compiling i386 binary"
+./extras/macosx/build-plugin.sh -a i386
 fi
 
 info "Creating Universal Binary"

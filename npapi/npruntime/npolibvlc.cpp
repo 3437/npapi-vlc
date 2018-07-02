@@ -536,7 +536,11 @@ LibvlcInputNPObject::setProperty(int index, const NPVariant &value)
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+                mp.setPosition( v, true );
+#else
                 mp.setPosition( v );
+#endif
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_input_time:
@@ -546,7 +550,11 @@ LibvlcInputNPObject::setProperty(int index, const NPVariant &value)
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+                mp.setTime( v, true );
+#else
                 mp.setTime( v );
+#endif
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_input_rate:

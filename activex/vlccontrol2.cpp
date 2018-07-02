@@ -734,7 +734,11 @@ STDMETHODIMP VLCInput::get_position(double* position)
 
 STDMETHODIMP VLCInput::put_position(double position)
 {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    _plug->get_player().get_mp().setPosition( static_cast<float>(position), true );
+#else
     _plug->get_player().get_mp().setPosition( static_cast<float>(position) );
+#endif
 
     return S_OK;
 }
@@ -751,7 +755,11 @@ STDMETHODIMP VLCInput::get_time(double* time)
 
 STDMETHODIMP VLCInput::put_time(double time)
 {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    _plug->get_player().get_mp().setTime(static_cast<libvlc_time_t>(time), true);
+#else
     _plug->get_player().get_mp().setTime(static_cast<libvlc_time_t>(time));
+#endif
 
     return S_OK;
 }

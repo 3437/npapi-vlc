@@ -460,7 +460,11 @@ void VLCControlsWnd::NeedHideControls()
 void VLCControlsWnd::SetVideoPos(float Pos) //0-start, 1-end
 {
     if( VP() ){
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        VP()->get_mp().setPosition( Pos, true );
+#else
         VP()->get_mp().setPosition( Pos );
+#endif
 
         if( VP()->get_mp().length() > 0 )
             PostMessage(hVideoPosScroll, (UINT)PBM_SETPOS, (WPARAM) (Pos * 1000), 0);

@@ -764,7 +764,11 @@ void VLCPlugin::setTime(int seconds)
     if( seconds != _i_time )
     {
         setStartTime(_i_time);
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        m_player.get_mp().setTime( _i_time, true );
+#else
         m_player.get_mp().setTime( _i_time );
+#endif
     }
 }
 

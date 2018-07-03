@@ -346,7 +346,20 @@ VLCDispatchEvent::~VLCDispatchEvent()
     if( _dispParams.rgvarg != nullptr )
     {
         for(unsigned int c = 0; c < _dispParams.cArgs; ++c)
+        {
+            if ( (_dispParams.rgvarg[c].vt & VT_BYREF) )
+            {
+                switch ( _dispParams.rgvarg[c].vt ) {
+                case VT_I2|VT_BYREF:
+                    delete _dispParams.rgvarg[c].piVal;
+                    break;
+                case VT_I4|VT_BYREF:
+                    delete _dispParams.rgvarg[c].plVal;
+                    break;
+                }
+            }
             VariantClear(_dispParams.rgvarg + c);
+        }
         CoTaskMemFree(_dispParams.rgvarg);
     }
     if( _dispParams.rgdispidNamedArgs != nullptr )

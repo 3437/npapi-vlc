@@ -73,7 +73,8 @@ private:
 };
 
 class VLCPlugin
-    : public IUnknown, private vlc_player_options
+    : public IUnknown, private vlc_player_options,
+      public VLCWindowsManager::InputObserver
 {
 public:
     VLCPlugin(VLCPluginClass *p_class, LPUNKNOWN pUnkOuter);
@@ -219,6 +220,10 @@ public:
 
     BOOL isInPlaceActive(void);
 
+    //VLCWindowsManager::InputObserver methods
+    virtual void OnKeyEvent(UINT uKeyMsg, WPARAM wParam, LPARAM lParam) override;
+    virtual void OnMouseEvent(UINT uMouseMsg, WPARAM wParam, LPARAM lParam) override;
+
     /*
     ** container events
     */
@@ -269,6 +274,15 @@ public:
     void fireOnMediaPlayerUnmutedEvent();
     void fireOnMediaPlayerAudioVolumeEvent(float volume);
 #endif
+
+    void fireClickEvent();
+    void fireDblClickEvent();
+    void fireMouseDownEvent(short nButton, short nShiftState, int x, int y);
+    void fireMouseMoveEvent(short nButton, short nShiftState, int x, int y);
+    void fireMouseUpEvent(short nButton, short nShiftState, int x, int y);
+    void fireKeyDownEvent(short nChar, short nShiftState);
+    void fireKeyPressEvent(short nChar);
+    void fireKeyUpEvent(short nchar, short shiftState);
 
     // controlling IUnknown interface
     LPUNKNOWN pUnkOuter;

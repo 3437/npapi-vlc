@@ -51,8 +51,17 @@
 #include <servprov.h>
 #include <shlwapi.h>
 #include <wininet.h>
+#include <windowsx.h>
 
 using namespace std;
+
+#define LEFT_BUTTON     0x01
+#define RIGHT_BUTTON    0x02
+#define MIDDLE_BUTTON   0x04
+
+#define SHIFT_MASK      0x01
+#define CTRL_MASK       0x02
+#define ALT_MASK        0x04
 
 ////////////////////////////////////////////////////////////////////////
 //class factory
@@ -87,9 +96,14 @@ static LRESULT CALLBACK VLCInPlaceClassWndProc(HWND hWnd, UINT uMsg, WPARAM wPar
             }
             return 0L;
         }
-        default:
-            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+        case WM_CHAR:
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
+        case WM_SYSKEYDOWN:
+        case WM_KEYDOWN:
+            p_instance->OnKeyEvent(uMsg, wParam, lParam);
     }
+    return DefWindowProc(hWnd, uMsg, wParam, lParam);
 };
 
 VLCPluginClass::VLCPluginClass(LONG *p_class_ref, HINSTANCE hInstance, REFCLSID rclsid) :
@@ -219,7 +233,7 @@ extern HMODULE DllGetModule();
 
 VLCPlugin::VLCPlugin(VLCPluginClass *p_class, LPUNKNOWN pUnkOuter) :
     _inplacewnd(NULL),
-    _WindowsManager(DllGetModule(), _ViewRC, &m_player, this),
+    _WindowsManager(DllGetModule(), _ViewRC, &m_player, this, this),
     _p_class(p_class),
     _i_ref(1UL),
     _i_codepage(CP_ACP),
@@ -577,6 +591,83 @@ HRESULT VLCPlugin::onClose(DWORD)
 BOOL VLCPlugin::isInPlaceActive(void)
 {
     return (NULL != _inplacewnd);
+}
+
+static short _shiftState()
+{
+    short shift = (GetKeyState(VK_SHIFT) < 0) ? SHIFT_MASK : 0;
+    short ctrl  = (GetKeyState(VK_CONTROL) < 0) ? CTRL_MASK : 0;
+    short alt   = (GetKeyState(VK_MENU) < 0) ? ALT_MASK : 0;
+    return (shift | ctrl | alt);
+}
+
+void VLCPlugin::OnKeyEvent(UINT uKeyMsg, WPARAM wParam, LPARAM lParam)
+{
+    USHORT nChar = (USHORT)wParam;
+    USHORT nShiftState = _shiftState();
+    switch (uKeyMsg) {
+        case WM_SYSKEYDOWN:
+        case WM_KEYDOWN:
+            fireKeyDownEvent(nChar , nShiftState);
+            break;
+        case WM_CHAR:
+            fireKeyPressEvent(nChar);
+            break;
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
+            fireKeyUpEvent(nChar , nShiftState);
+            break;
+    }
+}
+
+void VLCPlugin::OnMouseEvent(UINT uMouseMsg, WPARAM wParam, LPARAM lParam)
+{
+    short state = _shiftState();
+    int x = GET_X_LPARAM(lParam);
+    int y = GET_Y_LPARAM(lParam);
+    switch (uMouseMsg) {
+        case WM_MOUSEMOVE:
+        {
+            short button = 0;
+            button |= (wParam & MK_LBUTTON) ? LEFT_BUTTON : 0;
+            button |= (wParam & MK_MBUTTON) ? MIDDLE_BUTTON : 0;
+            button |= (wParam & MK_RBUTTON) ? RIGHT_BUTTON : 0;
+            fireMouseMoveEvent( button, state, x, y );
+            break;
+        }
+
+        case WM_RBUTTONDBLCLK:
+        case WM_MBUTTONDBLCLK:
+        case WM_LBUTTONDBLCLK:
+            fireDblClickEvent();
+            break;
+
+        case WM_RBUTTONDOWN:
+            fireMouseDownEvent( RIGHT_BUTTON, state , x, y );
+            break;
+        case WM_MBUTTONDOWN:
+            fireMouseDownEvent( MIDDLE_BUTTON, state , x, y );
+            break;
+        case WM_LBUTTONDOWN:
+            fireMouseDownEvent( LEFT_BUTTON, state , x, y );
+            break;
+
+        case WM_RBUTTONUP:
+            fireMouseUpEvent( RIGHT_BUTTON, state , x, y );
+            fireClickEvent();
+            break;
+        case WM_MBUTTONUP:
+            fireMouseUpEvent( MIDDLE_BUTTON, state , x, y );
+            fireClickEvent();
+            break;
+        case WM_LBUTTONUP:
+            fireMouseUpEvent( LEFT_BUTTON, state , x, y );
+            fireClickEvent();
+            break;
+
+        default:
+            break;
+    }
 }
 
 HRESULT VLCPlugin::onActivateInPlace(LPMSG, HWND hwndParent, LPCRECT lprcPosRect, LPCRECT lprcClipRect)
@@ -1125,20 +1216,121 @@ void VLCPlugin::fireOnMediaPlayerLengthChangedEvent(long length)
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerLengthChangedEvent, &params);
 }
 
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
-void VLCPlugin::fireOnMediaPlayerChapterChangedEvent(int chapter)
+void VLCPlugin::fireClickEvent()
+{
+    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
+    vlcConnectionPointContainer->fireEvent(DISPID_CLICK, &dispparamsNoArgs);
+}
+
+void VLCPlugin::fireDblClickEvent()
+{
+    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
+    vlcConnectionPointContainer->fireEvent(DISPID_DBLCLICK, &dispparamsNoArgs);
+}
+
+void VLCPlugin::fireMouseDownEvent(short nButton, short nShiftState, int x, int y)
+{
+    DISPPARAMS params;
+    params.cArgs = 4;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs);
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[3].vt = VT_I2;
+    params.rgvarg[3].iVal = nButton;
+    params.rgvarg[2].vt = VT_I2;
+    params.rgvarg[2].iVal = nShiftState;
+    params.rgvarg[1].vt = VT_I4;
+    params.rgvarg[1].lVal = x;
+    params.rgvarg[0].vt = VT_I4;
+    params.rgvarg[0].lVal = y;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MOUSEDOWN, &params);
+}
+
+void VLCPlugin::fireMouseMoveEvent(short nButton, short nShiftState, int x, int y)
+{
+    DISPPARAMS params;
+    params.cArgs = 4;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs);
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[3].vt = VT_I2;
+    params.rgvarg[3].iVal = nButton;
+    params.rgvarg[2].vt = VT_I2;
+    params.rgvarg[2].iVal = nShiftState;
+    params.rgvarg[1].vt = VT_I4;
+    params.rgvarg[1].lVal = x;
+    params.rgvarg[0].vt = VT_I4;
+    params.rgvarg[0].lVal = y;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MOUSEMOVE, &params);
+}
+
+
+void VLCPlugin::fireMouseUpEvent(short nButton, short nShiftState, int x, int y)
+{
+    DISPPARAMS params;
+    params.cArgs = 4;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs);
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[3].vt = VT_I2;
+    params.rgvarg[3].iVal = nButton;
+    params.rgvarg[2].vt = VT_I2;
+    params.rgvarg[2].iVal = nShiftState;
+    params.rgvarg[1].vt = VT_I4;
+    params.rgvarg[1].lVal = x;
+    params.rgvarg[0].vt = VT_I4;
+    params.rgvarg[0].lVal = y;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MOUSEUP, &params);
+}
+
+void VLCPlugin::fireKeyDownEvent(short nChar, short nShiftState)
+{
+    DISPPARAMS params;
+    params.cArgs = 2;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs);
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    //freed by VLCDispatchEvent::~VLCDispatchEvent
+    params.rgvarg[1].vt = VT_I2 | VT_BYREF;
+    params.rgvarg[1].piVal = new short(nChar);
+    params.rgvarg[0].vt = VT_I2;
+    params.rgvarg[0].iVal = nShiftState;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_KEYDOWN, &params);
+}
+
+void VLCPlugin::fireKeyPressEvent(short nChar)
 {
     DISPPARAMS params;
     params.cArgs = 1;
-    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs);
     memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
-    params.rgvarg[0].vt = VT_I2;
-    params.rgvarg[0].iVal = chapter;
+    //freed by VLCDispatchEvent::~VLCDispatchEvent
+    params.rgvarg[0].vt = VT_I2 | VT_BYREF;
+    params.rgvarg[0].piVal = new short(nChar);
     params.rgdispidNamedArgs = NULL;
     params.cNamedArgs = 0;
-    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerChapterChangedEvent, &params);
+    vlcConnectionPointContainer->fireEvent(DISPID_KEYPRESS, &params);
 }
-#endif
+
+void VLCPlugin::fireKeyUpEvent(short nChar, short nShiftState)
+{
+    DISPPARAMS params;
+    params.cArgs = 2;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs);
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    //freed by VLCDispatchEvent::~VLCDispatchEvent
+    params.rgvarg[1].vt = VT_I2 | VT_BYREF;
+    params.rgvarg[1].piVal = new short(nChar);
+    params.rgvarg[0].vt = VT_I2;
+    params.rgvarg[0].iVal = nShiftState;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_KEYUP, &params);
+}
 
 void VLCPlugin::fireOnMediaPlayerVoutEvent(int count)
 {
@@ -1177,6 +1369,21 @@ void VLCPlugin::fireOnMediaPlayerAudioVolumeEvent(float volume)
     params.rgdispidNamedArgs = NULL;
     params.cNamedArgs = 0;
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerAudioVolumeEvent, &params);
+}
+#endif
+
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
+void VLCPlugin::fireOnMediaPlayerChapterChangedEvent(int chapter)
+{
+    DISPPARAMS params;
+    params.cArgs = 1;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[0].vt = VT_I2;
+    params.rgvarg[0].iVal = chapter;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_CLICK, &params);
 }
 #endif
 

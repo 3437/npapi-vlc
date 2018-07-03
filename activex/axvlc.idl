@@ -28,6 +28,8 @@
 // playlist" and "current playlist" to "the playlist" [t]
 
 import "ocidl.idl";
+#include <olectl.h>
+#include <idispids.h>
 
 [
   uuid(DF2BBE39-40A8-433b-A279-073F48DA94B6),
@@ -149,6 +151,26 @@ library AXVLC
             void MediaPlayerUnmuted();
             [id(DISPID_MediaPlayerAudioVolumeEvent), helpstring("Audio volume changed")]
             void MediaPlayerAudioVolume([in] float volume);
+
+
+            [id(DISPID_CLICK)]
+            void Click();
+            [id(DISPID_DBLCLICK)]
+            void DblClick( );
+
+            [id(DISPID_KEYDOWN)]
+            void KeyDown( short* KeyCode, short Shift );
+            [id(DISPID_KEYPRESS)]
+            void KeyPress( short* KeyAscii );
+            [id(DISPID_KEYUP)]
+            void KeyUp( short* KeyCode, short Shift );
+
+            [id(DISPID_MOUSEDOWN)]
+            void MouseDown( short Button , short Shift , long x , long y);
+            [id(DISPID_MOUSEMOVE)]
+            void MouseMove( short Button , short Shift , long x , long y);
+            [id(DISPID_MOUSEUP)]
+            void MouseUp( short Button , short Shift , long x, long y);
     };
 
     [

@@ -580,6 +580,7 @@ LRESULT VLCHolderWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         case WM_SET_MOUSE_HOOK:{
             MouseHook(true);
+            KeyboardHook(true);
             break;
         }
         case WM_PAINT:{
@@ -616,6 +617,7 @@ LRESULT VLCHolderWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
             break;
         case WM_MOUSEMOVE:
+            WM().OnMouseEvent(uMsg, wParam, lParam);
             if (_CtrlsWnd && (_oldMouseCoords.x != GET_X_LPARAM(lParam) ||
                 _oldMouseCoords.y != GET_Y_LPARAM(lParam)))
             {
@@ -623,9 +625,28 @@ LRESULT VLCHolderWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 _oldMouseCoords = MAKEPOINTS(lParam);
             }
             break;
+
+        case WM_MBUTTONDBLCLK:
         case WM_LBUTTONDBLCLK:
-            WM().OnMouseEvent(uMsg);
+        case WM_RBUTTONDBLCLK:
+        case WM_XBUTTONDBLCLK:
+        case WM_MBUTTONUP:
+        case WM_LBUTTONUP:
+        case WM_RBUTTONUP:
+        case WM_XBUTTONUP:
+        case WM_MBUTTONDOWN:
+        case WM_LBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        case WM_XBUTTONDOWN:
+            WM().OnMouseEvent(uMsg, wParam, lParam);
+            return VLCWnd::WindowProc(uMsg, wParam, lParam);
             break;
+
+        case WM_CHAR:
+        case WM_KEYUP:
+        case WM_KEYDOWN:
+            WM().OnKeyEvent(uMsg, wParam, lParam);
+            return VLCWnd::WindowProc(uMsg, wParam, lParam);
         case WM_MOUSE_EVENT_NOTIFY:{
             // This is called synchronously, though handling it directly from the mouse hook
             // deadlocks (quite likely because we're destroying the windows we're being called from)
@@ -634,7 +655,32 @@ LRESULT VLCHolderWnd::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
             return WM_MOUSE_EVENT_NOTIFY_SUCCESS;
         }
         case WM_MOUSE_EVENT_REPOST:
-            WM().OnMouseEvent(wParam);
+        {
+            //on click set focus to the parent of MP to receice key events
+            switch (wParam) {
+                case WM_RBUTTONUP:
+                case WM_MBUTTONUP:
+                case WM_LBUTTONUP:
+                case WM_XBUTTONUP:
+                {
+                    HWND mphwnd = FindMP_hWnd();
+                    if (mphwnd)
+                        SetFocus(GetParent(mphwnd));
+                   break;
+                }
+            }
+            WM().OnMouseEvent(uMsg, wParam, lParam);
+            break;
+        }
+        case WM_KEYBOARD_EVENT_NOTIFY:{
+            PostMessage(hWnd(), WM_KEYBOARD_EVENT_REPOST, wParam, lParam);
+            return WM_KEYBOARD_EVENT_NOTIFY_SUCCESS;
+        }
+        case WM_KEYBOARD_EVENT_REPOST:
+            if ((lParam & 0xA0000000) == 0)
+                WM().OnKeyEvent(WM_KEYDOWN, wParam, lParam);
+            else
+                WM().OnKeyEvent(WM_KEYUP, wParam, lParam);
             break;
         default:
             return VLCWnd::WindowProc(uMsg, wParam, lParam);
@@ -655,11 +701,22 @@ void VLCHolderWnd::DestroyWindow()
 
 LRESULT CALLBACK VLCHolderWnd::MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
-    bool AllowReceiveMessage = true;
     if(nCode >= 0){
         switch(wParam){
             case WM_MOUSEMOVE:
-            case WM_LBUTTONDBLCLK:{
+            case WM_RBUTTONDBLCLK:
+            case WM_MBUTTONDBLCLK:
+            case WM_LBUTTONDBLCLK:
+            case WM_XBUTTONDBLCLK:
+            case WM_RBUTTONDOWN:
+            case WM_MBUTTONDOWN:
+            case WM_LBUTTONDOWN:
+            case WM_XBUTTONDOWN:
+            case WM_RBUTTONUP:
+            case WM_MBUTTONUP:
+            case WM_LBUTTONUP:
+            case WM_XBUTTONUP:
+            {
                 MOUSEHOOKSTRUCT* mhs = reinterpret_cast<MOUSEHOOKSTRUCT*>(lParam);
 
                 //try to find HolderWnd and notify it
@@ -669,19 +726,31 @@ LRESULT CALLBACK VLCHolderWnd::MouseHookProc(int nCode, WPARAM wParam, LPARAM lP
                     hNotifyWnd = GetParent(hNotifyWnd);
                     SMRes = ::SendMessage(hNotifyWnd, WM_MOUSE_EVENT_NOTIFY, wParam, 0);
                 }
-
-                AllowReceiveMessage = WM_MOUSEMOVE==wParam || (WM_MOUSE_EVENT_NOTIFY_SUCCESS != SMRes);
                 break;
             }
         }
     }
 
-    LRESULT NHRes = CallNextHookEx(NULL, nCode, wParam, lParam);
-    if(AllowReceiveMessage)
-        return NHRes;
-    else
-        return 1;
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
+
+
+LRESULT CALLBACK VLCHolderWnd::KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    if (nCode != HC_ACTION)
+        return CallNextHookEx(NULL, nCode, wParam, lParam);
+
+    //try to find HolderWnd and notify it
+    HWND hNotifyWnd = ::GetFocus();
+    LRESULT SMRes = ::SendMessage(hNotifyWnd, WM_KEYBOARD_EVENT_NOTIFY, wParam, lParam);
+    while( hNotifyWnd && WM_KEYBOARD_EVENT_NOTIFY_SUCCESS != SMRes){
+        hNotifyWnd = GetParent(hNotifyWnd);
+        SMRes = ::SendMessage(hNotifyWnd, WM_KEYBOARD_EVENT_NOTIFY, wParam, lParam);
+    }
+
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
 
 void VLCHolderWnd::MouseHook(bool SetHook)
 {
@@ -708,6 +777,33 @@ void VLCHolderWnd::MouseHook(bool SetHook)
         }
     }
 }
+
+void VLCHolderWnd::KeyboardHook(bool SetHook)
+{
+    if(SetHook){
+        HWND hMPWnd = FindMP_hWnd();
+        const DWORD WndThreadID = (hMPWnd) ? GetWindowThreadProcessId(hMPWnd, NULL) : 0;
+        if( _hKeyboardHook &&( !hMPWnd || WndThreadID != _KeyboardHookThreadId) ){
+            //unhook if something changed
+            KeyboardHook(false);
+        }
+
+        if(!_hKeyboardHook && hMPWnd && WndThreadID){
+            _KeyboardHookThreadId = WndThreadID;
+            _hKeyboardHook =
+                SetWindowsHookEx(WH_KEYBOARD, VLCHolderWnd::KeyboardHookProc,
+                                 NULL, WndThreadID);
+        }
+    }
+    else{
+        if(_hKeyboardHook){
+            UnhookWindowsHookEx(_hKeyboardHook);
+            _KeyboardHookThreadId=0;
+            _hKeyboardHook = 0;
+        }
+    }
+}
+
 
 HWND VLCHolderWnd::FindMP_hWnd()
 {
@@ -800,10 +896,20 @@ LRESULT CALLBACK VLCFullScreenWnd::FSWndWindowProc(HWND hWnd, UINT uMsg, WPARAM 
             }
             break;
         }
-        case WM_KEYDOWN: {
+
+        case WM_CHAR:
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
             if (fs_data)
-                fs_data->_WindowsManager->OnKeyDownEvent(wParam);
-            break;
+                fs_data->_WindowsManager->OnKeyEvent(uMsg, wParam, lParam);
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+        case WM_SYSKEYDOWN:
+        case WM_KEYDOWN: {
+            if (fs_data) {
+                fs_data->_WindowsManager->OnKeyEvent(uMsg, wParam, lParam);
+                fs_data->_WindowsManager->OnKeyDownEvent(uMsg, wParam, lParam);
+            }
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
         }
         default:
             return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -832,9 +938,10 @@ VLCFullScreenWnd* VLCFullScreenWnd::CreateFSWindow(VLCWindowsManager* WM)
 //VLCWindowsManager
 ///////////////////////
 VLCWindowsManager::VLCWindowsManager(HMODULE hModule, const VLCViewResources& rc,
-                                     vlc_player* player, const vlc_player_options* po)
+                                     vlc_player* player, const vlc_player_options* po,
+                                     InputObserver* observer)
     :_rc(rc), _hModule(hModule), _po(po), _hWindowedParentWnd(0), _vp(player),
-    _HolderWnd(0), _FSWnd(0), _b_new_messages_flag(false), Last_WM_MOUSEMOVE_Pos(0)
+    _HolderWnd(0), _FSWnd(0), _InputObserver(observer), _b_new_messages_flag(false), Last_WM_MOUSEMOVE_Pos(0)
 {
     VLCFullScreenWnd::RegisterWndClassName(hModule);
 }
@@ -960,9 +1067,9 @@ bool VLCWindowsManager::IsFullScreen()
     return 0!=_FSWnd && 0!=_HolderWnd && GetParent(_HolderWnd->hWnd())==_FSWnd->getHWND();
 }
 
-void VLCWindowsManager::OnKeyDownEvent(UINT uKeyMsg)
+void VLCWindowsManager::OnKeyDownEvent(UINT uKeyMsg, WPARAM wParam, LPARAM lParam)
 {
-    switch(uKeyMsg){
+    switch(wParam){
         case VK_ESCAPE:
         case 'F':
             EndFullScreen();
@@ -971,20 +1078,34 @@ void VLCWindowsManager::OnKeyDownEvent(UINT uKeyMsg)
     }
 }
 
-void VLCWindowsManager::OnMouseEvent(UINT uMouseMsg)
+void VLCWindowsManager::OnKeyEvent(UINT uKeyMsg, WPARAM wParam, LPARAM lParam)
 {
-    switch(uMouseMsg){
-        case WM_LBUTTONDBLCLK:
-            ToggleFullScreen();
-            break;
-        case WM_MOUSEMOVE:{
-            DWORD MsgPos = GetMessagePos();
-            if(Last_WM_MOUSEMOVE_Pos != MsgPos){
-                Last_WM_MOUSEMOVE_Pos = MsgPos;
-                _HolderWnd->ControlWindow()->NeedShowControls();
+    if (_InputObserver)
+        this->_InputObserver->OnKeyEvent(uKeyMsg, wParam, lParam);
+}
+
+void VLCWindowsManager::OnMouseEvent(UINT uMouseMsg, WPARAM wParam, LPARAM lParam)
+{
+    if (uMouseMsg == WM_MOUSE_EVENT_REPOST)
+    {
+        DWORD MsgPos = GetMessagePos();
+        switch(wParam){
+            case WM_LBUTTONDBLCLK:
+                ToggleFullScreen();
+                break;
+            case WM_MOUSEMOVE:{
+                DWORD MsgPos = GetMessagePos();
+                if(Last_WM_MOUSEMOVE_Pos != MsgPos){
+                    Last_WM_MOUSEMOVE_Pos = MsgPos;
+                    _HolderWnd->ControlWindow()->NeedShowControls();
+                }
+                break;
             }
-            break;
         }
+        if (_InputObserver)
+            this->_InputObserver->OnMouseEvent(wParam, lParam, MsgPos);
     }
+    else if (_InputObserver)
+        this->_InputObserver->OnMouseEvent(uMouseMsg, wParam, lParam);
 }
 

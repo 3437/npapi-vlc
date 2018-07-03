@@ -33,8 +33,11 @@
 enum{
     WM_MOUSE_EVENT_NOTIFY = WM_APP + 1,
     WM_MOUSE_EVENT_REPOST,
+    WM_KEYBOARD_EVENT_NOTIFY,
+    WM_KEYBOARD_EVENT_REPOST,
     WM_SET_MOUSE_HOOK,
-    WM_MOUSE_EVENT_NOTIFY_SUCCESS = 0xFF
+    WM_MOUSE_EVENT_NOTIFY_SUCCESS = 0xFE,
+    WM_KEYBOARD_EVENT_NOTIFY_SUCCESS = 0xFF
 };
 
 
@@ -154,7 +157,9 @@ public:
 
 protected:
     VLCHolderWnd(HINSTANCE hInstance, VLCWindowsManager* WM)
-        : VLCWnd(hInstance), _hMouseHook(NULL), _MouseHookThreadId(0),
+        : VLCWnd(hInstance),
+          _hMouseHook(NULL), _MouseHookThreadId(0),
+          _hKeyboardHook(NULL), _KeyboardHookThreadId(0),
         _wm(WM), _hBgBrush(0), _CtrlsWnd(0), _oldMouseCoords() {}
     bool Create(HWND hWndParent);
 
@@ -171,12 +176,18 @@ public:
 
 private:
     static LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam);
 
     HWND FindMP_hWnd();
 
     HHOOK _hMouseHook;
     DWORD _MouseHookThreadId;
     void MouseHook(bool SetHook);
+
+    HHOOK _hKeyboardHook;
+    DWORD _KeyboardHookThreadId;
+    void KeyboardHook(bool SetHook);
+
 
     VLCWindowsManager& WM()
         {return *_wm;}
@@ -239,8 +250,18 @@ private:
 class VLCWindowsManager
 {
 public:
+    class InputObserver
+    {
+    public:
+        virtual ~InputObserver() {}
+        virtual void OnKeyEvent(UINT uKeyMsg, WPARAM wParam, LPARAM lParam) = 0;
+        virtual void OnMouseEvent(UINT uMouseMsg, WPARAM wParam, LPARAM lParam) = 0;
+    };
+
+public:
     VLCWindowsManager(HMODULE hModule, const VLCViewResources& rc,
-                    vlc_player* player, const vlc_player_options* = 0);
+                    vlc_player* player, const vlc_player_options* = 0,
+                    InputObserver* observer = 0);
     ~VLCWindowsManager();
     VLCWindowsManager(const VLCWindowsManager&) = delete;
     VLCWindowsManager& operator=(const VLCWindowsManager&) = delete;
@@ -266,8 +287,9 @@ public:
     bool getNewMessageFlag() const
         {return _b_new_messages_flag;};
 public:
-    void OnKeyDownEvent(UINT uKeyMsg);
-    void OnMouseEvent(UINT uMouseMsg);
+    void OnKeyEvent(UINT uMouseMsg, WPARAM wParam, LPARAM lParam);
+    void OnKeyDownEvent(UINT uKeyMsg, WPARAM wParam, LPARAM lParam);
+    void OnMouseEvent(UINT uMouseMsg, WPARAM wParam, LPARAM lParam);
 
 private:
     const VLCViewResources& _rc;
@@ -280,6 +302,8 @@ private:
 
     VLCHolderWnd* _HolderWnd;
     VLCFullScreenWnd* _FSWnd;
+
+    InputObserver* _InputObserver;
 
     bool _b_new_messages_flag;
 

@@ -1,4 +1,6 @@
 #!/bin/sh
+# Copyright (C) Felix Paul Kühne, 2012-2018
+
 set -e
 
 info()
@@ -8,9 +10,9 @@ info()
     echo "[${green}build${normal}] $1"
 }
 
+OSX_VERSION=`xcrun --sdk macosx --show-sdk-version`
 ARCH="x86_64"
 MINIMAL_OSX_VERSION="10.7"
-OSX_VERSION="10.11"
 SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_VERSION.sdk
 VERBOSE=no
 
@@ -104,7 +106,7 @@ git submodule update --init
 
 info "Creating builddir and configuration"
 mkdir -p ${ARCH}-build && cd ${ARCH}-build
-../configure --build=${ARCH}-apple-darwin10
+../configure --build=${ARCH}-apple-darwin14
 
 core_count=`sysctl -n machdep.cpu.core_count`
 let jobs=$core_count+1

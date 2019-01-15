@@ -1383,7 +1383,7 @@ void VLCPlugin::fireOnMediaPlayerChapterChangedEvent(int chapter)
     params.rgvarg[0].iVal = chapter;
     params.rgdispidNamedArgs = NULL;
     params.cNamedArgs = 0;
-    vlcConnectionPointContainer->fireEvent(DISPID_CLICK, &params);
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerChapterChangedEvent, &params);
 }
 #endif
 

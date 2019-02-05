@@ -1,6 +1,6 @@
 dnl Autoconf settings for npapi-vlc
 
-AC_COPYRIGHT([Copyright 2002-2018 VLC authors and VideoLAN])
+AC_COPYRIGHT([Copyright 2002-2019 VLC authors and VideoLAN])
 
 AC_INIT(npapi-vlc, 3.0.3)
 VERSION_MAJOR="3"
@@ -18,7 +18,7 @@ case $( echo ${VERSION_EXTRA}|wc -m ) in
        *) if test "${VERSION_EXTRA}" = "-git"; then VERSION_EXTRA_RC="666"; else VERSION_EXTRA_RC="99"; fi
 esac
 AC_SUBST(VERSION_EXTRA_RC)
-COPYRIGHT_YEARS="2002-2018"
+COPYRIGHT_YEARS="2002-2019"
 AC_SUBST(COPYRIGHT_YEARS)
 COPYRIGHT_MESSAGE="Copyright © ${COPYRIGHT_YEARS} VLC authors and VideoLAN"
 AC_SUBST(COPYRIGHT_MESSAGE)

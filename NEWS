@@ -5,11 +5,16 @@ Core:
  * Add ChapterChanged, Vout, (Un)Muted, AudioVolume events
  * Fix usage of toggleTeletext() for 3.0 builds
  * Support for multiple video tracks selection
+ * Fix MediaPlayerChapterChangedEvent event propagation
 
 ActiveX:
  * Support video scaling set|get
  * Add method to parse items
  * Add method to stop asynchronously
+ * Add method to expose Mouse and Keyboard events
+
+Windows:
+ * Fix resource files flags
 
 
 Changes between VLC plugins 2.2.5 and 2.2.6:

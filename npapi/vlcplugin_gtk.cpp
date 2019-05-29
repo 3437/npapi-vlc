@@ -326,7 +326,11 @@ gboolean VlcPluginGtk::update_time_slider(gpointer user_data)
 static bool time_slider_handler(GtkRange*, GtkScrollType, gdouble value, gpointer user_data)
 {
     VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    plugin->getMD().setPosition( value / 100.0, true );
+#else
     plugin->getMD().setPosition( value / 100.0 );
+#endif
     return false;
 }
 

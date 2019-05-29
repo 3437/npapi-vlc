@@ -1079,7 +1079,11 @@ STDMETHODIMP VLCPlaylist::togglePause()
 
 STDMETHODIMP VLCPlaylist::stop()
 {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+    _plug->get_player().mlp().stopAsync();
+#else
     _plug->get_player().mlp().stop();
+#endif
     return S_OK;
 }
 

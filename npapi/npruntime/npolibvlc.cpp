@@ -1011,7 +1011,11 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_stop:
                 if( argCount == 0 )
                 {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+                    p_plugin->player().mlp().stopAsync();
+#else
                     p_plugin->player().mlp().stop();
+#endif
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;

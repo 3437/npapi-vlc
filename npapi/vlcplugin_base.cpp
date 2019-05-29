@@ -665,7 +665,11 @@ void VlcPluginBase::control_handler(vlc_toolbar_clicked_t clicked)
 
         case clicked_Stop:
         {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+            player().get_mp().stopAsync();
+#else
             player().get_mp().stop();
+#endif
         }
         break;
 

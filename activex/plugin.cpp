@@ -793,7 +793,13 @@ BOOL VLCPlugin::getFullscreen()
 HRESULT VLCPlugin::onInPlaceDeactivate(void)
 {
     if( m_player.mlp().isPlaying() )
+    {
+#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
+        m_player.mlp().stopAsync();
+#else
         m_player.mlp().stop();
+#endif
+    }
 
     _WindowsManager.DestroyWindows();
 

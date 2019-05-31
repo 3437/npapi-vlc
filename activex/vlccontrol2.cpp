@@ -888,10 +888,14 @@ STDMETHODIMP VLCMarquee::get_text(BSTR *val)
     if( NULL == val )
         return E_POINTER;
 
+#if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0)
     auto str = _plug->get_player().get_mp().marqueeString( libvlc_marquee_Text );
     if( !str.empty() )
         *val = BSTRFromCStr( CP_UTF8, str.c_str() );
     return S_OK;
+#else
+    return E_INVALIDARG;
+#endif
 }
 
 STDMETHODIMP VLCMarquee::put_text(BSTR val)

@@ -1694,9 +1694,11 @@ LibvlcMarqueeNPObject::getProperty(int index, npapi::OutVariant& result)
         result = position_bynumber( mp.marqueeInt( libvlc_marquee_Position ) );
         return INVOKERESULT_NO_ERROR;
 
+#if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0)
     case ID_marquee_text:
         result = mp.marqueeString( libvlc_marquee_Text );
         return INVOKERESULT_NO_ERROR;
+#endif
     }
     return INVOKERESULT_GENERIC_ERROR;
 }

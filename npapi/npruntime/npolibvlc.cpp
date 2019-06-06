@@ -536,11 +536,7 @@ LibvlcInputNPObject::setProperty(int index, const NPVariant &value)
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
                 mp.setPosition( v, true );
-#else
-                mp.setPosition( v );
-#endif
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_input_time:
@@ -550,11 +546,7 @@ LibvlcInputNPObject::setProperty(int index, const NPVariant &value)
                     return INVOKERESULT_INVALID_VALUE;
                 }
 
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
                 mp.setTime( v, true );
-#else
-                mp.setTime( v );
-#endif
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_input_rate:
@@ -1011,11 +1003,7 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
             case ID_playlist_stop:
                 if( argCount == 0 )
                 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
                     p_plugin->player().mlp().stopAsync();
-#else
-                    p_plugin->player().mlp().stop();
-#endif
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
@@ -1588,14 +1576,10 @@ LibvlcVideoNPObject::invoke(int index, const NPVariant *args,
             {
                 if( argCount == 0 )
                 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
                     if ( p_plugin->getMD().teletext() == 0 )
                         p_plugin->getMD().setTeletext( 100 );
                     else
                         p_plugin->getMD().setTeletext( 0 );
-#else
-                    p_plugin->getMD().toggleTeletext();
-#endif
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
@@ -1694,11 +1678,6 @@ LibvlcMarqueeNPObject::getProperty(int index, npapi::OutVariant& result)
         result = position_bynumber( mp.marqueeInt( libvlc_marquee_Position ) );
         return INVOKERESULT_NO_ERROR;
 
-#if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0)
-    case ID_marquee_text:
-        result = mp.marqueeString( libvlc_marquee_Text );
-        return INVOKERESULT_NO_ERROR;
-#endif
     }
     return INVOKERESULT_GENERIC_ERROR;
 }
@@ -1995,12 +1974,8 @@ LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
     switch( index )
     {
     case ID_deint_disable:
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
         mp.setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Disabled,
                            std::string() );
-#else
-        mp.setDeinterlace( std::string() );
-#endif
         break;
 
     case ID_deint_enable:
@@ -2011,11 +1986,7 @@ LibvlcDeinterlaceNPObject::invoke(int index, const NPVariant *args,
         if ( !v.is<const char*>() )
             return INVOKERESULT_INVALID_VALUE;
 
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
         mp.setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Enabled, v );
-#else
-        mp.setDeinterlace( v );
-#endif
         break;
     }
     default:

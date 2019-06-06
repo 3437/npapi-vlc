@@ -111,7 +111,6 @@ int vlc_player::preparse_item_sync(unsigned int idx, int options, unsigned int t
         return -1;
     auto em = media->eventManager();
 
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
 #  if defined(_WIN32)
     HANDLE barrier = CreateEvent(nullptr, true,  false, nullptr);
     if ( barrier == nullptr )
@@ -152,13 +151,6 @@ int vlc_player::preparse_item_sync(unsigned int idx, int options, unsigned int t
     retval = future.get();
     event->unregister();
 #  endif
-#else
-    media->parse();
-    if ( media->isParsed() )
-        retval = 4; /* int( VLC::Media::ParsedStatus::Done ); */
-    else
-        retval = 2; /* int( VLC::Media::ParsedStatus::Failed ); */
-#endif
 
     return retval;
 }

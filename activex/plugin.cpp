@@ -794,11 +794,7 @@ HRESULT VLCPlugin::onInPlaceDeactivate(void)
 {
     if( m_player.mlp().isPlaying() )
     {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
         m_player.mlp().stopAsync();
-#else
-        m_player.mlp().stop();
-#endif
     }
 
     _WindowsManager.DestroyWindows();
@@ -861,11 +857,7 @@ void VLCPlugin::setTime(int seconds)
     if( seconds != _i_time )
     {
         setStartTime(_i_time);
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
         m_player.get_mp().setTime( _i_time, true );
-#else
-        m_player.get_mp().setTime( _i_time );
-#endif
     }
 }
 
@@ -1351,7 +1343,6 @@ void VLCPlugin::fireOnMediaPlayerVoutEvent(int count)
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerVoutEvent, &params);
 }
 
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
 void VLCPlugin::fireOnMediaPlayerMutedEvent()
 {
     DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
@@ -1376,9 +1367,7 @@ void VLCPlugin::fireOnMediaPlayerAudioVolumeEvent(float volume)
     params.cNamedArgs = 0;
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerAudioVolumeEvent, &params);
 }
-#endif
 
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
 void VLCPlugin::fireOnMediaPlayerChapterChangedEvent(int chapter)
 {
     DISPPARAMS params;
@@ -1391,7 +1380,6 @@ void VLCPlugin::fireOnMediaPlayerChapterChangedEvent(int chapter)
     params.cNamedArgs = 0;
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerChapterChangedEvent, &params);
 }
-#endif
 
 /* */
 
@@ -1457,15 +1445,12 @@ void VLCPlugin::player_register_events()
     em.onLengthChanged( [this]( int64_t length ) {
         fireOnMediaPlayerLengthChangedEvent( length );
     });
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
     em.onChapterChanged( [this]( int chapter ) {
         fireOnMediaPlayerChapterChangedEvent( chapter );
     });
-#endif
     em.onVout( [this]( int count ) {
         fireOnMediaPlayerVoutEvent( count );
     });
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
     em.onMuted( [this] {
         fireOnMediaPlayerMutedEvent();
     });
@@ -1475,7 +1460,6 @@ void VLCPlugin::player_register_events()
     em.onAudioVolume( [this]( float volume ) {
         fireOnMediaPlayerAudioVolumeEvent( volume );
     });
-#endif
 }
 
 #undef B

@@ -2,12 +2,12 @@ dnl Autoconf settings for npapi-vlc
 
 AC_COPYRIGHT([Copyright 2002-2019 VLC authors and VideoLAN])
 
-AC_INIT(npapi-vlc, 3.0.3)
-VERSION_MAJOR="3"
+AC_INIT(npapi-vlc, 4.0.0)
+VERSION_MAJOR="4"
 AC_SUBST(VERSION_MAJOR)
 VERSION_MINOR="0"
 AC_SUBST(VERSION_MINOR)
-VERSION_REVISION="3"
+VERSION_REVISION="0"
 AC_SUBST(VERSION_REVISION)
 VERSION_EXTRA=""
 AC_SUBST(VERSION_EXTRA)
@@ -167,7 +167,7 @@ glibc run-time.])
 dnl
 dnl libraries checks
 AC_PATH_XTRA
-PKG_CHECK_MODULES([LIBVLC], [libvlc >= 2.0.0], [
+PKG_CHECK_MODULES([LIBVLC], [libvlc >= 4.0.0], [
     LIBVLC_PREFIX=`pkg-config --variable=prefix libvlc`
     AC_SUBST(LIBVLC_PREFIX)])
 

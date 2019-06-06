@@ -15,8 +15,6 @@ Makefile
 Makefile.in
 stamp-*
 extras/macosx/Info.plist
-npapi/VLC Plugin*
-npapi/npvlc.rsrc
 .DS_Store
 extras/macosx/vlc
 x86_64-build

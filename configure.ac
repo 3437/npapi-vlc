@@ -23,7 +23,6 @@ AC_SUBST(COPYRIGHT_YEARS)
 COPYRIGHT_MESSAGE="Copyright © ${COPYRIGHT_YEARS} VLC authors and VideoLAN"
 AC_SUBST(COPYRIGHT_MESSAGE)
 
-AC_CONFIG_SRCDIR(npapi/vlcshell.cpp)
 AC_CONFIG_AUX_DIR(autotools)
 AC_CONFIG_MACRO_DIR(m4)
 AC_CANONICAL_BUILD
@@ -180,107 +179,6 @@ AM_CONDITIONAL(BUILD_ACTIVEX, test "${SYS}" = "mingw32" -a "${enable_activex}" !
 
 
 dnl
-dnl NPAPI headers
-AC_ARG_ENABLE(npapi, AS_HELP_STRING([--enable-npapi], [NPAPI/Mozilla plugin [default=yes]]))
-AC_ARG_VAR([MOZILLA_CFLAGS], [C compiler flags for Mozilla, overriding pkg-config])
-AC_ARG_VAR([MOZILLA_LIBS], [linker flags for Mozilla, overriding pkg-config])
-
-AS_IF([test "x${enable_npapi}" != x"no"],[
-
-AC_LANG_PUSH(C++)
-AC_MSG_CHECKING([Mozilla headers])
-
-dnl pkg-config
-dnl As we want to do a loop due to the number of name possible for the .pc
-dnl we can't use the pkg-config macros.
-  for i in "${with_mozilla_pkg}" npapi-sdk seamonkey-plugin iceape-plugin xulrunner-plugin firefox-plugin iceweasel-plugin mozilla-plugin libxul; do
-    if test -n "$i"; then
-      echo "Trying to find $i package" >&AS_MESSAGE_LOG_FD
-      AS_IF([test $i = npapi-sdk], [moz_ver=0.27], [moz_ver=1.9.2])
-      AC_MSG_CHECKING([for $i >= $moz_ver])
-      if $PKG_CONFIG --exists --print-errors "$i >= $moz_ver" 2>&AS_MESSAGE_LOG_FD
-      then
-        echo "Using $i pkg-config package." >&AS_MESSAGE_LOG_FD
-        MOZILLA_CFLAGS=$(eval $PKG_CONFIG --cflags "$i" )
-        MOZILLA_LIBS=$(eval $PKG_CONFIG --libs "$i" )
-        AC_MSG_RESULT([yes])
-        break
-      else
-        AC_MSG_RESULT([no])
-      fi
-    fi
-  done
-
-CPPFLAGS_save="${CPPFLAGS}"
-CPPFLAGS="${CPPFLAGS} ${MOZILLA_CFLAGS} -Inpapi/npapi-sdk/"
-
-AC_CHECK_HEADERS(npapi.h npruntime.h, [
-    dnl if found
-    have_headers="true"
-  ],[
-    dnl if not found
-    AC_MSG_WARN([Please install the Mozilla development tools, required headers were not found.])
-    have_headers="false"
-  ], [
-    #include <stdint.h>
-    #if HAVE_NPAPI_H
-     #include <npapi.h>
-    #endif
-  ]
-)
-AM_CONDITIONAL(FETCH_NPAPI, [ test "${have_headers}" != "true" ])
-
-dnl
-dnl check the const-ness of GetMIMEDesc, since it changed in latest npapi headers
-AC_MSG_CHECKING([if NP_GetMIMEDescription() returns const])
-AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-   #ifdef _WIN32
-   # define XP_WIN 1
-   #else
-   # ifdef __APPLE__
-   #  define XP_MACOSX 1
-   # endif
-   # define XP_UNIX 1
-   #endif
-   #include <stdint.h>
-   #include <npapi.h>
-   #include <npfunctions.h>
-  char *NP_GetMIMEDescription(void);
-])],[
-  AC_MSG_RESULT(no)
-  AC_DEFINE(NPP_GET_MIME_CONST, [], [Whether NP_GetMIMEDescription returns const])
-],[
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(NPP_GET_MIME_CONST, [const], [Whether NP_GetMIMEDescription returns const])
-])
-
-CPPFLAGS="${CPPFLAGS_save}"
-
-AC_LANG_POP(C++)
-
-])
-dnl end of NPAPI
-AM_CONDITIONAL(BUILD_NPAPI, test "${enable_npapi}" != "no")
-
-dnl
-dnl GTK+ for linux toolbar
-AC_ARG_WITH([gtk], AS_HELP_STRING([--with-gtk], [Build the GTK+ toolbars in NPAPI plugin [default=auto]]),, [with_gtk=yes])
-gtk_found=no
-AS_IF([ test "${SYS}" != "mingw32" -a "${SYS}" != "darwin" ], [
-  PKG_CHECK_MODULES(XCB, [xcb x11-xcb],[xcb_found=yes], [
-     AC_MSG_ERROR([Please install the libxcb and x11-xcb development files])
-  ])
-  AS_IF([ test "x$with_gtk" != "xno" ],
-    [
-       PKG_CHECK_MODULES(GTK, [gtk+-2.0], [gtk_found=yes])
-    ])
-])
-AS_IF([ test "x$gtk_found" = "xyes" ],
-    AC_DEFINE([USE_GTK], [1], [Define to 1 if using GTK+]))
-AM_CONDITIONAL(WITH_GTK, [ test "x$gtk_found" = "xyes" ])
-AM_CONDITIONAL(HAVE_XCB, [ test "x$xcb_found" = "xyes" ])
-
-dnl
 dnl final flags for ActiveX
 AM_COND_IF([HAVE_WIN32], [
   ACTIVEX_CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE -D_MIDL_USE_GUIDDEF_"
@@ -294,24 +192,13 @@ AC_CONFIG_FILES([
   Makefile
   share/Makefile
   common/Makefile
-  npapi/Makefile
   activex/Makefile
-  npapi/package/install.js
-  npapi/package/install.rdf
-  npapi/package/manifest.json
 ])
 
 AM_COND_IF([HAVE_WIN32], [
   AC_CONFIG_FILES([
-    npapi/package/npvlc_rc.rc
     activex/axvlc.inf
     activex/axvlc_rc.rc
-  ])
-])
-AM_COND_IF([HAVE_DARWIN], [
-  AC_CONFIG_FILES([
-    npapi/package/vlc.r
-    extras/macosx/Info.plist
   ])
 ])
 AC_OUTPUT

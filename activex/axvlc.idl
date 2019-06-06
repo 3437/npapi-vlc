@@ -416,8 +416,6 @@ library AXVLC
         [helpstring("disable Marquee Filter.")]
         HRESULT disable();
 
-        [propget, helpstring("Retrieve marquee text.")]
-        HRESULT text([out, retval] BSTR* val);
         [propput, helpstring("Change marquee text.")]
         HRESULT text([in] BSTR val);
 
@@ -554,10 +552,12 @@ library AXVLC
         [propput, helpstring("Sets video subtitle to use.")]
         HRESULT subtitle([in] long spu);
 
-        [propget, helpstring("Returns crop filter geometry.")]
-        HRESULT crop([out, retval] BSTR* geometry);
-        [propput, helpstring("Sets crop filter geometry.")]
-        HRESULT crop([in] BSTR geometry);
+        [propput, helpstring("Sets crop ratio.")]
+        HRESULT crop_ratio([in] ULONG num, [in] ULONG den);
+        [propput, helpstring("Sets crop window.")]
+        HRESULT crop_window([in] ULONG x, [in] ULONG y, [in] ULONG width, [in] ULONG height);
+        [propput, helpstring("Sets crop border.")]
+        HRESULT crop_border([in] ULONG left, [in] ULONG right, [in] ULONG top, [in] ULONG bottom);
 
         [propget, helpstring("Returns teletext page used.")]
         HRESULT teletext([out, retval] long* page);

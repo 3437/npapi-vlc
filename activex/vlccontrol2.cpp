@@ -867,13 +867,6 @@ STDMETHODIMP VLCMarquee::put_position(BSTR val)
     return hr;
 }
 
-STDMETHODIMP VLCMarquee::get_text(BSTR *val)
-{
-    if( NULL == val )
-        return E_POINTER;
-    return E_INVALIDARG;
-}
-
 STDMETHODIMP VLCMarquee::put_text(BSTR val)
 {
     char *psz_text = CStrFromBSTR(CP_UTF8, val);
@@ -1397,32 +1390,20 @@ STDMETHODIMP VLCVideo::put_subtitle(long spu)
     return S_OK;
 }
 
-STDMETHODIMP VLCVideo::get_crop(BSTR* geometry)
+STDMETHODIMP VLCVideo::put_crop_ratio(ULONG num, ULONG den)
 {
-    if( NULL == geometry )
-        return E_POINTER;
-
-    auto g = _plug->get_player().get_mp().cropGeometry();
-    *geometry = BSTRFromCStr( CP_UTF8, g.c_str() );
-    return *geometry == nullptr ? E_OUTOFMEMORY : S_OK;
+    _plug->get_player().get_mp().setCropRatio(num, den);
+    return S_OK;
 }
 
-STDMETHODIMP VLCVideo::put_crop(BSTR geometry)
+STDMETHODIMP VLCVideo::put_crop_window(ULONG x, ULONG y, ULONG width, ULONG height)
 {
-    if( 0 == SysStringLen(geometry) )
-    {
-        _plug->get_player().get_mp().setCropGeometry( "" );
-        return S_OK;
-    }
-
-    char *psz_geometry = CStrFromBSTR(CP_UTF8, geometry);
-    if( !psz_geometry )
-    {
-        return E_OUTOFMEMORY;
-    }
-    _plug->get_player().get_mp().setCropGeometry( psz_geometry );
-    CoTaskMemFree(psz_geometry);
-
+    _plug->get_player().get_mp().setCropWindow(x, y, width, height);
+    return S_OK;
+}
+STDMETHODIMP VLCVideo::put_crop_border(ULONG left, ULONG right, ULONG top, ULONG bottom)
+{
+    _plug->get_player().get_mp().setCropBorder(left, right, top, bottom);
     return S_OK;
 }
 

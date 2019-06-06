@@ -206,7 +206,6 @@ public:
     STDMETHODIMP enable()  { return do_put_int(libvlc_marquee_Enable, true); }
     STDMETHODIMP disable() { return do_put_int(libvlc_marquee_Enable, false); }
 
-    STDMETHODIMP get_text(BSTR *);
     STDMETHODIMP put_text(BSTR);
     STDMETHODIMP get_position(BSTR *);
     STDMETHODIMP put_position(BSTR);
@@ -355,8 +354,9 @@ public:
     STDMETHODIMP put_scale(float);
     STDMETHODIMP get_subtitle(long*);
     STDMETHODIMP put_subtitle(long);
-    STDMETHODIMP get_crop(BSTR*);
-    STDMETHODIMP put_crop(BSTR);
+    STDMETHODIMP put_crop_ratio(ULONG, ULONG);
+    STDMETHODIMP put_crop_window(ULONG, ULONG, ULONG, ULONG);
+    STDMETHODIMP put_crop_border(ULONG, ULONG, ULONG, ULONG);
     STDMETHODIMP get_teletext(long*);
     STDMETHODIMP put_teletext(long);
     STDMETHODIMP get_marquee(IVLCMarquee**);

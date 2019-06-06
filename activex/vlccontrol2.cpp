@@ -562,12 +562,7 @@ STDMETHODIMP VLCAudio::toggleMute()
 
 STDMETHODIMP VLCDeinterlace::disable()
 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    _plug->get_player().get_mp().setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Disabled,
-                                                 std::string() );
-#else
     _plug->get_player().get_mp().setDeinterlace( "" );
-#endif
     return S_OK;
 }
 
@@ -576,12 +571,7 @@ STDMETHODIMP VLCDeinterlace::enable(BSTR mode)
     char *psz_mode = CStrFromBSTR(CP_UTF8, mode);
     if ( psz_mode == nullptr )
         return E_OUTOFMEMORY;
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    _plug->get_player().get_mp().setDeinterlace( VLC::MediaPlayer::DeinterlaceState::Enabled,
-                                                 psz_mode );
-#else
     _plug->get_player().get_mp().setDeinterlace( psz_mode );
-#endif
     CoTaskMemFree(psz_mode);
     return S_OK;
 }
@@ -734,11 +724,7 @@ STDMETHODIMP VLCInput::get_position(double* position)
 
 STDMETHODIMP VLCInput::put_position(double position)
 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    _plug->get_player().get_mp().setPosition( static_cast<float>(position), true );
-#else
     _plug->get_player().get_mp().setPosition( static_cast<float>(position) );
-#endif
 
     return S_OK;
 }
@@ -755,11 +741,7 @@ STDMETHODIMP VLCInput::get_time(double* time)
 
 STDMETHODIMP VLCInput::put_time(double time)
 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    _plug->get_player().get_mp().setTime(static_cast<libvlc_time_t>(time), true);
-#else
     _plug->get_player().get_mp().setTime(static_cast<libvlc_time_t>(time));
-#endif
 
     return S_OK;
 }
@@ -888,14 +870,10 @@ STDMETHODIMP VLCMarquee::get_text(BSTR *val)
     if( NULL == val )
         return E_POINTER;
 
-#if LIBVLC_VERSION_INT < LIBVLC_VERSION(4, 0, 0, 0)
     auto str = _plug->get_player().get_mp().marqueeString( libvlc_marquee_Text );
     if( !str.empty() )
         *val = BSTRFromCStr( CP_UTF8, str.c_str() );
     return S_OK;
-#else
-    return E_INVALIDARG;
-#endif
 }
 
 STDMETHODIMP VLCMarquee::put_text(BSTR val)
@@ -1083,11 +1061,7 @@ STDMETHODIMP VLCPlaylist::togglePause()
 
 STDMETHODIMP VLCPlaylist::stop()
 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    _plug->get_player().mlp().stopAsync();
-#else
     _plug->get_player().mlp().stop();
-#endif
     return S_OK;
 }
 
@@ -1570,15 +1544,11 @@ STDMETHODIMP VLCVideo::toggleFullscreen()
 
 STDMETHODIMP VLCVideo::toggleTeletext()
 {
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
     if( _plug->get_player().get_mp().teletext() == 0 )
         _plug->get_player().get_mp().setTeletext( 100 );
     else
         _plug->get_player().get_mp().setTeletext( 0 );
     return S_OK;
-#else
-    _plug->get_player().get_mp().toggleTeletext();
-#endif
 }
 
 STDMETHODIMP VLCVideo::get_track(long* track)

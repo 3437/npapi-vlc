@@ -264,16 +264,12 @@ public:
     void fireOnMediaPlayerMediaChangedEvent();
     void fireOnMediaPlayerTitleChangedEvent(int title);
     void fireOnMediaPlayerLengthChangedEvent(long length);
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(3, 0, 0, 0)
     void fireOnMediaPlayerChapterChangedEvent(int chapter);
-#endif
 
     void fireOnMediaPlayerVoutEvent(int count);
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(2, 2, 2, 0)
     void fireOnMediaPlayerMutedEvent();
     void fireOnMediaPlayerUnmutedEvent();
     void fireOnMediaPlayerAudioVolumeEvent(float volume);
-#endif
 
     void fireClickEvent();
     void fireDblClickEvent();

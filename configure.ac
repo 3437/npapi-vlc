@@ -280,6 +280,20 @@ AS_IF([ test "x$gtk_found" = "xyes" ],
 AM_CONDITIONAL(WITH_GTK, [ test "x$gtk_found" = "xyes" ])
 AM_CONDITIONAL(HAVE_XCB, [ test "x$xcb_found" = "xyes" ])
 
+vlc_build_pdb=0
+AC_ARG_ENABLE([pdb],
+     AS_HELP_STRING([--enable-pdb],
+                    [Build PDB files for windows targets (default off)]))
+AS_IF([test "${SYS}" = "mingw32"],[
+  AS_IF([test "${enable_pdb}" = "yes"], [
+    vlc_build_pdb=1
+    AX_APPEND_FLAG([-g -gcodeview],[CFLAGS])
+    AX_APPEND_FLAG([-g -gcodeview],[CXXFLAGS])
+    LDFLAGS="${LDFLAGS} -Wl,-pdb="
+  ],[])
+])
+AM_CONDITIONAL([ENABLE_PDB],   [test "$vlc_build_pdb" = "1"])
+
 dnl
 dnl final flags for ActiveX
 AM_COND_IF([HAVE_WIN32], [

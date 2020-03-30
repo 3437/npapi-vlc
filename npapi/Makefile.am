@@ -41,6 +41,11 @@ npvlc_la_SOURCES = $(libvlcplugin_la_SOURCES)
 npvlc_la_DEPENDENCIES = $(libvlcplugin_la_DEPENDENCIES)
 npvlc_la_LIBADD = $(libvlcplugin_la_LIBADD)
 npvlc_la_LDFLAGS = $(libvlcplugin_la_LDFLAGS)
+if ENABLE_PDB
+# libtool magic path
+npvlc_la_DATA = .libs/npvlc.pdb
+npvlc_ladir = /lib
+endif
 
 npapi-sdk:
 	wget https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/npapi-sdk/source-archive.zip

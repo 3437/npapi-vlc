@@ -73,6 +73,11 @@ axvlc_la_LDFLAGS = -Wl,--kill-at -Wl,$(DATA_axvlc_rc) \
     -Wc,--static -Wc,-static-libgcc
 axvlc_la_LIBADD = ../common/libvlcplugin_common.la \
 	$(LIBVLC_LIBS) $(ACTIVEX_LIBS)
+if ENABLE_PDB
+# libtool magic path
+axvlc_la_DATA = .libs/axvlc.pdb
+axvlc_ladir = /lib
+endif
 
 
 DATA_axvlc_rc = $(noinst_axvlc_rc_DATA)

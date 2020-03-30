@@ -107,7 +107,11 @@ WINE_SDK_PATH ?= /usr/include/wine/windows
 stdole2.tlb stdole2_idl.c stdole2_idl.h: $(WINE_SDK_PATH)/stdole2.idl
 	$(WIDL) $(WIDLFLAGS) -I$(WINE_SDK_PATH) -t -u -h -T stdole2.tlb -U stdole2_idl.c -H stdole2_idl.h $<
 
-axvlc.tlb axvlc_idl.c axvlc_idl.h: axvlc.idl stdole2.tlb
+if !HAS_STDOLE2_TLB
+axvlc.tlb: stdole2.tlb
+endif
+
+axvlc.tlb axvlc_idl.c axvlc_idl.h: axvlc.idl
 	$(WIDL) $(WIDLFLAGS) -I$(WINE_SDK_PATH) -I. -t -u -h -T axvlc.tlb -U axvlc_idl.c -H axvlc_idl.h $<
 
 clean-tlb:

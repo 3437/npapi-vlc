@@ -134,15 +134,33 @@ AS_IF([test "${SYS}" = "mingw32"],[
     AC_CHECK_HEADER(ole2.h,,[AC_MSG_ERROR([required OLE header ole2.h is missing from your system])])
     AC_CHECK_HEADER(olectl.h,,[AC_MSG_ERROR([required OLE header olectl.h is missing from your system])])
     AC_CHECK_HEADERS(objsafe.h,,,[#include <ole2.h>])
+    AS_IF([test "${WIDL}" != "no"],[
+      ac_ext=idl
+      ac_objext=tlb
+      ac_compile='$WIDL -t conftest.$ac_ext -o conftest.$ac_objext'
+      cat <<_ACEOF >conftest.idl
+import "ocidl.idl";
+[[
+  uuid(DF2BBE39-40A8-433b-A279-073F48DA94B6),
+]]
+library AXVLC
+{
+  importlib("stdole2.tlb");
+}
+_ACEOF
+AS_IF([ac_fn_cxx_try_compile "$LINENO"],[has_stdole2_tlb=yes],[has_stdole2_tlb=no])
+    ],[has_stdole2_tlb=no])
     AC_LANG_POP(C++)
 ],[
     MIDL="no"
     WIDL="no"
+    has_stdole2_tlb="no"
 ])
 
 AC_SUBST(WIDLFLAGS)
 AM_CONDITIONAL(HAS_MIDL_COMPILER, test "${MIDL}" != "no")
 AM_CONDITIONAL(HAS_WIDL_COMPILER, test "${WIDL}" != "no")
+AM_CONDITIONAL(HAS_STDOLE2_TLB, test "${has_stdole2_tlb}" = "yes")
 
 dnl
 dnl Buggy glibc prevention. Purposedly not cached.

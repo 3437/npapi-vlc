@@ -137,7 +137,7 @@ AS_IF([test "${SYS}" = "mingw32"],[
     AS_IF([test "${WIDL}" != "no"],[
       ac_ext=idl
       ac_objext=tlb
-      ac_compile='$WIDL -t conftest.$ac_ext -o conftest.$ac_objext'
+      ac_compile='$WIDL $WIDLFLAGS -t conftest.$ac_ext -o conftest.$ac_objext'
       cat <<_ACEOF >conftest.idl
 import "ocidl.idl";
 [[

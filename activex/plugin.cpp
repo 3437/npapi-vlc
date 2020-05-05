@@ -1439,7 +1439,7 @@ void VLCPlugin::player_register_events()
     em.onPausableChanged([this](bool b) {
         fireOnMediaPlayerPausableChangedEvent( B( b ) );
     });
-    em.onTitleChanged([this](int t) {
+    em.onTitleSelectionChanged([this](const VLC::TitleDescription&, int t) {
         fireOnMediaPlayerTitleChangedEvent( t );
     });
     em.onLengthChanged( [this]( int64_t length ) {

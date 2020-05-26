@@ -1,8 +1,9 @@
 == ACTIVEX Control for VLC ==
 
 The VLC ActiveX Control has been primary designed to work with Internet
-Explorer. However it may also work with Visual Basic and/or .NET. Please
-note, that this code does not rely upon Microsoft MFC/ATL code, hence
+Explorer. However it may also work with Visual Basic and/or .NET. For regular .NET apps,
+using https://code.videolan.org/videolan/LibVLCSharp is the recommended way. Please
+note, that the VLC ActiveX Control code does not rely upon Microsoft MFC/ATL code, hence
 good compatibility is not guaranteed.
 
 I. Compiling

@@ -40,7 +40,7 @@ bool vlc_player::open(VLC::Instance& inst)
 
     try {
         _mp   = VLC::MediaPlayer(inst);
-        _ml   = VLC::MediaList(inst);
+        _ml   = VLC::MediaList();
         _ml_p = VLC::MediaListPlayer(inst);
 
         _ml_p.setMediaList( _ml );

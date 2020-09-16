@@ -173,38 +173,28 @@ void vlc_player::play()
 
 int vlc_player::currentAudioTrack()
 {
-    auto current = _mp.audioTrack();
-    auto tracks = _mp.audioTrackDescription();
-    return getTrack( current, tracks );
+    auto tracks = _mp.tracks( VLC::MediaTrack::Type::Audio );
+    return getCurrentTrack( tracks );
 }
 
 int vlc_player::currentSubtitleTrack()
 {
-    auto current = _mp.spu();
-    auto tracks = _mp.spuDescription();
-    return getTrack( current, tracks );
+    auto tracks = _mp.tracks( VLC::MediaTrack::Type::Subtitle );
+    return getCurrentTrack( tracks );
 }
 
 int vlc_player::currentVideoTrack()
 {
-    auto current = _mp.videoTrack();
-    auto tracks = _mp.videoTrackDescription();
-    return getTrack( current, tracks );
+    auto tracks = _mp.tracks( VLC::MediaTrack::Type::Video );
+    return getCurrentTrack( tracks );
 }
 
-int vlc_player::getTrack( int currentId, const std::vector<VLC::TrackDescription>& tracks )
+int vlc_player::getCurrentTrack( const std::vector<VLC::MediaTrack>& tracks )
 {
-    if ( tracks.empty() )
-        return -1;
-
-    int trackId = 0;
     for ( const auto& t : tracks )
     {
-        if ( t.id() == currentId )
-        {
-            return trackId;
-        }
-        ++trackId;
+        if ( t.selected() )
+            return t.id();
     }
     return -1;
 }

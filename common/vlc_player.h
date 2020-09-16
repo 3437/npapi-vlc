@@ -68,7 +68,7 @@ public:
 
 private:
     // Returns a 0-based track index, instead of the internal libvlc one
-    int getTrack( int currentId, const std::vector<VLC::TrackDescription>& tracks );
+    int getCurrentTrack( const std::vector<VLC::MediaTrack>& tracks );
 
 
 private:

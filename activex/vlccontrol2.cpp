@@ -454,10 +454,10 @@ STDMETHODIMP VLCAudio::get_track(long* track)
 
 STDMETHODIMP VLCAudio::put_track(long track)
 {
-    auto tracks = _plug->get_player().get_mp().audioTrackDescription();
+    auto tracks = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Audio );
     if ( track >= tracks.size() )
         return E_INVALIDARG;
-    _plug->get_player().get_mp().setAudioTrack( tracks[track].id() );
+    _plug->get_player().get_mp().selectTrack( tracks[track] );
     return S_OK;
 }
 
@@ -473,7 +473,7 @@ STDMETHODIMP VLCAudio::get_count(long* trackNumber)
     case libvlc_Playing:
     case libvlc_Paused:
     {
-        *trackNumber = negativeToZero( _plug->get_player().get_mp().audioTrackCount() );
+        *trackNumber = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Audio ).size();
         break;
     }
     default:
@@ -506,7 +506,7 @@ STDMETHODIMP VLCAudio::description(long trackId, BSTR* name)
     case libvlc_Playing:
     case libvlc_Paused:
     {
-        auto tracks = _plug->get_player().get_mp().audioTrackDescription();
+        auto tracks = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Audio );
         if ( trackId >= tracks.size() )
             return E_INVALIDARG;
         *name = BSTRFromCStr( CP_UTF8, tracks[trackId].name().c_str() );
@@ -1146,10 +1146,10 @@ STDMETHODIMP VLCSubtitle::get_track(long* spu)
 //FIXME: this should be unsigned
 STDMETHODIMP VLCSubtitle::put_track(long spu)
 {
-    auto tracks = _plug->get_player().get_mp().spuDescription();
+    auto tracks = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Subtitle );
     if ( spu >= tracks.size() )
         return E_INVALIDARG;
-    _plug->get_player().get_mp().setSpu( tracks[spu].id() );
+    _plug->get_player().get_mp().selectTrack( tracks[spu] );
     return S_OK;
 }
 
@@ -1165,7 +1165,7 @@ STDMETHODIMP VLCSubtitle::get_count(long* spuNumber)
     case libvlc_Playing:
     case libvlc_Paused:
     {
-        *spuNumber = _plug->get_player().get_mp().spuCount();
+        *spuNumber = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Subtitle ).size();
         break;
     }
     default:
@@ -1199,7 +1199,7 @@ STDMETHODIMP VLCSubtitle::description(long nameID, BSTR* name)
     case libvlc_Playing:
     case libvlc_Paused:
     {
-        auto tracks = _plug->get_player().get_mp().spuDescription();
+        auto tracks = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Subtitle );
         if ( nameID >= tracks.size() )
             return E_INVALIDARG;
         *name = BSTRFromCStr( CP_UTF8, tracks[nameID].name().c_str() );
@@ -1362,10 +1362,10 @@ STDMETHODIMP VLCVideo::get_subtitle(long* spu)
 
 STDMETHODIMP VLCVideo::put_subtitle(long spu)
 {
-    auto tracks = _plug->get_player().get_mp().spuDescription();
+    auto tracks = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Subtitle );
     if ( spu >= tracks.size() )
         return E_INVALIDARG;
-    _plug->get_player().get_mp().setSpu( tracks[spu].id() );
+    _plug->get_player().get_mp().selectTrack( tracks[spu] );
     return S_OK;
 }
 
@@ -1520,10 +1520,10 @@ STDMETHODIMP VLCVideo::get_track(long* track)
 
 STDMETHODIMP VLCVideo::put_track(long track)
 {
-    auto tracks = _plug->get_player().get_mp().videoTrackDescription();
+    auto tracks = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Video );
     if ( track >= tracks.size() )
         return E_INVALIDARG;
-    _plug->get_player().get_mp().setVideoTrack( tracks[track].id() );
+    _plug->get_player().get_mp().selectTrack( tracks[track] );
     return S_OK;
 }
 
@@ -1539,7 +1539,7 @@ STDMETHODIMP VLCVideo::get_count(long* trackNumber)
     case libvlc_Playing:
     case libvlc_Paused:
     {
-        *trackNumber = negativeToZero( _plug->get_player().get_mp().videoTrackCount() );
+        *trackNumber = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Video ).size();
         break;
     }
     default:
@@ -1574,7 +1574,7 @@ STDMETHODIMP VLCVideo::description(long trackId, BSTR* name)
     case libvlc_Playing:
     case libvlc_Paused:
     {
-        auto tracks = _plug->get_player().get_mp().videoTrackDescription();
+        auto tracks = _plug->get_player().get_mp().tracks( VLC::MediaTrack::Type::Video );
         if ( trackId >= tracks.size() )
             return E_INVALIDARG;
         *name = BSTRFromCStr( CP_UTF8, tracks[trackId].name().c_str() );

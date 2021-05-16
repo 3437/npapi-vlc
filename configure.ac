@@ -123,7 +123,7 @@ AS_IF([test "${SYS}" = "mingw32"],[
     AC_CHECK_TOOL(WIDL, [widl], no)
 
     case "${host}" in
-        amd64*|x86_64*)
+        amd64*|x86_64*|aarch64*)
             WIDLFLAGS=" -m64"
         ;;
         *)

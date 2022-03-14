@@ -1421,7 +1421,7 @@ void VLCPlugin::player_register_events()
     em.onBackward([this] {
         fireOnMediaPlayerBackwardEvent();
     });
-    em.onEndReached([this] {
+    em.onStopping([this] {
         fireOnMediaPlayerEndReachedEvent();
     });
     em.onEncounteredError([this] {

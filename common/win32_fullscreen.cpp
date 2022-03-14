@@ -421,7 +421,7 @@ void VLCControlsWnd::RegisterToVLCEvents()
         PostMessage(hVideoPosScroll, (UINT) PBM_SETPOS, (WPARAM)0, 0);
     });
 
-    VP()->get_mp().eventManager().onEndReached([this] {
+    VP()->get_mp().eventManager().onStopping([this] {
         PostMessage(hPlayPauseButton, BM_SETIMAGE, (WPARAM) IMAGE_BITMAP, (LPARAM) RC().hPlayBitmap);
         PostMessage(hVideoPosScroll, (UINT) PBM_SETPOS, (WPARAM)0, 0);
     });
